@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: exchange
+
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/exchange_db
+    username: your_username
+    password: your_password
+
+exchange:
+  api:
+    key: MTTECKpBsABg74lVDXK6w0NxJrY6LE2p
+    base-url: https://www.koreaexim.go.kr

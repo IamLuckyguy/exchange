@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/exchange.css}">
+    <title>환율 계산기</title>
+</head>
+<body class="dark-mode">
+<div class="container">
+    <div class="exchange-form">
+        <h1>환율 계산기</h1>
+        <div class="currency-selector">
+            <label for="currency">국가 선택:</label>
+            <select id="currency" name="currency">
+                <option th:each="currency : ${currencies}" th:text="${currency}"></option>
+            </select>
+        </div>
+        <div class="amount-input">
+            <label for="amount">금액 입력:</label>
+            <input type="number" id="amount" name="amount" placeholder="금액을 입력하세요">
+        </div>
+    </div>
+    <div class="exchange-result">
+        <h2>환율 결과</h2>
+        <ul id="result-list">
+            <!-- 환율 결과가 표시되는 리스트 -->
+        </ul>
+    </div>
+</div>
+</body>
+</html>

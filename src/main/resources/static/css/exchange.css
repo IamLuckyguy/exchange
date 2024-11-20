@@ -1,0 +1,53 @@
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.exchange-form {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.currency-selector, .amount-input {
+    margin-bottom: 15px;
+}
+
+select, input[type="number"] {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #2c2c2c;
+    color: #ffffff;
+}
+
+.exchange-result ul {
+    list-style: none;
+    padding: 0;
+}
+
+.exchange-result li {
+    background: #1e1e1e;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .exchange-form {
+        padding: 15px;
+    }
+}
