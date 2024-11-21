@@ -1,4 +1,4 @@
-CREATE TABLE exchange_rates (
+CREATE TABLE IF NOT EXISTS exchange_rates (
     ID BIGINT AUTO_INCREMENT PRIMARY KEY,
     RESULT INT NOT NULL COMMENT '1 : 성공, 2 : DATA코드 오류, 3 : 인증코드 오류, 4 : 일일제한횟수 마감',
     CUR_UNIT VARCHAR(10) NOT NULL COMMENT '통화코드',
