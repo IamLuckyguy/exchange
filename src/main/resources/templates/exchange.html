@@ -1,77 +1,308 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currency Converter</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>환율 계산기</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        body { background-color: #111827; color: #ffffff; }
-        select, input { background-color: #374151; border-color: #4B5563; }
-        select:focus, input:focus { outline: none; border-color: #6B7280; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .container {
+            min-height: 100vh;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background-color: #2a2a2a;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        .btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: transparent;
+            border: 1px solid #4a4a4a;
+            border-radius: 0.25rem;
+            color: #ffffff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #3a3a3a;
+        }
+
+        .chevron-down {
+            font-size: 0.75rem;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem 0 0.75rem 1rem;
+            /*padding-right: 6rem;*/
+            background-color: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            border-radius: 0.25rem;
+            color: #ffffff;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .input-group .currency-btn {
+            position: absolute;
+            right: 0;
+            top: 1.5rem;
+            background-color: transparent;
+            border: none;
+            color: #ffffff;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dialog-content {
+            background-color: #2a2a2a;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #4a4a4a;
+        }
+
+        .dialog-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .close-btn {
+            background-color: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .dialog-body {
+            padding: 1rem;
+        }
+
+        .currency-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #4a4a4a;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .currency-item input[type="checkbox"] {
+            margin-right: 0.75rem;
+        }
+
+        .currency-item .currency-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .currency-item .currency-code {
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .currency-item .currency-name {
+            color: #a0a0a0;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
-<div class="w-full max-w-md bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
-    <div class="p-6">
-        <div class="flex flex-col sm:flex-row gap-4 mb-6">
-            <select id="countrySelect" class="w-full sm:w-[180px] bg-gray-700 border-gray-600 rounded-md p-2 text-white">
-                <option th:each="country : ${countries}" th:value="${country.code}" th:text="${country.name}"></option>
-            </select>
-            <input type="number" id="amountInput" th:placeholder="|Enter amount in ${countries[0].currency}|"
-                   class="flex-grow bg-gray-700 border-gray-600 rounded-md p-2 text-white placeholder-gray-300">
-        </div>
-        <div id="conversionResults" class="space-y-4">
-            <!-- Conversion results will be dynamically inserted here -->
+<body class="dark">
+<div class="container">
+    <div class="card">
+        <div class="card-content">
+            <div class="mb-6">
+                <button id="selectCurrencies" class="btn btn-outline">
+                    <span>통화 선택 (<span id="selectedCount">5</span>)</span>
+                    <span class="chevron-down">▼</span>
+                </button>
+            </div>
+            <div id="currencyInputs" class="space-y-4">
+                <!-- Currency inputs will be dynamically added here -->
+            </div>
         </div>
     </div>
 </div>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const countries = /*[[${countries}]]*/ [];
-    const conversionRates = /*[[${conversionRates}]]*/ {
-        KRW: 1, USD: 0.00076, JPY: 0.11, EUR: 0.00065, CNY: 0.005
-    }; // 각 통화에 대한 임의의 환율
+<div id="currencyDialog" class="dialog">
+    <div class="dialog-content">
+        <div class="dialog-header">
+            <h2>통화 선택</h2>
+            <button id="closeDialog" class="close-btn">&times;</button>
+        </div>
+        <div class="dialog-body">
+            <!-- Currency checkboxes will be dynamically added here -->
+        </div>
+    </div>
+</div>
 
-    function updateConversionResults() {
-        const selectedCountry = document.getElementById('countrySelect').value;
-        const amount = parseFloat(document.getElementById('amountInput').value);
-        const resultsContainer = document.getElementById('conversionResults');
-        resultsContainer.innerHTML = '';
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!--<script src="script.js"></script>-->
+<script>
+    $(document).ready(function() {
+        const currencies = [
+            { code: "USD", name: "US Dollar", flag: "🇺🇸" },
+            { code: "KRW", name: "Korean Won", flag: "🇰🇷" },
+            { code: "JPY", name: "Japanese Yen", flag: "🇯🇵" },
+            { code: "CNY", name: "Chinese Yuan", flag: "🇨🇳" },
+            { code: "INR", name: "Indian Rupee", flag: "🇮🇳" },
+            { code: "EUR", name: "Euro", flag: "🇪🇺" },
+            { code: "GBP", name: "British Pound", flag: "🇬🇧" },
+            { code: "CAD", name: "Canadian Dollar", flag: "🇨🇦" },
+            { code: "AUD", name: "Australian Dollar", flag: "🇦🇺" },
+            { code: "SGD", name: "Singapore Dollar", flag: "🇸🇬" },
+        ];
 
-        // amount가 유효한 숫자일 때만 변환 수행
-        if (!isNaN(amount) && amount > 0) {
-            countries.forEach(country => {
-                if (country.code !== selectedCountry) {
-                    const convertedAmount = convertCurrency(amount, selectedCountry, country.code);
-                    resultsContainer.innerHTML += `
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <img src="https://v0.dev/public/flags/${country.code.toLowerCase()}.svg" alt="${country.name}" class="w-5 h-5">
-                                <span>${country.name} (${country.currency})</span>
-                            </div>
-                            <span class="font-semibold">${convertedAmount}</span>
-                        </div>
-                    `;
+        let selectedCurrencies = ["USD", "KRW", "JPY", "CNY", "INR"];
+        let amounts = {
+            USD: "1",
+            KRW: "1,403",
+            JPY: "155",
+            CNY: "7.24",
+            INR: "84.43",
+        };
+
+        function updateCurrencyInputs() {
+            $('#currencyInputs').empty();
+            selectedCurrencies.forEach(code => {
+                const currency = currencies.find(c => c.code === code);
+                if (currency) {
+                    $('#currencyInputs').append(`
+                    <div class="input-group">
+                        <label for="${code}">금액</label>
+                        <input type="text" id="${code}" value="${amounts[code] || ''}" />
+                        <button class="currency-btn">
+                            <span class="currency-flag">${currency.flag}</span>
+                            <span class="currency-code">${currency.code}</span>
+                            <span class="chevron-down">▼</span>
+                        </button>
+                    </div>
+                `);
                 }
             });
+            updateSelectedCount();
         }
-    }
 
-    function convertCurrency(amount, from, to) {
-        console.log(conversionRates);
-        const fromRate = conversionRates[from];
-        const toRate = conversionRates[to];
-        return ((amount * toRate) / fromRate).toFixed(2);
-    }
+        function updateCurrencyDialog() {
+            $('.dialog-body').empty();
+            currencies.forEach(currency => {
+                $('.dialog-body').append(`
+                <label class="currency-item">
+                    <input type="checkbox" value="${currency.code}" ${selectedCurrencies.includes(currency.code) ? 'checked' : ''} />
+                    <div class="currency-info">
+                        <span>
+                            <span class="currency-flag">${currency.flag}</span>
+                            <span class="currency-code">${currency.code}</span>
+                        </span>
+                        <span class="currency-name">${currency.name}</span>
+                    </div>
+                </label>
+            `);
+            });
+        }
 
-    document.getElementById('countrySelect').addEventListener('change', updateConversionResults);
-    document.getElementById('amountInput').addEventListener('input', updateConversionResults);
+        function updateSelectedCount() {
+            $('#selectedCount').text(selectedCurrencies.length);
+        }
 
-    // Initial update to render conversion results when the page loads
-    updateConversionResults();
-    /*]]>*/
+        $('#selectCurrencies').on('click', function() {
+            updateCurrencyDialog();
+            $('#currencyDialog').css('display', 'flex');
+        });
+
+        $('#closeDialog').on('click', function() {
+            $('#currencyDialog').hide();
+        });
+
+        $(document).on('change', '.dialog-body input[type="checkbox"]', function() {
+            const currencyCode = $(this).val();
+            if (this.checked) {
+                if (!selectedCurrencies.includes(currencyCode)) {
+                    selectedCurrencies.push(currencyCode);
+                }
+            } else {
+                selectedCurrencies = selectedCurrencies.filter(code => code !== currencyCode);
+            }
+            updateCurrencyInputs();
+        });
+
+        $(document).on('input', '#currencyInputs input', function() {
+            const currencyCode = $(this).attr('id');
+            amounts[currencyCode] = $(this).val();
+        });
+
+        updateCurrencyInputs();
+    });
 </script>
 </body>
 </html>
