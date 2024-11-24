@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>환율 계산기</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -76,7 +77,6 @@
         .input-group input {
             width: 100%;
             padding: 0.75rem 0 0.75rem 1rem;
-            /*padding-right: 6rem;*/
             background-color: #3a3a3a;
             border: 1px solid #4a4a4a;
             border-radius: 0.25rem;
@@ -207,30 +207,36 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!--<script src="script.js"></script>-->
 <script>
     $(document).ready(function() {
         const currencies = [
-            { code: "USD", name: "US Dollar", flag: "🇺🇸" },
-            { code: "KRW", name: "Korean Won", flag: "🇰🇷" },
-            { code: "JPY", name: "Japanese Yen", flag: "🇯🇵" },
-            { code: "CNY", name: "Chinese Yuan", flag: "🇨🇳" },
-            { code: "INR", name: "Indian Rupee", flag: "🇮🇳" },
-            { code: "EUR", name: "Euro", flag: "🇪🇺" },
-            { code: "GBP", name: "British Pound", flag: "🇬🇧" },
-            { code: "CAD", name: "Canadian Dollar", flag: "🇨🇦" },
-            { code: "AUD", name: "Australian Dollar", flag: "🇦🇺" },
-            { code: "SGD", name: "Singapore Dollar", flag: "🇸🇬" },
+            { code: "USD", name: "US Dollar", flag: "🇺🇸", decimals: 2 },
+            { code: "KRW", name: "Korean Won", flag: "🇰🇷", decimals: 0 },
+            { code: "JPY", name: "Japanese Yen", flag: "🇯🇵", decimals: 0 },
+            { code: "CNY", name: "Chinese Yuan", flag: "🇨🇳", decimals: 2 },
+            { code: "INR", name: "Indian Rupee", flag: "🇮🇳", decimals: 2 },
+            { code: "EUR", name: "Euro", flag: "🇪🇺", decimals: 2 },
+            { code: "GBP", name: "British Pound", flag: "🇬🇧", decimals: 2 },
+            { code: "CAD", name: "Canadian Dollar", flag: "🇨🇦", decimals: 2 },
+            { code: "AUD", name: "Australian Dollar", flag: "🇦🇺", decimals: 2 },
+            { code: "SGD", name: "Singapore Dollar", flag: "🇸🇬", decimals: 2 },
         ];
 
-        let selectedCurrencies = ["USD", "KRW", "JPY", "CNY", "INR"];
-        let amounts = {
-            USD: "1",
-            KRW: "1,403",
-            JPY: "155",
-            CNY: "7.24",
-            INR: "84.43",
+        // 기준 환율 (USD 기준)
+        const baseRates = {
+            USD: 1,
+            KRW: 1403,
+            JPY: 155,
+            CNY: 7.24,
+            INR: 84.43,
+            EUR: 0.92,
+            GBP: 0.79,
+            CAD: 1.35,
+            AUD: 1.52,
+            SGD: 1.34
         };
+
+        let selectedCurrencies = ["USD", "KRW", "JPY", "CNY", "INR"];
 
         function updateCurrencyInputs() {
             $('#currencyInputs').empty();
@@ -240,7 +246,7 @@
                     $('#currencyInputs').append(`
                     <div class="input-group">
                         <label for="${code}">금액</label>
-                        <input type="text" id="${code}" value="${amounts[code] || ''}" />
+                        <input type="text" id="${code}" value="${formatNumber(baseRates[code], currency.decimals)}" class="currency-input" />
                         <button class="currency-btn">
                             <span class="currency-flag">${currency.flag}</span>
                             <span class="currency-code">${currency.code}</span>
@@ -275,6 +281,19 @@
             $('#selectedCount').text(selectedCurrencies.length);
         }
 
+        function convertCurrency(amount, fromCurrency, toCurrency) {
+            const usdAmount = amount / baseRates[fromCurrency];
+            return usdAmount * baseRates[toCurrency];
+        }
+
+        function formatNumber(number, decimals) {
+            return number.toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        // 이벤트 핸들러
         $('#selectCurrencies').on('click', function() {
             updateCurrencyDialog();
             $('#currencyDialog').css('display', 'flex');
@@ -282,6 +301,12 @@
 
         $('#closeDialog').on('click', function() {
             $('#currencyDialog').hide();
+        });
+
+        $(document).on('click', function(event) {
+            if ($(event.target).is('#currencyDialog')) {
+                $('#currencyDialog').hide();
+            }
         });
 
         $(document).on('change', '.dialog-body input[type="checkbox"]', function() {
@@ -296,9 +321,21 @@
             updateCurrencyInputs();
         });
 
-        $(document).on('input', '#currencyInputs input', function() {
+        // 통화 입력 처리
+        $(document).on('input', '.currency-input', function() {
             const currencyCode = $(this).attr('id');
-            amounts[currencyCode] = $(this).val();
+            const inputValue = $(this).val().replace(/,/g, '');
+            const amount = parseFloat(inputValue);
+
+            if (!isNaN(amount) && amount >= 0) {
+                selectedCurrencies.forEach(code => {
+                    if (code !== currencyCode) {
+                        const convertedAmount = convertCurrency(amount, currencyCode, code);
+                        const targetCurrency = currencies.find(c => c.code === code);
+                        $(`#${code}`).val(formatNumber(convertedAmount, targetCurrency.decimals));
+                    }
+                });
+            }
         });
 
         updateCurrencyInputs();
