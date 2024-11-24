@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.models;
+package kr.co.kwt.exchange.deprecated.models;
 
 public record Country(
         String code,

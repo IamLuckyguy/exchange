@@ -1,14 +1,14 @@
-package kr.co.kwt.exchange.models;
+package kr.co.kwt.exchange.deprecated.models;
 
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
-import lombok.Data;
-import lombok.Builder;
 
 @Data
 @Builder
 @Table("exchange_rates")
-public class ExchangeRate {
+public class ExchangeRates {
     @Id
     private Long id;
     private int result;          // 요청 결과
