@@ -15,12 +15,17 @@ public class LoadExchangeRateAdapter implements LoadExchangeRatePort {
     private final ExchangeRateRepository exchangeRateRepository;
 
     @Override
-    public Mono<ExchangeRate> findByCountry(String country) {
+    public Mono<ExchangeRate> findByCountry(final String country) {
         return exchangeRateRepository.findByCountry(country);
     }
 
     @Override
     public Flux<ExchangeRate> findAll() {
         return exchangeRateRepository.findAll();
+    }
+
+    @Override
+    public Mono<ExchangeRate> findByCurrencyCode(final String currencyCode) {
+        return exchangeRateRepository.findByCurrencyCode(currencyCode);
     }
 }

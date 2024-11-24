@@ -7,5 +7,7 @@ import reactor.core.publisher.Mono;
 public interface ExchangeRateRepository extends ReactiveCrudRepository<ExchangeRate, Long> {
     Mono<ExchangeRate> findByCountry(String country);
 
+    Mono<ExchangeRate> findByCurrencyCode(String currencyCode);
+
 //    Flux<ExchangeRate> findBySearchDate(String searchDate);
 }

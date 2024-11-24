@@ -3,13 +3,9 @@ package kr.co.kwt.exchange.adpater.in.api;
 import kr.co.kwt.exchange.application.port.in.AddExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.SearchExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.UpdateRateUseCase;
-import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateRequest;
-import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateResponse;
-import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateRequest;
-import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateResponse;
+import kr.co.kwt.exchange.application.port.in.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,6 +17,7 @@ class ExchangeRateApiController {
     private final SearchExchangeRateUseCase searchExchangeRateUseCase;
     private final UpdateRateUseCase updateExchangeRateUseCase;
     private final AddExchangeRateUseCase addExchangeRateUseCase;
+    private final ExchangeRateFetcher exchangeRateFetcher;
 
     @GetMapping("/exchange-rates")
     public Flux<SearchExchangeRateResponse> getExchangeRates() {
@@ -42,7 +39,14 @@ class ExchangeRateApiController {
     }
 
     @PostMapping("/exchange-rates/fetch")
-    public Mono<ServerResponse> fetchExchangeRates() {
-        return Mono.empty();
+    public Flux<UpdateRateResponse> fetchExchangeRates(
+            @RequestBody final FetchExchangeRateRequest fetchExchangeRateRequest
+    ) {
+        return updateExchangeRateUseCase.updateRates(exchangeRateFetcher
+                .fetchAndSaveExchangeRates(fetchExchangeRateRequest.getSearchDate())
+                .map(fetchExchangeRateResponse -> new UpdateRateRequest(
+                        fetchExchangeRateResponse.getCurNm(),
+                        fetchExchangeRateResponse.getCurUnit(),
+                        Double.parseDouble(fetchExchangeRateResponse.getTtb().replace(",", "")))));
     }
 }

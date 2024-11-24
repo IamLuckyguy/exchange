@@ -47,7 +47,8 @@ public class ExchangeRate {
         return new ExchangeRate(id, country, countryFlag, countryCode, currencyCode, rateValue, updatedAt);
     }
 
-    public void updateRate(final double rateValue) {
-        Rate newRate = new Rate(rateValue, LocalDateTime.now());
+    public void updateRate(final double newRateValue) {
+        rateValue = newRateValue;
+        updatedAt = LocalDateTime.now();
     }
 }

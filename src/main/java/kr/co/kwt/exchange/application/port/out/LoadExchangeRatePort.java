@@ -9,4 +9,6 @@ public interface LoadExchangeRatePort {
     Mono<ExchangeRate> findByCountry(String country);
 
     Flux<ExchangeRate> findAll();
+
+    Mono<ExchangeRate> findByCurrencyCode(String upperCase);
 }
