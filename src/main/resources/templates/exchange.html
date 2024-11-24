@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>환율 계산기</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="styles.css">
+<!--    <link rel="stylesheet" href="styles.css">-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -48,11 +50,13 @@
             color: #ffffff;
             font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
         }
 
         .btn:hover {
             background-color: #3a3a3a;
+            border-color: #6a6a6a;
+            color: #00ff88;  /* 밝은 민트색으로 변경 */
         }
 
         .chevron-down {
@@ -150,6 +154,20 @@
             border: 1px solid #4a4a4a;
             border-radius: 0.25rem;
             margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .currency-item:hover {
+            background-color: #3a3a3a;
+            border-color: #6a6a6a;
+        }
+
+        .currency-item:hover .currency-code {
+            color: #00ff88;  /* 밝은 민트색으로 변경 */
+        }
+
+        .currency-item:hover .currency-name {
+            color: #ffffff;  /* 흰색으로 변경 */
         }
 
         .currency-item input[type="checkbox"] {
@@ -174,6 +192,67 @@
 
         .mb-6 {
             margin-bottom: 1.5rem;
+        }
+
+
+        /** 차트 관련 스타일 */
+        .chart-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #2a2a2a;
+            border-radius: 0.5rem;
+        }
+
+        .chart-controls {
+            margin-bottom: 1rem;
+        }
+
+        .period-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .period-btn {
+            padding: 0.5rem 1rem;
+            background-color: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            border-radius: 0.25rem;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .period-btn:hover {
+            background-color: #4a4a4a;
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .period-btn.selected {
+            background-color: #00ff88;
+            border-color: #00ff88;
+            color: #1a1a1a;
+        }
+
+        .custom-period {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #customDays {
+            width: 100px;
+            padding: 0.5rem;
+            background-color: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            border-radius: 0.25rem;
+            color: #ffffff;
+        }
+
+        .chart-container {
+            height: 400px;
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -206,7 +285,6 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
         const currencies = [
@@ -339,6 +417,259 @@
         });
 
         updateCurrencyInputs();
+
+        // 차트 관련 상수
+        const CHART_PERIODS = {
+            WEEK: 7,
+            MONTH: 30,
+            HALF_YEAR: 180,
+            YEAR: 365,
+            ALL: 'all'
+        };
+
+        // 가짜 데이터 생성 함수
+        function generateMockData(days, baseCurrency, targetCurrency) {
+            const data = {
+                dates: [],
+                rates: []
+            };
+
+            // 기준 환율 설정 (USD 기준)
+            const baseRates = {
+                USD: 1,
+                KRW: 1300,
+                JPY: 150,
+                CNY: 7.2,
+                EUR: 0.92,
+                GBP: 0.79,
+                CAD: 1.35,
+                AUD: 1.52,
+                SGD: 1.34,
+                INR: 84
+            };
+
+            // 변동폭 설정 (각 통화별 적절한 변동폭)
+            const volatility = {
+                USD: 0,
+                KRW: 5,
+                JPY: 0.5,
+                CNY: 0.02,
+                EUR: 0.005,
+                GBP: 0.005,
+                CAD: 0.01,
+                AUD: 0.01,
+                SGD: 0.01,
+                INR: 0.2
+            };
+
+            const today = new Date();
+            const baseRate = baseRates[targetCurrency] / baseRates[baseCurrency];
+            const maxVolatility = volatility[targetCurrency];
+
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+
+                // 날짜 포맷팅 (YYYY-MM-DD)
+                const formattedDate = date.toISOString().split('T')[0];
+
+                // 사인 곡선을 이용한 자연스러운 변동 생성
+                const trendVariation = Math.sin(i / 30) * maxVolatility * 0.5;
+                // 랜덤 노이즈 추가
+                const randomVariation = (Math.random() - 0.5) * maxVolatility;
+
+                const rate = baseRate + trendVariation + randomVariation;
+
+                data.dates.push(formattedDate);
+                data.rates.push(parseFloat(rate.toFixed(4)));
+            }
+
+            return data;
+        }
+
+        // 차트 컨테이너 HTML 수정 (적용 버튼 제거)
+        $('.card-content').append(`
+            <div class="chart-section mt-4">
+                <div class="chart-controls">
+                    <div class="period-buttons mb-3">
+                        <button class="period-btn selected" data-period="${CHART_PERIODS.WEEK}">1주일</button>
+                        <button class="period-btn" data-period="${CHART_PERIODS.MONTH}">1개월</button>
+                        <button class="period-btn" data-period="${CHART_PERIODS.HALF_YEAR}">6개월</button>
+                        <button class="period-btn" data-period="${CHART_PERIODS.YEAR}">1년</button>
+                        <button class="period-btn" data-period="${CHART_PERIODS.ALL}">전체</button>
+                        <div class="custom-period">
+                            <input type="number"
+                                   id="customDays"
+                                   placeholder="일수 입력 (2-365)"
+                                   min="2"
+                                   max="365"
+                                   class="custom-days-input">
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="exchangeRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        `);
+
+        // 차트 업데이트 함수
+        function updateChart(days, baseCurrency = 'USD') {
+            const selectedCurrency = selectedCurrencies.find(code => code !== baseCurrency) || 'KRW';
+
+            // 가짜 데이터 생성
+            const data = generateMockData(days, baseCurrency, selectedCurrency);
+            const ctx = document.getElementById('exchangeRateChart');
+
+            // Chart 객체가 이미 존재하는지 확인하고 안전하게 제거
+            if (window.exchangeRateChart instanceof Chart) {
+                window.exchangeRateChart.destroy();
+            }
+
+            if (!ctx) {
+                console.error('Canvas element not found');
+                return;
+            }
+
+            try {
+                window.exchangeRateChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            label: `${baseCurrency}/${selectedCurrency} 환율`,
+                            data: data.rates,
+                            borderColor: '#00ff88',
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: '#ffffff',
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#00ff88',
+                                bodyColor: '#ffffff',
+                                borderColor: '#4a4a4a',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                grid: {
+                                    color: '#4a4a4a',
+                                    borderColor: '#4a4a4a'
+                                },
+                                ticks: {
+                                    color: '#ffffff',
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            },
+                            y: {
+                                display: true,
+                                grid: {
+                                    color: '#4a4a4a',
+                                    borderColor: '#4a4a4a'
+                                },
+                                ticks: {
+                                    color: '#ffffff',
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Chart initialization error:', error);
+            }
+        }
+
+        // input 이벤트 핸들러 수정
+        $(document).on('input', '#customDays', function() {
+            const days = parseInt($(this).val());
+
+            if (days >= 2 && days <= 365) {
+                $('.period-btn').removeClass('selected');
+                updateChart(days);
+            }
+        });
+
+        // 기간 선택 버튼 이벤트 핸들러
+        $('.period-btn').on('click', function() {
+            const days = $(this).data('period');
+            $('.period-btn').removeClass('selected');
+            $(this).addClass('selected');
+            $('#customDays').val(''); // 커스텀 입력 초기화
+            updateChart(days);
+        });
+
+        // 커스텀 기간 적용 버튼 이벤트 핸들러
+        $('#applyCustomPeriod').on('click', function() {
+            const days = $('#customDays').val();
+            if (days && days > 0 && days <= 365) {
+                $('.period-btn').removeClass('selected');
+                $(this).addClass('selected');
+                updateChart(parseInt(days));
+            } else {
+                alert('1에서 365 사이의 값을 입력해주세요.');
+            }
+        });
+
+        // 입력 필드 스타일 추가
+        const style = `
+            <style>
+                .custom-days-input {
+                    width: 120px;
+                    padding: 0.5rem;
+                    background-color: #3a3a3a;
+                    border: 1px solid #4a4a4a;
+                    border-radius: 0.25rem;
+                    color: #ffffff;
+                    transition: all 0.3s ease;
+                }
+
+                .custom-days-input:focus {
+                    outline: none;
+                    border-color: #00ff88;
+                    box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.2);
+                }
+
+                .custom-days-input::placeholder {
+                    color: #888;
+                }
+            </style>
+        `;
+
+        $('head').append(style);
+
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js is not loaded!');
+            return;
+        }
+        updateChart(CHART_PERIODS.WEEK);
     });
 </script>
 </body>
