@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.models;
+package kr.co.kwt.exchange.deprecated.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

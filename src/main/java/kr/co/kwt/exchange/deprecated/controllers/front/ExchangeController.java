@@ -1,16 +1,14 @@
-package kr.co.kwt.exchange.controllers.front;
+package kr.co.kwt.exchange.deprecated.controllers.front;
 
-import kr.co.kwt.exchange.models.Country;
-import org.springframework.stereotype.Controller;
+import kr.co.kwt.exchange.deprecated.models.Country;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Controller
-@RequestMapping("/")
+//@Controller
+//@RequestMapping("/")
 public class ExchangeController {
 
     private final List<Country> countries = Arrays.asList(
@@ -26,6 +24,6 @@ public class ExchangeController {
     ) {
         model.addAttribute("countries", countries);
         model.addAttribute("currencies", new String[]{"KRW", "USD", "JPY", "EUR", "CNY"});
-        return "exchange";
+        return "exchangeRate";
     }
 }
