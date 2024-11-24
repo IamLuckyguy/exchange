@@ -13,8 +13,6 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
-
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -30,10 +28,10 @@ class ExchangeRateApiController {
     }
 
     @GetMapping("/exchange-rates/{country}")
-    public Mono<ServerResponse> getExchangeRates(
+    public Mono<SearchExchangeRateResponse> getExchangeRates(
             @ModelAttribute final SearchExchangeRateRequest searchExchangeRateRequest
     ) {
-        return ok().bodyValue(searchExchangeRateUseCase.searchExchangeRate(searchExchangeRateRequest));
+        return searchExchangeRateUseCase.searchExchangeRate(searchExchangeRateRequest);
     }
 
     @PostMapping("/exchange-rates")
