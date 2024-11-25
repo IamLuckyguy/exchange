@@ -76,11 +76,8 @@ public class ExchangeRateService implements AddExchangeRateUseCase, UpdateRateUs
                         exchangeRate.getRateValue(),
                         exchangeRate.getUpdatedAt())));
     }
-    
+
     private Function<ExchangeRate, ExchangeRate> doUpdateRate(final UpdateRateRequest updateRateRequest) {
-        return exchangeRate -> {
-            exchangeRate.updateRate(updateRateRequest.getRateValue());
-            return exchangeRate;
-        };
+        return exchangeRate -> exchangeRate.updateRate(updateRateRequest.getRateValue());
     }
 }

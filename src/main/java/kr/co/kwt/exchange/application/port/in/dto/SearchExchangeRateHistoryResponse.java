@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.domain;
+package kr.co.kwt.exchange.application.port.in.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,12 +6,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Deprecated
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Rate {
+public class SearchExchangeRateHistoryResponse {
 
-    private double value;
+    private String country;
+    private double currency;
     private LocalDateTime updatedAt;
 }

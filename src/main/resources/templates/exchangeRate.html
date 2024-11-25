@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>환율 계산기</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<!--    <link rel="stylesheet" href="styles.css">-->
+    <!--    <link rel="stylesheet" href="styles.css">-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
@@ -56,7 +56,7 @@
         .btn:hover {
             background-color: #3a3a3a;
             border-color: #6a6a6a;
-            color: #00ff88;  /* 밝은 민트색으로 변경 */
+            color: #00ff88; /* 밝은 민트색으로 변경 */
         }
 
         .chevron-down {
@@ -163,11 +163,11 @@
         }
 
         .currency-item:hover .currency-code {
-            color: #00ff88;  /* 밝은 민트색으로 변경 */
+            color: #00ff88; /* 밝은 민트색으로 변경 */
         }
 
         .currency-item:hover .currency-name {
-            color: #ffffff;  /* 흰색으로 변경 */
+            color: #ffffff; /* 흰색으로 변경 */
         }
 
         .currency-item input[type="checkbox"] {
@@ -286,48 +286,68 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        const currencies = [
-            { code: "USD", name: "US Dollar", flag: "🇺🇸", decimals: 2 },
-            { code: "KRW", name: "Korean Won", flag: "🇰🇷", decimals: 0 },
-            { code: "JPY", name: "Japanese Yen", flag: "🇯🇵", decimals: 0 },
-            { code: "CNY", name: "Chinese Yuan", flag: "🇨🇳", decimals: 2 },
-            { code: "INR", name: "Indian Rupee", flag: "🇮🇳", decimals: 2 },
-            { code: "EUR", name: "Euro", flag: "🇪🇺", decimals: 2 },
-            { code: "GBP", name: "British Pound", flag: "🇬🇧", decimals: 2 },
-            { code: "CAD", name: "Canadian Dollar", flag: "🇨🇦", decimals: 2 },
-            { code: "AUD", name: "Australian Dollar", flag: "🇦🇺", decimals: 2 },
-            { code: "SGD", name: "Singapore Dollar", flag: "🇸🇬", decimals: 2 },
+    $(document).ready(function () {
+        let currencies = [
+            // {code: "USD", name: "US Dollar", flag: "🇺🇸", decimals: 2},
+            // {code: "KRW", name: "Korean Won", flag: "🇰🇷", decimals: 0},
+            // {code: "JPY", name: "Japanese Yen", flag: "🇯🇵", decimals: 0},
+            // {code: "CNY", name: "Chinese Yuan", flag: "🇨🇳", decimals: 2},
+            // {code: "INR", name: "Indian Rupee", flag: "🇮🇳", decimals: 2},
+            // {code: "EUR", name: "Euro", flag: "🇪🇺", decimals: 2},
+            // {code: "GBP", name: "British Pound", flag: "🇬🇧", decimals: 2},
+            // {code: "CAD", name: "Canadian Dollar", flag: "🇨🇦", decimals: 2},
+            // {code: "AUD", name: "Australian Dollar", flag: "🇦🇺", decimals: 2},
+            // {code: "SGD", name: "Singapore Dollar", flag: "🇸🇬", decimals: 2},
         ];
+        let selectedCurrencies = ["USD", "KRW", "JPY", "CNH", "AUD"];
+        let exchangeRates = [];
 
-        // 기준 환율 (USD 기준)
-        const baseRates = {
-            USD: 1,
-            KRW: 1403,
-            JPY: 155,
-            CNY: 7.24,
-            INR: 84.43,
-            EUR: 0.92,
-            GBP: 0.79,
-            CAD: 1.35,
-            AUD: 1.52,
-            SGD: 1.34
-        };
+        function initCurrencies(exchangeRates) {
+            exchangeRates.forEach(function (exchangeRate) {
+                currencies.push({
+                    code: exchangeRate.currencyCode,
+                    name: exchangeRate.country,
+                    flag: exchangeRate.countryFlag,
+                    decimal: 2
+                });
+            });
+        }
 
-        let selectedCurrencies = ["USD", "KRW", "JPY", "CNY", "INR"];
+        function initExchangeRates(data) {
+            data.forEach(function (item) {
+                exchangeRates.push(item);
+            });
+        }
+
+        function init() {
+            $.ajax({
+                url: "/api/exchange-rates",
+                method: "GET",
+            }).done(function (data) {
+                initExchangeRates(data);
+                initCurrencies(exchangeRates);
+                updateCurrencyInputs();
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("Failed to fetch exchange rates:", textStatus, errorThrown);
+                alert("환율 정보를 가져오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+            });
+        }
+
+        init();
 
         function updateCurrencyInputs() {
             $('#currencyInputs').empty();
             selectedCurrencies.forEach(code => {
-                const currency = currencies.find(c => c.code === code);
-                if (currency) {
+
+                const exchangeRate = exchangeRates.find(c => c.currencyCode === code);
+                if (exchangeRate) {
                     $('#currencyInputs').append(`
                     <div class="input-group">
                         <label for="${code}">금액</label>
-                        <input type="text" id="${code}" value="${formatNumber(baseRates[code], currency.decimals)}" class="currency-input" />
+                        <input type="text" id="${code}" value="${formatNumber(1000 / exchangeRate.rateValue, 2)}" class="currency-input" />
                         <button class="currency-btn">
-                            <span class="currency-flag">${currency.flag}</span>
-                            <span class="currency-code">${currency.code}</span>
+                            <span class="currency-flag">${exchangeRate.countryFlag}</span>
+                            <span class="currency-code">${exchangeRate.currencyCode}</span>
 <!--                            <span class="chevron-down">▼</span>-->
                         </button>
                     </div>
@@ -359,9 +379,18 @@
             $('#selectedCount').text(selectedCurrencies.length);
         }
 
+        function getRateValue(currencyCode) {
+            console.log("currencyCode" + currencyCode);
+            return exchangeRates
+                .find(c => c.currencyCode === currencyCode)
+                .rateValue;
+        }
+
         function convertCurrency(amount, fromCurrency, toCurrency) {
-            const usdAmount = amount / baseRates[fromCurrency];
-            return usdAmount * baseRates[toCurrency];
+            if (fromCurrency === "KRW") {
+                return amount / getRateValue(toCurrency);
+            }
+            return amount * getRateValue(fromCurrency) / getRateValue(toCurrency);
         }
 
         function formatNumber(number, decimals) {
@@ -372,22 +401,22 @@
         }
 
         // 이벤트 핸들러
-        $('#selectCurrencies').on('click', function() {
+        $('#selectCurrencies').on('click', function () {
             updateCurrencyDialog();
             $('#currencyDialog').css('display', 'flex');
         });
 
-        $('#closeDialog').on('click', function() {
+        $('#closeDialog').on('click', function () {
             $('#currencyDialog').hide();
         });
 
-        $(document).on('click', function(event) {
+        $(document).on('click', function (event) {
             if ($(event.target).is('#currencyDialog')) {
                 $('#currencyDialog').hide();
             }
         });
 
-        $(document).on('change', '.dialog-body input[type="checkbox"]', function() {
+        $(document).on('change', '.dialog-body input[type="checkbox"]', function () {
             const currencyCode = $(this).val();
             if (this.checked) {
                 if (!selectedCurrencies.includes(currencyCode)) {
@@ -400,7 +429,7 @@
         });
 
         // 통화 입력 처리
-        $(document).on('input', '.currency-input', function() {
+        $(document).on('input', '.currency-input', function () {
             const currencyCode = $(this).attr('id');
             const inputValue = $(this).val().replace(/,/g, '');
             const amount = parseFloat(inputValue);
@@ -415,8 +444,6 @@
                 });
             }
         });
-
-        updateCurrencyInputs();
 
         // 차트 관련 상수
         const CHART_PERIODS = {
@@ -590,7 +617,7 @@
                                 },
                                 ticks: {
                                     color: '#ffffff',
-                                    callback: function(value) {
+                                    callback: function (value) {
                                         return value.toLocaleString();
                                     }
                                 }
@@ -608,7 +635,7 @@
         }
 
         // input 이벤트 핸들러 수정
-        $(document).on('input', '#customDays', function() {
+        $(document).on('input', '#customDays', function () {
             const days = parseInt($(this).val());
 
             if (days >= 2 && days <= 365) {
@@ -618,7 +645,7 @@
         });
 
         // 기간 선택 버튼 이벤트 핸들러
-        $('.period-btn').on('click', function() {
+        $('.period-btn').on('click', function () {
             const days = $(this).data('period');
             $('.period-btn').removeClass('selected');
             $(this).addClass('selected');
@@ -627,7 +654,7 @@
         });
 
         // 커스텀 기간 적용 버튼 이벤트 핸들러
-        $('#applyCustomPeriod').on('click', function() {
+        $('#applyCustomPeriod').on('click', function () {
             const days = $('#customDays').val();
             if (days && days > 0 && days <= 365) {
                 $('.period-btn').removeClass('selected');

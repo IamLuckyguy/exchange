@@ -27,7 +27,6 @@ public class ExchangeRate {
     private String currencyCode;
     private Double rateValue;
     private LocalDateTime updatedAt;
-//    private List<Rate> rateHistories;
 
     public static ExchangeRate withoutId(@NonNull final String country,
                                          @NonNull final String countryFlag,
@@ -47,8 +46,9 @@ public class ExchangeRate {
         return new ExchangeRate(id, country, countryFlag, countryCode, currencyCode, rateValue, updatedAt);
     }
 
-    public void updateRate(final double newRateValue) {
+    public ExchangeRate updateRate(final double newRateValue) {
         rateValue = newRateValue;
         updatedAt = LocalDateTime.now();
+        return this;
     }
 }
