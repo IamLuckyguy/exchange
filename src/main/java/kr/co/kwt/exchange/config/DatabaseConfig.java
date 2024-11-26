@@ -10,7 +10,7 @@ import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EnableR2dbcRepositories(basePackages = "kr.co.kwt.exchange.repositories")
+@EnableR2dbcRepositories(basePackages = "kr.co.kwt.exchange.adapter.out.persistence")
 @EnableR2dbcAuditing
 @EnableTransactionManagement
 public class DatabaseConfig {
