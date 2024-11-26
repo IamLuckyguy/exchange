@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: dev
   r2dbc:
-    url: r2dbc:mysql://mysql-router-service:3306/exchange
+    url: r2dbc:mysql://root:rootqlalfqjsgh486@mysql-router-service:3306/exchange
     username: root
     password: rootqlalfqjsgh486
     properties:
