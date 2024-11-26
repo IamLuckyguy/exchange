@@ -3,9 +3,9 @@ spring:
     activate:
       on-profile: dev
   r2dbc:
-    url: r2dbc:mysql://localhost:33306/exchange
-    username: exchange_user
-    password: exchange_password
+    url: r2dbc:mysql://mysql-router-primary:6446/exchange
+    username: root
+    password: rootqlalfqjsgh486
     properties:
       initial-size: 5
       max-size: 10
