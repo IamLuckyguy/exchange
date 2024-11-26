@@ -4,8 +4,8 @@ spring:
       on-profile: dev
   r2dbc:
     url: r2dbc:mysql://mysql-router-service:3306/exchange
-    username: exchange_user
-    password: exchange_password
+    username: root
+    password: rootqlalfqjsgh486
     properties:
       initial-size: 5
       max-size: 10
