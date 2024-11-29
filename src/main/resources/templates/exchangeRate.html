@@ -281,6 +281,37 @@
                 padding: 0.4rem 0.8rem;
             }
         }
+
+        .currency-pair-selector select {
+            background-color: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            color: #ffffff;
+            padding: 0.4rem;
+            margin-left: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .currency-pair-selector select:hover {
+            border-color: #00ff88;
+        }
+
+        .form-check-input {
+            margin-top: 0.75rem;
+        }
+
+        .currency-pairs {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 767px) {
+            .currency-pairs {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body class="dark">
@@ -301,10 +332,30 @@
             </div>
         </div>
 
-        <!-- 차트 카드 -->
+        <!-- 차트 카드 수정 -->
         <div class="card chart-card">
             <div class="card-content">
                 <div class="chart-section">
+                    <!-- 통화 쌍 선택 추가 -->
+                    <div class="currency-pair-selector mb-3">
+                        <h6 class="text-light mb-2">차트에 표시할 통화 선택</h6>
+                        <div class="currency-pairs">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="pair1Checkbox">
+                                <label class="form-check-label" for="pair1Checkbox">
+                                    <select id="pair1Currency" class="custom-select bg-dark text-light"></select>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="pair2Checkbox">
+                                <label class="form-check-label" for="pair2Checkbox">
+                                    <select id="pair2Currency" class="custom-select bg-dark text-light"></select>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 기존 차트 컨트롤 -->
                     <div class="chart-controls">
                         <div class="period-buttons mb-3">
                             <button class="period-btn selected" data-period="7">1주일</button>
@@ -314,11 +365,7 @@
                             <button class="period-btn" data-period="all">전체</button>
                         </div>
                         <div class="custom-period">
-                            <input type="number"
-                                   id="customDays"
-                                   placeholder="일수 입력 (2-365)"
-                                   min="2"
-                                   max="365">
+                            <input type="number" id="customDays" placeholder="일수 입력 (2-365)" min="2" max="365">
                         </div>
                     </div>
                     <div class="chart-container">
@@ -358,6 +405,29 @@
                     decimal: 2
                 });
             });
+        }
+
+        // 통화 선택 드롭다운 초기화 함수 추가
+        function initializeCurrencySelectors() {
+            const selectors = ['#pair1Currency', '#pair2Currency'];
+            selectors.forEach(selector => {
+                const select = $(selector);
+                select.empty();
+                selectedCurrencies.forEach(code => {
+                    const currency = currencies.find(c => c.code === code);
+                    if (currency && currency.code !== 'USD') {
+                        select.append(`
+                            <option value="${currency.code}">
+                                ${currency.flag} ${currency.code}
+                            </option>
+                        `);
+                    }
+                });
+            });
+
+            // 기본값 설정
+            $('#pair1Currency').val(selectedCurrencies[1]);
+            $('#pair2Currency').val(selectedCurrencies[2]);
         }
 
         function initExchangeRates(data) {
@@ -551,11 +621,43 @@
             return data;
         }
 
-        // 차트 업데이트 함수
-        function updateChart(days, baseCurrency = 'USD') {
-            const selectedCurrency = selectedCurrencies.find(code => code !== baseCurrency) || 'KRW';
-            const data = generateMockData(days, baseCurrency, selectedCurrency);
+        // 차트 업데이트 함수 수정
+        function updateChart(days) {
             const ctx = document.getElementById('exchangeRateChart');
+            const baseCurrency = 'USD'; // 기준 통화
+
+            const pair1Checked = $('#pair1Checkbox').is(':checked');
+            const pair2Checked = $('#pair2Checkbox').is(':checked');
+            const pair1Currency = $('#pair1Currency').val();
+            const pair2Currency = $('#pair2Currency').val();
+
+            const datasets = [];
+
+            if (pair1Checked) {
+                const data1 = generateMockData(days, baseCurrency, pair1Currency);
+                datasets.push({
+                    label: `${baseCurrency}/${pair1Currency}`,
+                    data: data1.rates,
+                    borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: false
+                });
+            }
+
+            if (pair2Checked) {
+                const data2 = generateMockData(days, baseCurrency, pair2Currency);
+                datasets.push({
+                    label: `${baseCurrency}/${pair2Currency}`,
+                    data: data2.rates,
+                    borderColor: '#ff8800',
+                    backgroundColor: 'rgba(255, 136, 0, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: false
+                });
+            }
 
             if (window.exchangeRateChart instanceof Chart) {
                 window.exchangeRateChart.destroy();
@@ -570,16 +672,8 @@
                 window.exchangeRateChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: data.dates,
-                        datasets: [{
-                            label: `${baseCurrency}/${selectedCurrency} 환율`,
-                            data: data.rates,
-                            borderColor: '#00ff88',
-                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            fill: true
-                        }]
+                        labels: generateMockData(days, baseCurrency, pair1Currency).dates,
+                        datasets: datasets
                     },
                     options: {
                         responsive: true,
@@ -641,6 +735,22 @@
                 console.error('Chart initialization error:', error);
             }
         }
+
+        // 이벤트 리스너 추가
+        $('#pair1Currency, #pair2Currency').on('change', function() {
+            updateChart(CHART_PERIODS.WEEK);
+        });
+
+        $('#pair1Checkbox, #pair2Checkbox').on('change', function() {
+            updateChart(CHART_PERIODS.WEEK);
+        });
+
+        // 통화 선택 리스트 업데이트시 셀렉터도 업데이트하도록 수정
+        const originalUpdateCurrencyInputs = updateCurrencyInputs;
+        updateCurrencyInputs = function() {
+            originalUpdateCurrencyInputs();
+            initializeCurrencySelectors();
+        };
 
         // 기간 선택 버튼 이벤트 핸들러
         $(document).on('input', '#customDays', function () {
