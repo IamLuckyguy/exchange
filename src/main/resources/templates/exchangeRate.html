@@ -312,6 +312,39 @@
                 gap: 0.5rem;
             }
         }
+
+        .currency-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: #2a2a2a;
+            border-radius: 0.5rem;
+        }
+
+        .currency-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: #3a3a3a;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .currency-checkbox-item:hover {
+            background: #4a4a4a;
+        }
+
+        .currency-checkbox-item input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .currency-flag {
+            margin-right: 0.25rem;
+        }
     </style>
 </head>
 <body class="dark">
@@ -337,21 +370,10 @@
             <div class="card-content">
                 <div class="chart-section">
                     <!-- 통화 쌍 선택 추가 -->
-                    <div class="currency-pair-selector mb-3">
+                    <div class="currency-selector mb-3">
                         <h6 class="text-light mb-2">차트에 표시할 통화 선택</h6>
-                        <div class="currency-pairs">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="pair1Checkbox">
-                                <label class="form-check-label" for="pair1Checkbox">
-                                    <select id="pair1Currency" class="custom-select bg-dark text-light"></select>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="pair2Checkbox">
-                                <label class="form-check-label" for="pair2Checkbox">
-                                    <select id="pair2Currency" class="custom-select bg-dark text-light"></select>
-                                </label>
-                            </div>
+                        <div id="currencyCheckboxes" class="currency-checkboxes">
+                            <!-- 체크박스들이 동적으로 추가됨 -->
                         </div>
                     </div>
 
@@ -407,6 +429,28 @@
             });
         }
 
+        function initCurrencySelector() {
+            const container = $('#currencyCheckboxes');
+            container.empty();
+
+            exchangeRates.forEach(rate => {
+                if (rate.currencyCode !== 'USD') { // USD는 기준 통화이므로 제외
+                    container.append(`
+                <label class="currency-checkbox-item">
+                    <input type="checkbox"
+                           class="currency-checkbox"
+                           value="${rate.currencyCode}"
+                           ${selectedCurrencies.includes(rate.currencyCode) ? 'checked' : ''}>
+                    <span>
+                        <span class="currency-flag">${rate.countryFlag}</span>
+                        <span class="currency-code">${rate.currencyCode}</span>
+                    </span>
+                </label>
+            `);
+                }
+            });
+        }
+
         // 통화 선택 드롭다운 초기화 함수 추가
         function initializeCurrencySelectors() {
             const selectors = ['#pair1Currency', '#pair2Currency'];
@@ -424,10 +468,6 @@
                     }
                 });
             });
-
-            // 기본값 설정
-            $('#pair1Currency').val(selectedCurrencies[1]);
-            $('#pair2Currency').val(selectedCurrencies[2]);
         }
 
         function initExchangeRates(data) {
@@ -444,6 +484,14 @@
                 initExchangeRates(data);
                 initCurrencies(exchangeRates);
                 updateCurrencyInputs();
+                // 초기 로드시 통화 체크박스 생성
+                initCurrencySelector();
+                // 초기 차트 표시
+                if (typeof Chart !== 'undefined') {
+                    updateChart(CHART_PERIODS.WEEK);
+                } else {
+                    console.error('Chart.js is not loaded!');
+                }
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.error("Failed to fetch exchange rates:", textStatus, errorThrown);
                 alert("환율 정보를 가져오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
@@ -571,10 +619,10 @@
         function generateMockData(days, baseCurrency, targetCurrency) {
             const data = {
                 dates: [],
-                rates: []
+                rates: [],
+                percentageChanges: []
             };
 
-            // 기준 환율 설정 (USD 기준)
             const baseRates = {
                 USD: 1,
                 KRW: 1300,
@@ -588,7 +636,6 @@
                 INR: 84
             };
 
-            // 변동폭 설정
             const volatility = {
                 USD: 0,
                 KRW: 5,
@@ -605,6 +652,7 @@
             const today = new Date();
             const baseRate = baseRates[targetCurrency] / baseRates[baseCurrency];
             const maxVolatility = volatility[targetCurrency];
+            let firstRate = null;
 
             for (let i = days - 1; i >= 0; i--) {
                 const date = new Date(today);
@@ -614,135 +662,144 @@
                 const randomVariation = (Math.random() - 0.5) * maxVolatility;
                 const rate = baseRate + trendVariation + randomVariation;
 
+                if (firstRate === null) {
+                    firstRate = rate;
+                }
+
                 data.dates.push(formattedDate);
                 data.rates.push(parseFloat(rate.toFixed(4)));
+                data.percentageChanges.push(parseFloat(((rate / firstRate * 100) - 100).toFixed(2)));
             }
 
             return data;
         }
 
-        // 차트 업데이트 함수 수정
         function updateChart(days) {
+            // 기존 차트 제거
+            if (exchangeRateChart.type) {
+                exchangeRateChart.destroy();
+                exchangeRateChart = null;
+            }
+
+            // 캔버스 초기화를 위해 새로운 캔버스 생성
+            const chartContainer = document.querySelector('.chart-container');
+            chartContainer.innerHTML = '<canvas id="exchangeRateChart"></canvas>';
+
+            // 새로운 캔버스 컨텍스트 가져오기
             const ctx = document.getElementById('exchangeRateChart');
-            const baseCurrency = 'USD'; // 기준 통화
-
-            const pair1Checked = $('#pair1Checkbox').is(':checked');
-            const pair2Checked = $('#pair2Checkbox').is(':checked');
-            const pair1Currency = $('#pair1Currency').val();
-            const pair2Currency = $('#pair2Currency').val();
-
-            const datasets = [];
-
-            if (pair1Checked) {
-                const data1 = generateMockData(days, baseCurrency, pair1Currency);
-                datasets.push({
-                    label: `${baseCurrency}/${pair1Currency}`,
-                    data: data1.rates,
-                    borderColor: '#00ff88',
-                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: false
-                });
-            }
-
-            if (pair2Checked) {
-                const data2 = generateMockData(days, baseCurrency, pair2Currency);
-                datasets.push({
-                    label: `${baseCurrency}/${pair2Currency}`,
-                    data: data2.rates,
-                    borderColor: '#ff8800',
-                    backgroundColor: 'rgba(255, 136, 0, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: false
-                });
-            }
-
-            if (window.exchangeRateChart instanceof Chart) {
-                window.exchangeRateChart.destroy();
-            }
-
             if (!ctx) {
                 console.error('Canvas element not found');
                 return;
             }
 
-            try {
-                window.exchangeRateChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: generateMockData(days, baseCurrency, pair1Currency).dates,
-                        datasets: datasets
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    color: '#ffffff',
-                                    font: {
-                                        size: 14
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                titleColor: '#00ff88',
-                                bodyColor: '#ffffff',
-                                borderColor: '#4a4a4a',
-                                borderWidth: 1
-                            }
-                        },
-                        scales: {
-                            x: {
-                                display: true,
-                                grid: {
-                                    color: '#4a4a4a',
-                                    borderColor: '#4a4a4a'
-                                },
-                                ticks: {
-                                    color: '#ffffff',
-                                    maxRotation: 45,
-                                    minRotation: 45
-                                }
-                            },
-                            y: {
-                                display: true,
-                                grid: {
-                                    color: '#4a4a4a',
-                                    borderColor: '#4a4a4a'
-                                },
-                                ticks: {
-                                    color: '#ffffff',
-                                    callback: function (value) {
-                                        return value.toLocaleString();
-                                    }
-                                }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: 'index'
-                        }
-                    }
+            const baseCurrency = 'USD';
+            const selectedCurrencies = $('.currency-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            const datasets = [];
+            const colors = ['#00ff88', '#ff8800', '#ff0088', '#88ff00', '#0088ff', '#8800ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff'];
+
+            // 각 선택된 통화에 대한 데이터셋 생성
+            selectedCurrencies.forEach((currency, index) => {
+                const data = generateMockData(days, baseCurrency, currency);
+                const color = colors[index % colors.length];
+
+                datasets.push({
+                    label: `${baseCurrency}/${currency}`,
+                    data: data.rates.map((rate, i) => ({
+                        x: data.dates[i],
+                        y: data.percentageChanges[i],
+                        rate: rate
+                    })),
+                    borderColor: color,
+                    backgroundColor: `${color}33`,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: false
                 });
-            } catch (error) {
-                console.error('Chart initialization error:', error);
-            }
+            });
+
+            // 새로운 차트 생성
+            exchangeRateChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#ffffff',
+                                font: { size: 14 }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#00ff88',
+                            bodyColor: '#ffffff',
+                            borderColor: '#4a4a4a',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    const dataset = context.dataset;
+                                    const data = dataset.data[context.dataIndex];
+                                    const label = dataset.label;
+                                    return [
+                                        `${label}: ${data.rate.toLocaleString()} (실제 환율)`,
+                                        `변동률: ${data.y.toFixed(2)}%`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            // time scale을 일반 카테고리 스케일로 변경
+                            type: 'category',
+                            display: true,
+                            grid: {
+                                color: '#4a4a4a',
+                                borderColor: '#4a4a4a'
+                            },
+                            ticks: {
+                                color: '#ffffff',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            display: true,
+                            grid: {
+                                color: '#4a4a4a',
+                                borderColor: '#4a4a4a'
+                            },
+                            ticks: {
+                                color: '#ffffff',
+                                callback: function(value) {
+                                    return value.toFixed(2) + '%';
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
         }
 
-        // 이벤트 리스너 추가
-        $('#pair1Currency, #pair2Currency').on('change', function() {
-            updateChart(CHART_PERIODS.WEEK);
-        });
-
-        $('#pair1Checkbox, #pair2Checkbox').on('change', function() {
-            updateChart(CHART_PERIODS.WEEK);
+        // 체크박스 변경 이벤트
+        $(document).on('change', '.currency-checkbox', function() {
+            console.log("Checkbox changed");
+            updateChart($('.period-btn.selected').data('period') ||
+                parseInt($('#customDays').val()) || 7);
         });
 
         // 통화 선택 리스트 업데이트시 셀렉터도 업데이트하도록 수정
@@ -768,13 +825,6 @@
             $('#customDays').val('');
             updateChart(days);
         });
-
-        // 초기 차트 표시
-        if (typeof Chart !== 'undefined') {
-            updateChart(CHART_PERIODS.WEEK);
-        } else {
-            console.error('Chart.js is not loaded!');
-        }
     });
 </script>
 </body>
