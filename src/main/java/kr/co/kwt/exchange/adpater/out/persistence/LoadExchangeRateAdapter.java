@@ -1,6 +1,10 @@
 package kr.co.kwt.exchange.adpater.out.persistence;
 
 import kr.co.kwt.exchange.adpater.out.persistence.repositories.ExchangeRateRepository;
+import kr.co.kwt.exchange.application.port.in.dto.SearchCountryRequest;
+import kr.co.kwt.exchange.application.port.in.dto.SearchCountryResponse;
+import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryRequest;
+import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryResponse;
 import kr.co.kwt.exchange.application.port.out.LoadExchangeRatePort;
 import kr.co.kwt.exchange.domain.ExchangeRate;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +19,6 @@ public class LoadExchangeRateAdapter implements LoadExchangeRatePort {
     private final ExchangeRateRepository exchangeRateRepository;
 
     @Override
-    public Mono<ExchangeRate> findByCountry(final String country) {
-        return exchangeRateRepository.findByCountry(country);
-    }
-
-    @Override
     public Flux<ExchangeRate> findAll() {
         return exchangeRateRepository.findAll();
     }
@@ -28,4 +27,22 @@ public class LoadExchangeRateAdapter implements LoadExchangeRatePort {
     public Mono<ExchangeRate> findByCurrencyCode(final String currencyCode) {
         return exchangeRateRepository.findByCurrencyCode(currencyCode);
     }
+
+    @Override
+    public Flux<SearchExchangeRateWithCountryResponse> searchAllExchangeRateWithCountry() {
+        return exchangeRateRepository.searchAllExchangeRateWithCountry();
+    }
+
+    @Override
+    public Mono<SearchExchangeRateWithCountryResponse> searchExchangeRateWithCountry(
+            final SearchExchangeRateWithCountryRequest searchExchangeRateWithCountryRequest
+    ) {
+        return exchangeRateRepository.searchExchangeRateWithCountry(searchExchangeRateWithCountryRequest);
+    }
+
+    @Override
+    public Mono<SearchCountryResponse> searchCountry(final SearchCountryRequest searchCountryRequest) {
+        return exchangeRateRepository.searchCountry(searchCountryRequest);
+    }
+
 }

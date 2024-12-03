@@ -1,15 +1,15 @@
-package kr.co.kwt.exchange.adpater.in.api;
+package kr.co.kwt.exchange.adpater.in.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class FetchExchangeRateResponse {
+public class FetchExchangeRateOpenApiResponse {
 
     private int result;
 
     @JsonProperty("cur_unit")
-    private String curUnit;
+    private String currencyCode;
 
     @JsonProperty("cur_nm")
     private String curNm;

@@ -2,6 +2,16 @@ spring:
   config:
     activate:
       on-profile: local
+
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      additional-paths: src/main/resources/templates
+
+  thymeleaf:
+    cache: false
+
   r2dbc:
     url: r2dbc:mysql://localhost:33306/exchange
     username: exchange_user
