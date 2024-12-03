@@ -9,7 +9,7 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface ExchangeRateRepository extends ReactiveCrudRepository<ExchangeRate, Long> {
+public interface ExchangeRateRepository extends ReactiveCrudRepository<ExchangeRate, Long>, ExchangeRateCustomRepository {
 
     Mono<ExchangeRate> findByCurrencyCode(String currencyCode);
 

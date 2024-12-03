@@ -19,15 +19,24 @@
 
 CREATE TABLE IF NOT EXISTS exchange_rates
 (
-    id            BIGINT AUTO_INCREMENT PRIMARY KEY,                                           -- 기본 키
-    country       VARCHAR(255) NOT NULL,                                                       -- 국가 이름
-    country_flag  VARCHAR(255),                                                                -- 국가 깃발 URL (NULL 허용)
-    country_code  VARCHAR(10)  NOT NULL,                                                       -- 국가 코드
-    currency_code VARCHAR(10)  NOT NULL,                                                       -- 통화 코드
-    rate_value    DOUBLE       NOT NULL,                                                       -- 환율 값
-    updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 마지막 업데이트 시간
-    INDEX idx_country_code (country_code),                                                     -- 국가 코드 인덱스
-    INDEX idx_currency_code (currency_code)                                                    -- 통화 코드 인덱스
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,                                          -- 기본 키
+    country_code  VARCHAR(10) NOT NULL,                                                       -- 국가 코드
+    currency_code VARCHAR(10) NOT NULL,                                                       -- 통화 코드
+    unit_amount   INT,
+    rate_value    DOUBLE      NOT NULL,                                                       -- 환율 값
+    updated_at    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 마지막 업데이트 시간
+    INDEX idx_country_code (country_code),                                                    -- 국가 코드 인덱스
+    INDEX idx_currency_code (currency_code)                                                   -- 통화 코드 인덱스
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE Country
+(
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    currency_code VARCHAR(10) UNIQUE  NOT NULL,
+    country_name  VARCHAR(100) UNIQUE NOT NULL,
+    country_flag  VARCHAR(255) UNIQUE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;

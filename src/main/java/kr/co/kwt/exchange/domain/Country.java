@@ -13,5 +13,4 @@ public class Country {
     private String currencyCode;
     private String countryName;
     private String countryFlag;
-
 }

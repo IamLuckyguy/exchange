@@ -49,6 +49,7 @@ public class ExchangeRateService implements AddExchangeRateUseCase, UpdateRateUs
     private Mono<ExchangeRate> createExchangeRate(@NonNull final AddExchangeRateRequest addExchangeRateRequest) {
         return Mono.fromSupplier(() -> ExchangeRate.withoutId(
                 addExchangeRateRequest.getCurrencyCode(),
+                addExchangeRateRequest.getUnitAmount(),
                 addExchangeRateRequest.getRateValue()));
     }
 

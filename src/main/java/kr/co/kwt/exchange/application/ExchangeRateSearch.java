@@ -26,19 +26,16 @@ public class ExchangeRateSearch implements SearchExchangeRateUseCase {
     public Mono<SearchExchangeRateWithCountryResponse> searchExchangeRateWithCountry(
             final SearchExchangeRateWithCountryRequest searchExchangeRateWithCountryRequest
     ) {
-        return loadExchangeRatePort
-                .searchExchangeRateWithCountry(searchExchangeRateWithCountryRequest);
+        return loadExchangeRatePort.searchExchangeRateWithCountry(searchExchangeRateWithCountryRequest);
     }
 
     @Override
     public Flux<SearchExchangeRateWithCountryResponse> searchAllExchangeRateWithCountry() {
-        return loadExchangeRatePort
-                .searchAllExchangeRateWithCountry();
+        return loadExchangeRatePort.searchAllExchangeRateWithCountry();
     }
 
     @Override
     public Mono<SearchCountryResponse> searchCountry(SearchCountryRequest searchCountryRequest) {
-        return loadExchangeRatePort
-                .searchCountry(searchCountryRequest);
+        return loadExchangeRatePort.searchCountry(searchCountryRequest);
     }
 }
