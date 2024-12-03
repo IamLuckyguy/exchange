@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateRateRequest {
+public class SearchCountryResponse {
 
     private String currencyCode;
-    private double rateValue;
+    private String countryName;
+    private String countryFlag;
+
 }

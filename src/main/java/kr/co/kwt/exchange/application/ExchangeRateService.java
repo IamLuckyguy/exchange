@@ -11,6 +11,7 @@ import kr.co.kwt.exchange.application.port.out.SaveExchangeRatePort;
 import kr.co.kwt.exchange.domain.ExchangeRate;
 import lombok.RequiredArgsConstructor;
 import org.reactivestreams.Publisher;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,16 +27,16 @@ public class ExchangeRateService implements AddExchangeRateUseCase, UpdateRateUs
 
     @Override
     public Mono<AddExchangeRateResponse> addExchangeRate(final AddExchangeRateRequest addExchangeRateRequest) {
-        return validateAlreadyExistCountry(addExchangeRateRequest.getCountry())
+        return validateAlreadyExistExchangeRate(addExchangeRateRequest.getCurrencyCode())
                 .then(createExchangeRate(addExchangeRateRequest))
                 .flatMap(saveExchangeRatePort::save)
                 .map(ExchangeRate::getId)
                 .map(AddExchangeRateResponse::new);
     }
 
-    private Mono<ExchangeRate> validateAlreadyExistCountry(String country) {
+    private Mono<ExchangeRate> validateAlreadyExistExchangeRate(final String currencyCode) {
         return loadExchangeRatePort
-                .findByCountry(country)
+                .findByCurrencyCode(currencyCode)
                 .flatMap(exchangeRate -> {
                     if (exchangeRate != null) {
                         return Mono.error(AlreadyAddedCountryException::new);
@@ -45,18 +46,16 @@ public class ExchangeRateService implements AddExchangeRateUseCase, UpdateRateUs
                 });
     }
 
-    private Mono<ExchangeRate> createExchangeRate(AddExchangeRateRequest addExchangeRateRequest) {
-        return Mono.fromSupplier(() -> ExchangeRate.withoutId(addExchangeRateRequest.getCountry(),
-                addExchangeRateRequest.getCountryFlag(),
-                addExchangeRateRequest.getCountryCode(),
+    private Mono<ExchangeRate> createExchangeRate(@NonNull final AddExchangeRateRequest addExchangeRateRequest) {
+        return Mono.fromSupplier(() -> ExchangeRate.withoutId(
                 addExchangeRateRequest.getCurrencyCode(),
-                null));
+                addExchangeRateRequest.getRateValue()));
     }
 
     @Override
     public Mono<UpdateRateResponse> updateRate(final UpdateRateRequest updateRateRequest) {
         return loadExchangeRatePort
-                .findByCountry(updateRateRequest.getCountry())
+                .findByCurrencyCode(updateRateRequest.getCurrencyCode())
                 .map(doUpdateRate(updateRateRequest))
                 .flatMap(saveExchangeRatePort::save)
                 .map(exchangeRate -> UpdateRateResponse.of(exchangeRate.getRateValue(), exchangeRate.getUpdatedAt()));

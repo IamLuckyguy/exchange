@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 
 import static lombok.AccessLevel.PROTECTED;
 
-
 @Table("exchange_rates")
 @Getter
 @NoArgsConstructor(access = PROTECTED)
@@ -21,29 +20,20 @@ public class ExchangeRate {
 
     @Id
     private Long id;
-    private String country;
-    private String countryFlag;
-    private String countryCode;
     private String currencyCode;
     private Double rateValue;
     private LocalDateTime updatedAt;
 
-    public static ExchangeRate withoutId(@NonNull final String country,
-                                         @NonNull final String countryFlag,
-                                         @NonNull final String countryCode,
-                                         @NonNull final String currencyCode,
+    public static ExchangeRate withoutId(@NonNull final String currencyCode,
                                          @Nullable final Double rate) {
-        return new ExchangeRate(null, country, countryFlag, countryCode, currencyCode, rate, LocalDateTime.now());
+        return new ExchangeRate(null, currencyCode, rate, LocalDateTime.now());
     }
 
     public static ExchangeRate withId(@NonNull final Long id,
-                                      @NonNull final String country,
-                                      @NonNull final String countryFlag,
-                                      @NonNull final String countryCode,
                                       @NonNull final String currencyCode,
                                       @NonNull final double rateValue,
                                       @NonNull final LocalDateTime updatedAt) {
-        return new ExchangeRate(id, country, countryFlag, countryCode, currencyCode, rateValue, updatedAt);
+        return new ExchangeRate(id, currencyCode, rateValue, updatedAt);
     }
 
     public ExchangeRate updateRate(final double newRateValue) {
