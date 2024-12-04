@@ -125,12 +125,10 @@ public class ExchangeRateApiService {
             final ExchangeRate exchangeRate,
             final FetchExchangeRateOpenApiResponse fetchExchangeRateOpenApiResponse
     ) {
-        if (exchangeRate.getId() == null) {
-            return save(fetchExchangeRateOpenApiResponse)
-                    .then(update(fetchExchangeRateOpenApiResponse));
-        }
-
-        return update(fetchExchangeRateOpenApiResponse);
+        return Mono.just(exchangeRate)
+                .flatMap(rate -> rate.getId() == null
+                        ? save(fetchExchangeRateOpenApiResponse).then(update(fetchExchangeRateOpenApiResponse))
+                        : update(fetchExchangeRateOpenApiResponse));
     }
 
     private Mono<ExchangeRate> update(final FetchExchangeRateOpenApiResponse fetchExchangeRateOpenApiResponse) {
@@ -155,7 +153,7 @@ public class ExchangeRateApiService {
 
         return currencyCode.indexOf("(") > 0 ?
                 Integer.parseInt(currencyCode.substring(currencyCode.indexOf("(") + 1, currencyCode.indexOf(")")))
-                : 0;
+                : 1;
     }
 
     private double getRateValue(FetchExchangeRateOpenApiResponse fetchExchangeRateOpenApiResponse) {

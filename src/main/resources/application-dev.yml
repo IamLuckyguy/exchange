@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: dev
   r2dbc:
-    url: r2dbc:mysql://mysql-router-primary:6446/exchange
+    url: r2dbc:mysql://mysql-cluster.kwt-dev:6446/exchange
     username: root
     password: rootqlalfqjsgh486
     properties:
