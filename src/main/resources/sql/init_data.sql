@@ -1,14 +1,23 @@
-INSERT INTO exchange.exchange_rates (id, country, country_flag, country_code, currency_code, rate_value, updated_at)
-VALUES (1, 'korea', '🇰🇷', 'KR', 'KRW', 1, '2024-11-25 12:28:29');
-INSERT INTO exchange.exchange_rates (id, country, country_flag, country_code, currency_code, rate_value, updated_at)
-VALUES (5, 'usa', '🇺🇸', 'US', 'USD', 1377.68, '2024-11-24 21:54:23');
-INSERT INTO exchange.exchange_rates (id, country, country_flag, country_code, currency_code, rate_value, updated_at)
-VALUES (6, 'Japanese', '🇯🇵', 'JP', 'JPY', 886.91, '2024-11-24 21:54:23');
-INSERT INTO exchange.exchange_rates (id, country, country_flag, country_code, currency_code, rate_value, updated_at)
-VALUES (7, 'Chinese', '🇨🇳', 'CN', 'CNH', 190.35, '2024-11-25 13:57:58');
-INSERT INTO exchange.exchange_rates (id, country, country_flag, country_code, currency_code, rate_value, updated_at)
-VALUES (9, 'Australia', '🇦🇺', 'AU', 'AUD', 896.59, '2024-11-24 21:54:23');
+INSERT INTO country (id, currency_code, country_name, country_flag)
+VALUES (1, 'USD', 'United States', '🇺🇸'),
+       (2, 'EUR', 'Eurozone', '🇪🇺'),
+       (3, 'JPY(100)', 'Japan', '🇯🇵'),
+       (4, 'GBP', 'United Kingdom', '🇬🇧'),
+       (5, 'AUD', 'Australia', '🇦🇺'),
+       (6, 'CAD', 'Canada', '🇨🇦'),
+       (7, 'CHF', 'Switzerland', '🇨🇭'),
+       (8, 'CNY', 'China', '🇨🇳'),
+       (9, 'HKD', 'Hong Kong', '🇭🇰'),
+       (10, 'NZD', 'New Zealand', '🇳🇿'),
+       (11, 'SEK', 'Sweden', '🇸🇪'),
+       (12, 'KRW', 'Korea', '🇰🇷'),
+       (13, 'SGD', 'Singapore', '🇸🇬'),
+       (14, 'NOK', 'Norway', '🇳🇴'),
+       (15, 'INR', 'India', '🇮🇳'),
+       (16, 'MXN', 'Mexico', '🇲🇽'),
+       (17, 'RUB', 'Russia', '🇷🇺'),
+       (18, 'ZAR', 'South Africa', '🇿🇦'),
+       (19, 'BRL', 'Brazil', '🇧🇷'),
+       (20, 'TRY', 'Turkey', '🇹🇷'),
+       (21, 'IDR(100)', 'Indonesia', '🇮🇩');
 
-
-INSERT INTO exchange.country (id, currency_code, country_name, country_flag)
-VALUES (1, 'KRW', 'Korea', '🇰🇷');

@@ -50,7 +50,7 @@ public class ExchangeRateService implements AddExchangeRateUseCase, UpdateRateUs
         return Mono.fromSupplier(() -> ExchangeRate.withoutId(
                 addExchangeRateRequest.getCurrencyCode(),
                 addExchangeRateRequest.getUnitAmount(),
-                addExchangeRateRequest.getRateValue()));
+                addExchangeRateRequest.getRateValue() == 0 ? 1 : addExchangeRateRequest.getRateValue()));
     }
 
     @Override
@@ -59,7 +59,9 @@ public class ExchangeRateService implements AddExchangeRateUseCase, UpdateRateUs
                 .findByCurrencyCode(updateRateRequest.getCurrencyCode())
                 .map(doUpdateRate(updateRateRequest))
                 .flatMap(saveExchangeRatePort::save)
-                .map(exchangeRate -> UpdateRateResponse.of(exchangeRate.getRateValue(), exchangeRate.getUpdatedAt()));
+                .map(exchangeRate -> UpdateRateResponse.of(
+                        exchangeRate.getRateValue(),
+                        exchangeRate.getUpdatedAt()));
     }
 
     @Override
@@ -78,6 +80,7 @@ public class ExchangeRateService implements AddExchangeRateUseCase, UpdateRateUs
     }
 
     private Function<ExchangeRate, ExchangeRate> doUpdateRate(final UpdateRateRequest updateRateRequest) {
-        return exchangeRate -> exchangeRate.updateRate(updateRateRequest.getRateValue());
+        return exchangeRate -> exchangeRate.updateRate(
+                updateRateRequest.getRateValue() == 0 ? 1 : updateRateRequest.getRateValue());
     }
 }

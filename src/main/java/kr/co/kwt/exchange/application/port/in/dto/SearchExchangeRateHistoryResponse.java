@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SearchExchangeRateHistoryResponse {
 
-    private String country;
-    private double currency;
+    private String countryName;
+    private double rateValue;
     private LocalDateTime updatedAt;
 }
