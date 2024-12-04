@@ -10,6 +10,7 @@ import kr.co.kwt.exchange.application.port.in.UpdateRateUseCase;
 import kr.co.kwt.exchange.application.port.in.dto.*;
 import kr.co.kwt.exchange.config.webclient.WebClientService;
 import kr.co.kwt.exchange.domain.ExchangeRate;
+import kr.co.kwt.exchange.utils.LogUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class ExchangeRateApiService {
+    private static final String SERVICE_NAME = "ExchangeRateApiService";
 
     @Value("${exchange.api.key}")
     private String apiKey;
@@ -61,33 +63,55 @@ public class ExchangeRateApiService {
     /**
      * 환율 정보 패치
      */
-    public Flux<FetchExchangeRateResponse> fetchExchangeRates(final FetchExchangeRateRequest fetchExchangeRateRequest) {
+    public Flux<FetchExchangeRateResponse> fetchExchangeRates(final FetchExchangeRateRequest request) {
         WebClient webClient = webClientService.getWebClient(baseUrl, webClientCustomizer);
+        String requestDate = request.getSearchDate();
+        LogUtils.logApiRequest(SERVICE_NAME, "fetchExchangeRates", requestDate);
+        long startTime = System.currentTimeMillis();
 
         return webClient.get()
                 .uri("/site/program/financial/exchangeJSON?authkey={apiKey}&searchdate={searchDate}&data=AP01",
-                        apiKey, fetchExchangeRateRequest.getSearchDate())
+                        apiKey, requestDate)
                 .retrieve()
                 .bodyToFlux(FetchExchangeRateOpenApiResponse.class)
+                .doOnNext(response -> LogUtils.logApiResponse(SERVICE_NAME, "fetchExchangeRates", response))
                 .filter(this::isSuccessApiResponse)
+                .doOnNext(response -> LogUtils.logBusinessOperation(
+                        SERVICE_NAME,
+                        "FETCH",
+                        response.getCurrencyCode(),
+                        "SUCCESS"
+                ))
                 .flatMap(this::updateExchangeRateValue)
-                .map(this::generateFetchExchangeRateResponse);
+                .map(this::generateFetchExchangeRateResponse)
+                .doOnComplete(() -> log.info("Completed fetching exchange rates for date: {}", requestDate))
+                .doOnError(error -> LogUtils.logError(SERVICE_NAME, "fetchExchangeRates", error));
     }
 
     private boolean isSuccessApiResponse(final FetchExchangeRateOpenApiResponse fetchExchangeRateOpenApiResponse) {
         return fetchExchangeRateOpenApiResponse.getResult() == 1;
     }
 
-    private Mono<ExchangeRate> updateExchangeRateValue(
-            final FetchExchangeRateOpenApiResponse fetchExchangeRateOpenApiResponse
-    ) {
+    private Mono<ExchangeRate> updateExchangeRateValue(FetchExchangeRateOpenApiResponse response) {
+        LogUtils.logDebug(SERVICE_NAME, "updateExchangeRateValue",
+                "Updating exchange rate for currency: %s", response.getCurrencyCode());
+
         return searchExchangeRateUseCase
-                .searchExchangeRate(fetchExchangeRateOpenApiResponse.getCurrencyCode())
-                .switchIfEmpty(Mono.just(ExchangeRate.withoutId(fetchExchangeRateOpenApiResponse.getCurrencyCode(),
-                        getUnitAmount(fetchExchangeRateOpenApiResponse),
-                        getRateValue(fetchExchangeRateOpenApiResponse))))
-                .flatMap(exchangeRate -> doUpdateExchangeRateValue(exchangeRate,
-                        fetchExchangeRateOpenApiResponse));
+                .searchExchangeRate(response.getCurrencyCode())
+                .doOnNext(rate -> LogUtils.logDebug(SERVICE_NAME, "updateExchangeRateValue",
+                        "Found existing rate for currency %s: %s",
+                        response.getCurrencyCode(), rate))
+                .switchIfEmpty(Mono.defer(() -> {
+                    LogUtils.logBusinessOperation(SERVICE_NAME, "CREATE",
+                            response.getCurrencyCode(), "NEW_ENTRY");
+                    return Mono.just(ExchangeRate.withoutId(
+                            response.getCurrencyCode(),
+                            getUnitAmount(response),
+                            getRateValue(response)));
+                }))
+                .flatMap(exchangeRate -> doUpdateExchangeRateValue(exchangeRate, response))
+                .doOnError(error -> LogUtils.logError(SERVICE_NAME, "updateExchangeRateValue",
+                        "Failed to update exchange rate for currency: %s", response.getCurrencyCode()));
     }
 
     private FetchExchangeRateResponse generateFetchExchangeRateResponse(final ExchangeRate exchangeRate) {
