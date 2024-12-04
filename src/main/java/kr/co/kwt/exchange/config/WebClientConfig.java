@@ -4,6 +4,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import kr.co.kwt.exchange.config.properties.WebClientProperties;
+import kr.co.kwt.exchange.config.webclient.WebClientLoggingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,8 @@ public class WebClientConfig {
     @Bean
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder()
+                .filter(WebClientLoggingFilter.logRequest())
+                .filter(WebClientLoggingFilter.logResponse())
                 .clientConnector(new ReactorClientHttpConnector(createHttpClient()));
     }
 
