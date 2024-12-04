@@ -24,7 +24,7 @@ class ExchangeRateApiController {
         return exchangeRateApiService.searchAllExchangeRateWithCountry();
     }
 
-    @GetMapping("/exchange-rates/{country}")
+    @GetMapping("/exchange-rates/{currencyCode}")
     public Mono<SearchExchangeRateWithCountryResponse> searchExchangeRateWithCountry(
             @ModelAttribute final SearchExchangeRateWithCountryRequest searchExchangeRateWithCountryRequest
     ) {

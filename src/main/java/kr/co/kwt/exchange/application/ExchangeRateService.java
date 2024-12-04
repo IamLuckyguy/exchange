@@ -59,7 +59,9 @@ public class ExchangeRateService implements AddExchangeRateUseCase, UpdateRateUs
                 .findByCurrencyCode(updateRateRequest.getCurrencyCode())
                 .map(doUpdateRate(updateRateRequest))
                 .flatMap(saveExchangeRatePort::save)
-                .map(exchangeRate -> UpdateRateResponse.of(exchangeRate.getRateValue(), exchangeRate.getUpdatedAt()));
+                .map(exchangeRate -> UpdateRateResponse.of(
+                        exchangeRate.getRateValue(),
+                        exchangeRate.getUpdatedAt()));
     }
 
     @Override
