@@ -1,14 +1,15 @@
-package kr.co.kwt.exchange.adpater.in.api.service;
+package kr.co.kwt.exchange.adapter.in.api.service;
 
-import kr.co.kwt.exchange.adpater.in.api.dto.FetchExchangeRateOpenApiResponse;
-import kr.co.kwt.exchange.adpater.in.api.dto.FetchExchangeRateRequest;
-import kr.co.kwt.exchange.adpater.in.api.dto.FetchExchangeRateResponse;
+import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateOpenApiResponse;
+import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateRequest;
+import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
+import kr.co.kwt.exchange.adapter.out.ExchangeRateWebClientCustomizer;
 import kr.co.kwt.exchange.application.port.in.AddExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.SearchExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.UpdateRateUseCase;
 import kr.co.kwt.exchange.application.port.in.dto.*;
+import kr.co.kwt.exchange.config.webclient.WebClientService;
 import kr.co.kwt.exchange.domain.ExchangeRate;
-import kr.co.kwt.exchange.utils.WebClientUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +29,8 @@ public class ExchangeRateApiService {
     @Value("${exchange.api.base-url}")
     private String baseUrl;
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClientService webClientService;
+    private final ExchangeRateWebClientCustomizer webClientCustomizer;
     private final UpdateRateUseCase updateExchangeRateUseCase;
     private final SearchExchangeRateUseCase searchExchangeRateUseCase;
     private final AddExchangeRateUseCase addExchangeRateUseCase;
@@ -60,7 +62,7 @@ public class ExchangeRateApiService {
      * 환율 정보 패치
      */
     public Flux<FetchExchangeRateResponse> fetchExchangeRates(final FetchExchangeRateRequest fetchExchangeRateRequest) {
-        WebClient webClient = WebClientUtils.getOrCreateWebClient(webClientBuilder, baseUrl);
+        WebClient webClient = webClientService.getWebClient(baseUrl, webClientCustomizer);
 
         return webClient.get()
                 .uri("/site/program/financial/exchangeJSON?authkey={apiKey}&searchdate={searchDate}&data=AP01",

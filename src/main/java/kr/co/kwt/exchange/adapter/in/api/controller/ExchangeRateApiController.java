@@ -1,8 +1,8 @@
-package kr.co.kwt.exchange.adpater.in.api.controller;
+package kr.co.kwt.exchange.adapter.in.api.controller;
 
-import kr.co.kwt.exchange.adpater.in.api.dto.FetchExchangeRateRequest;
-import kr.co.kwt.exchange.adpater.in.api.dto.FetchExchangeRateResponse;
-import kr.co.kwt.exchange.adpater.in.api.service.ExchangeRateApiService;
+import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateRequest;
+import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
+import kr.co.kwt.exchange.adapter.in.api.service.ExchangeRateApiService;
 import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateRequest;
 import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateResponse;
 import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryRequest;

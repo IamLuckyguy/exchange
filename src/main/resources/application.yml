@@ -1,5 +1,13 @@
 spring:
   profiles:
     active: local
+
   application:
     name: exchange-rate-service
+
+webclient:
+  connect-timeout: 5000
+  read-timeout: 5000
+  write-timeout: 5000
+  max-memory-size: 16777216
+  max-retries: 3

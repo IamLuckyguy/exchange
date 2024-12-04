@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.adpater.out.persistence.repositories;
+package kr.co.kwt.exchange.adapter.out.persistence.repositories;
 
 import kr.co.kwt.exchange.application.port.in.dto.SearchCountryRequest;
 import kr.co.kwt.exchange.application.port.in.dto.SearchCountryResponse;

@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.adpater.in.api.dto;
+package kr.co.kwt.exchange.adapter.in.api.dto;
 
 import lombok.Data;
 

@@ -1,6 +1,6 @@
-package kr.co.kwt.exchange.adpater.out.persistence;
+package kr.co.kwt.exchange.adapter.out.persistence;
 
-import kr.co.kwt.exchange.adpater.out.persistence.repositories.ExchangeRateRepository;
+import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateRepository;
 import kr.co.kwt.exchange.application.port.in.dto.SearchCountryRequest;
 import kr.co.kwt.exchange.application.port.in.dto.SearchCountryResponse;
 import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryRequest;
