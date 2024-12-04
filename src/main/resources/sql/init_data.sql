@@ -8,3 +8,7 @@ INSERT INTO exchange.exchange_rates (id, country, country_flag, country_code, cu
 VALUES (7, 'Chinese', '🇨🇳', 'CN', 'CNH', 190.35, '2024-11-25 13:57:58');
 INSERT INTO exchange.exchange_rates (id, country, country_flag, country_code, currency_code, rate_value, updated_at)
 VALUES (9, 'Australia', '🇦🇺', 'AU', 'AUD', 896.59, '2024-11-24 21:54:23');
+
+
+INSERT INTO exchange.country (id, currency_code, country_name, country_flag)
+VALUES (1, 'KRW', 'Korea', '🇰🇷');

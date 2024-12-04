@@ -3,6 +3,7 @@ package kr.co.kwt.exchange.domain;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.lang.NonNull;
@@ -12,38 +13,32 @@ import java.time.LocalDateTime;
 
 import static lombok.AccessLevel.PROTECTED;
 
-
 @Table("exchange_rates")
 @Getter
+@ToString
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor
 public class ExchangeRate {
 
     @Id
     private Long id;
-    private String country;
-    private String countryFlag;
-    private String countryCode;
     private String currencyCode;
+    private Integer unitAmount;
     private Double rateValue;
     private LocalDateTime updatedAt;
 
-    public static ExchangeRate withoutId(@NonNull final String country,
-                                         @NonNull final String countryFlag,
-                                         @NonNull final String countryCode,
-                                         @NonNull final String currencyCode,
+    public static ExchangeRate withoutId(@NonNull final String currencyCode,
+                                         @Nullable final Integer unitAmount,
                                          @Nullable final Double rate) {
-        return new ExchangeRate(null, country, countryFlag, countryCode, currencyCode, rate, LocalDateTime.now());
+        return new ExchangeRate(null, currencyCode, unitAmount, rate, LocalDateTime.now());
     }
 
     public static ExchangeRate withId(@NonNull final Long id,
-                                      @NonNull final String country,
-                                      @NonNull final String countryFlag,
-                                      @NonNull final String countryCode,
                                       @NonNull final String currencyCode,
+                                      @Nullable final Integer unitAmount,
                                       @NonNull final double rateValue,
                                       @NonNull final LocalDateTime updatedAt) {
-        return new ExchangeRate(id, country, countryFlag, countryCode, currencyCode, rateValue, updatedAt);
+        return new ExchangeRate(id, currencyCode, unitAmount, rateValue, updatedAt);
     }
 
     public ExchangeRate updateRate(final double newRateValue) {

@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.adpater.in.web;
+package kr.co.kwt.exchange.adapter.in.web;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
