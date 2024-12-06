@@ -1,6 +1,6 @@
 package kr.co.kwt.exchange.adapter.out.persistence;
 
-import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateRepository;
+import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateCustomRepository;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
 import kr.co.kwt.exchange.application.port.out.LoadExchangeRatePort;
@@ -15,14 +15,9 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class LoadExchangeRateAdapter implements LoadExchangeRatePort {
+class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
-    private final ExchangeRateRepository exchangeRateRepository;
-
-    @Override
-    public Flux<ExchangeRate> findAll() {
-        return exchangeRateRepository.findAll();
-    }
+    private final ExchangeRateCustomRepository exchangeRateRepository;
 
     @Override
     public Mono<ExchangeRate> findByCurrencyCode(final String currencyCode) {
@@ -36,19 +31,21 @@ public class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
     @Override
     public Mono<Country> findCountryByCurrencyCode(String currencyCode) {
-        return null;
+        return exchangeRateRepository
+                .findByCurrencyCode(currencyCode)
+                .map(ExchangeRate::getCountry);
     }
 
     /// DTO 조회 ///////////////////////////////// ////////////////////////////// //////////////////////////////
 
     @Override
     public Flux<GetExchangeRateResponse> getExchangeRates() {
-        return exchangeRateRepository.GetExchangeRates();
+        return exchangeRateRepository.getExchangeRates();
     }
 
     @Override
     public Mono<GetExchangeRateResponse> getExchangeRate(final GetExchangeRateRequest request) {
-        return exchangeRateRepository.GetExchangeRate(request);
+        return exchangeRateRepository.getExchangeRate(request);
     }
 
 }

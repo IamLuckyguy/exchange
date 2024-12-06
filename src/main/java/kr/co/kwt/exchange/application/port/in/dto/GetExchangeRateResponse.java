@@ -18,6 +18,7 @@ public class GetExchangeRateResponse {
     private String currencyCode;
     private double rateValue;
     private Integer unitAmount;
+    private Integer decimals;
     private LocalDateTime updatedAt;
 
     public static GetExchangeRateResponse of(final ExchangeRate exchangeRate, final Country country) {
@@ -27,6 +28,7 @@ public class GetExchangeRateResponse {
                 exchangeRate.getCurrencyCode(),
                 exchangeRate.getRateValue(),
                 exchangeRate.getUnitAmount(),
+                exchangeRate.getDecimals(),
                 exchangeRate.getUpdatedAt());
     }
 }

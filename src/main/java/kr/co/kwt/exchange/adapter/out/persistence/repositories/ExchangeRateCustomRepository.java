@@ -10,9 +10,13 @@ import java.util.List;
 
 public interface ExchangeRateCustomRepository {
 
-    Flux<GetExchangeRateResponse> GetExchangeRates();
+    Mono<ExchangeRate> save(ExchangeRate exchangeRate);
 
-    Mono<GetExchangeRateResponse> GetExchangeRate(GetExchangeRateRequest getExchangeRateRequest);
+    Mono<ExchangeRate> findByCurrencyCode(String currencyCode);
+
+    Flux<GetExchangeRateResponse> getExchangeRates();
+
+    Mono<GetExchangeRateResponse> getExchangeRate(GetExchangeRateRequest getExchangeRateRequest);
 
     Flux<ExchangeRate> findAllByCurrencyCode(List<String> currencyCodes);
 

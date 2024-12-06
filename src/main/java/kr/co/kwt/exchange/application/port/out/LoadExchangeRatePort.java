@@ -11,8 +11,6 @@ import java.util.List;
 
 public interface LoadExchangeRatePort {
 
-    Flux<ExchangeRate> findAll();
-
     Mono<ExchangeRate> findByCurrencyCode(String currencyCode);
 
     Flux<ExchangeRate> findAllByCurrencyCode(List<String> currencyCodes);

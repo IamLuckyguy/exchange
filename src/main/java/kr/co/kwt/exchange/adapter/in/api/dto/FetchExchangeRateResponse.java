@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class FetchExchangeRateResponse {
 
-    private Long id;
     private String currencyCode;
     private Double rateValue;
     private LocalDateTime updateTime;

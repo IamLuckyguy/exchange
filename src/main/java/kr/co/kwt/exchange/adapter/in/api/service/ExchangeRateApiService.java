@@ -1,15 +1,13 @@
 package kr.co.kwt.exchange.adapter.in.api.service;
 
+import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateOpenApiResponse;
 import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateRequest;
 import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
 import kr.co.kwt.exchange.adapter.out.ExchangeRateWebClientCustomizer;
 import kr.co.kwt.exchange.application.port.in.AddExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.GetExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.UpdateRateValueUseCase;
-import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateRequest;
-import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateResponse;
-import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
-import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
+import kr.co.kwt.exchange.application.port.in.dto.*;
 import kr.co.kwt.exchange.config.webclient.WebClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +61,32 @@ public class ExchangeRateApiService {
      * 환율 정보 패치
      */
     public Flux<FetchExchangeRateResponse> fetchExchangeRates(final FetchExchangeRateRequest request) {
+        return callOpenApi(request)
+                .map(this::mapToUpdateRateValueRequest)
+                .collectList()
+                .flatMapMany(updateExchangeRateUseCase::bulkUpdateRateValues)
+                .map(this::mapToFetchExchangeRateResponse);
+    }
 
+    private Flux<FetchExchangeRateOpenApiResponse> callOpenApi(final FetchExchangeRateRequest request) {
+        return webClientService
+                .getWebClient(baseUrl, webClientCustomizer)
+                .get()
+                .uri("/site/program/financial/exchangeJSON?authkey={apiKey}&searchdate={searchDate}&data=AP01",
+                        apiKey, request.getSearchDate())
+                .retrieve()
+                .bodyToFlux(FetchExchangeRateOpenApiResponse.class);
+    }
+
+    private UpdateRateValueRequest mapToUpdateRateValueRequest(FetchExchangeRateOpenApiResponse openApiResponse) {
+        return new UpdateRateValueRequest(
+                openApiResponse.getCurrencyCode(),
+                Double.parseDouble(openApiResponse.getTtb().replace(",", "")));
+    }
+
+    private FetchExchangeRateResponse mapToFetchExchangeRateResponse(UpdateRateValueResponse updateRateValueResponse) {
+        return new FetchExchangeRateResponse(updateRateValueResponse.getCurrencyCode(),
+                updateRateValueResponse.getRateValue(),
+                updateRateValueResponse.getUpdateTime());
     }
 }
