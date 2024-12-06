@@ -404,7 +404,7 @@
                     flag: exchangeRate.countryFlag,
                     unitAmount: exchangeRate.unitAmount,
                     rateValue: exchangeRate.rateValue,
-                    decimals: 2
+                    decimals: (exchangeRate.unitAmount >= 100 || exchangeRate.currencyCode === 'KRW') ? 0 : 2
                 });
             });
         }
@@ -463,7 +463,8 @@
                     $('#currencyInputs').append(`
                             <div class="input-group">
                                 <label for="${code}">금액</label>
-                                <input type="text" id="${code}" value="${formatNumber((1000 / exchangeRate.rateValue) * exchangeRate.unitAmount, 2)}" class="currency-input" />
+                                <input type="text" id="${code}" value="${formatNumber(
+                        (1000 / exchangeRate.rateValue) * exchangeRate.unitAmount, (exchangeRate.unitAmount >= 100 || exchangeRate.currencyCode === 'KRW') ? 0 : 2)}" class="currency-input" />
                                 <button class="currency-btn">
                                     <span class="currency-flag">${exchangeRate.countryFlag}</span>
                                     <span class="currency-code">${exchangeRate.currencyCode}</span>
