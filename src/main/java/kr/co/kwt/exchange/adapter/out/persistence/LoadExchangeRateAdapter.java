@@ -1,27 +1,23 @@
 package kr.co.kwt.exchange.adapter.out.persistence;
 
-import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateRepository;
-import kr.co.kwt.exchange.application.port.in.dto.SearchCountryRequest;
-import kr.co.kwt.exchange.application.port.in.dto.SearchCountryResponse;
-import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryRequest;
-import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryResponse;
+import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateCustomRepository;
+import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
+import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
 import kr.co.kwt.exchange.application.port.out.LoadExchangeRatePort;
+import kr.co.kwt.exchange.domain.Country;
 import kr.co.kwt.exchange.domain.ExchangeRate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
-public class LoadExchangeRateAdapter implements LoadExchangeRatePort {
+class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
-    private final ExchangeRateRepository exchangeRateRepository;
-
-    @Override
-    public Flux<ExchangeRate> findAll() {
-        return exchangeRateRepository.findAll();
-    }
+    private final ExchangeRateCustomRepository exchangeRateRepository;
 
     @Override
     public Mono<ExchangeRate> findByCurrencyCode(final String currencyCode) {
@@ -29,20 +25,27 @@ public class LoadExchangeRateAdapter implements LoadExchangeRatePort {
     }
 
     @Override
-    public Flux<SearchExchangeRateWithCountryResponse> searchAllExchangeRateWithCountry() {
-        return exchangeRateRepository.searchAllExchangeRateWithCountry();
+    public Flux<ExchangeRate> findAllByCurrencyCode(List<String> currencyCodes) {
+        return exchangeRateRepository.findAllByCurrencyCode(currencyCodes);
     }
 
     @Override
-    public Mono<SearchExchangeRateWithCountryResponse> searchExchangeRateWithCountry(
-            final SearchExchangeRateWithCountryRequest searchExchangeRateWithCountryRequest
-    ) {
-        return exchangeRateRepository.searchExchangeRateWithCountry(searchExchangeRateWithCountryRequest);
+    public Mono<Country> findCountryByCurrencyCode(String currencyCode) {
+        return exchangeRateRepository
+                .findByCurrencyCode(currencyCode)
+                .map(ExchangeRate::getCountry);
+    }
+
+    /// DTO 조회 ///////////////////////////////// ////////////////////////////// //////////////////////////////
+
+    @Override
+    public Flux<GetExchangeRateResponse> getExchangeRates() {
+        return exchangeRateRepository.getExchangeRates();
     }
 
     @Override
-    public Mono<SearchCountryResponse> searchCountry(final SearchCountryRequest searchCountryRequest) {
-        return exchangeRateRepository.searchCountry(searchCountryRequest);
+    public Mono<GetExchangeRateResponse> getExchangeRate(final GetExchangeRateRequest request) {
+        return exchangeRateRepository.getExchangeRate(request);
     }
 
 }

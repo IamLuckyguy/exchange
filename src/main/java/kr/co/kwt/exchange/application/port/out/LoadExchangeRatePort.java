@@ -1,23 +1,25 @@
 package kr.co.kwt.exchange.application.port.out;
 
-import kr.co.kwt.exchange.application.port.in.dto.SearchCountryRequest;
-import kr.co.kwt.exchange.application.port.in.dto.SearchCountryResponse;
-import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryRequest;
-import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryResponse;
+import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
+import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
+import kr.co.kwt.exchange.domain.Country;
 import kr.co.kwt.exchange.domain.ExchangeRate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public interface LoadExchangeRatePort {
 
-    Flux<ExchangeRate> findAll();
+    Mono<ExchangeRate> findByCurrencyCode(String currencyCode);
 
-    Mono<ExchangeRate> findByCurrencyCode(String upperCase);
+    Flux<ExchangeRate> findAllByCurrencyCode(List<String> currencyCodes);
 
-    Flux<SearchExchangeRateWithCountryResponse> searchAllExchangeRateWithCountry();
+    Mono<Country> findCountryByCurrencyCode(String currencyCode);
 
-    Mono<SearchExchangeRateWithCountryResponse> searchExchangeRateWithCountry(SearchExchangeRateWithCountryRequest searchExchangeRateWithCountryRequest);
+    /// DTO 조회 ///////////////////////////////// ////////////////////////////// //////////////////////////////
 
-    Mono<SearchCountryResponse> searchCountry(SearchCountryRequest searchCountryRequest);
+    Flux<GetExchangeRateResponse> getExchangeRates();
 
+    Mono<GetExchangeRateResponse> getExchangeRate(GetExchangeRateRequest getExchangeRateRequest);
 }
