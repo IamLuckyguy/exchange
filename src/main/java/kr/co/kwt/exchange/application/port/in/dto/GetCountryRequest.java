@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SearchCountryRequest {
+public class GetCountryRequest {
 
     private final String currencyCode;
 }

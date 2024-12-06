@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 public class AddExchangeRateRequest {
 
     private String currencyCode;
-    private Integer unitAmount;
     private Double rateValue;
 }

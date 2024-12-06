@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS exchange_rates
     country_code  VARCHAR(10) NOT NULL,                                                       -- 국가 코드
     currency_code VARCHAR(10) NOT NULL,                                                       -- 통화 코드
     unit_amount   INT                  DEFAULT 1,
+    decimal       INT                  DEFAULT 1,
     rate_value    DOUBLE      NOT NULL,                                                       -- 환율 값
     updated_at    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 마지막 업데이트 시간
     INDEX idx_country_code (country_code),                                                    -- 국가 코드 인덱스

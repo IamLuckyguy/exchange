@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateRateRequest {
+public class UpdateRateValueRequest {
 
     private String currencyCode;
     private double rateValue;

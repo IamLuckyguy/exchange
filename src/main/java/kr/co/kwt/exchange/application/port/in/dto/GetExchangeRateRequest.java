@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SearchExchangeRateWithCountryRequest {
+public class GetExchangeRateRequest {
 
     private String currencyCode;
 }
