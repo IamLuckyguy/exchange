@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SearchExchangeRateWithCountryResponse {
+public class GetExchangeRateResponse {
 
     private String countryName;
     private String countryFlag;
@@ -20,8 +20,8 @@ public class SearchExchangeRateWithCountryResponse {
     private Integer unitAmount;
     private LocalDateTime updatedAt;
 
-    public static SearchExchangeRateWithCountryResponse of(final ExchangeRate exchangeRate, final Country country) {
-        return new SearchExchangeRateWithCountryResponse(
+    public static GetExchangeRateResponse of(final ExchangeRate exchangeRate, final Country country) {
+        return new GetExchangeRateResponse(
                 country.getCountryName(),
                 country.getCountryFlag(),
                 exchangeRate.getCurrencyCode(),

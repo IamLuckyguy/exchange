@@ -5,8 +5,8 @@ import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
 import kr.co.kwt.exchange.adapter.in.api.service.ExchangeRateApiService;
 import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateRequest;
 import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateResponse;
-import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryRequest;
-import kr.co.kwt.exchange.application.port.in.dto.SearchExchangeRateWithCountryResponse;
+import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
+import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -20,15 +20,15 @@ class ExchangeRateApiController {
     private final ExchangeRateApiService exchangeRateApiService;
 
     @GetMapping("/exchange-rates")
-    public Flux<SearchExchangeRateWithCountryResponse> searchAllExchangeRateWithCountry() {
+    public Flux<GetExchangeRateResponse> searchAllExchangeRateWithCountry() {
         return exchangeRateApiService.searchAllExchangeRateWithCountry();
     }
 
     @GetMapping("/exchange-rates/{currencyCode}")
-    public Mono<SearchExchangeRateWithCountryResponse> searchExchangeRateWithCountry(
-            @ModelAttribute final SearchExchangeRateWithCountryRequest searchExchangeRateWithCountryRequest
+    public Mono<GetExchangeRateResponse> searchExchangeRateWithCountry(
+            @ModelAttribute final GetExchangeRateRequest getExchangeRateRequest
     ) {
-        return exchangeRateApiService.searchExchangeRateWithCountry(searchExchangeRateWithCountryRequest);
+        return exchangeRateApiService.searchExchangeRateWithCountry(getExchangeRateRequest);
     }
 
     @PostMapping("/exchange-rates")

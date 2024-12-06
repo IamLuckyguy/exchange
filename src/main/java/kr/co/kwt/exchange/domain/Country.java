@@ -2,15 +2,15 @@ package kr.co.kwt.exchange.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.springframework.data.relational.core.mapping.Table;
 
+@Table("countries")
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class Country {
+public final class Country {
 
-    private Long id;
-    private String currencyCode;
     private String countryName;
+    private String currencyCode;
     private String countryFlag;
+
 }
