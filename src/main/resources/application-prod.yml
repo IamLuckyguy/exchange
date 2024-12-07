@@ -4,8 +4,8 @@ spring:
       on-profile: prod
   r2dbc:
     url: r2dbc:mysql://mysql-cluster.kwt-prod:6446/exchange
-    username: exchange_user
-    password: exchange_password
+    username: root
+    password: rootqlalfqjsgh486
     properties:
       initial-size: 5
       max-size: 10
