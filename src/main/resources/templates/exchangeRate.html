@@ -425,6 +425,35 @@
             });
         }
 
+        // 숫자만 입력하도록 처리
+        function allowOnlyPositiveNumbers(event) {
+            const input = event.target;
+            let value = input.value;
+
+            // 숫자 외의 문자는 제거
+            value = value.replace(/[^0-9]/g, '');
+
+            // 1000단위 쉼표 추가
+            if (value) {
+                value = parseInt(value, 10).toLocaleString();
+            }
+
+            // 업데이트
+            input.value = value;
+        }
+
+        // 동적으로 생성된 요소에 이벤트 리스너를 추가하는 함수
+        function attachInputListeners() {
+            document.querySelectorAll('.currency-input').forEach(input => {
+                input.addEventListener('input', allowOnlyPositiveNumbers);
+            });
+        }
+
+        // 페이지가 로드될 때 초기 이벤트 리스너를 설정
+        document.addEventListener('DOMContentLoaded', () => {
+            attachInputListeners();
+        });
+
         function init() {
             $.ajax({
                 url: "/api/exchange-rates",
@@ -448,7 +477,10 @@
                     $('#currencyInputs').append(`
                             <div class="input-group">
                                 <label for="${code}">금액</label>
-                                <input type="text" id="${code}" value="${formatNumber((1000 / exchangeRate.rateValue) * exchangeRate.unitAmount, exchangeRate.decimals)}" class="currency-input" />
+                                <input type="text"
+                                       id="${code}"
+                                       value="${formatNumber((1000 / exchangeRate.rateValue) * exchangeRate.unitAmount, exchangeRate.decimals)}"
+                                       class="currency-input" />
                                 <button class="currency-btn">
                                     <span class="currency-flag">${exchangeRate.countryFlag}</span>
                                     <span class="currency-code">${exchangeRate.currencyCode}</span>
@@ -457,6 +489,7 @@
                         `);
                 }
             });
+            attachInputListeners();
             updateSelectedCount();
         }
 
