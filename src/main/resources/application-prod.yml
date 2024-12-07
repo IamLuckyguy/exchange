@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: prod
   r2dbc:
-    url: r2dbc:mysql://localhost:33306/exchange
+    url: r2dbc:mysql://mysql-cluster.kwt-prod:6446/exchange
     username: exchange_user
     password: exchange_password
     properties:
