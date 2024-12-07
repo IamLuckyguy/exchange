@@ -11,20 +11,24 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SearchExchangeRateWithCountryResponse {
+public class GetExchangeRateResponse {
 
-    private String country;
+    private String countryName;
     private String countryFlag;
     private String currencyCode;
     private double rateValue;
+    private Integer unitAmount;
+    private Integer decimals;
     private LocalDateTime updatedAt;
 
-    public static SearchExchangeRateWithCountryResponse of(final ExchangeRate exchangeRate, final Country country) {
-        return new SearchExchangeRateWithCountryResponse(
+    public static GetExchangeRateResponse of(final ExchangeRate exchangeRate, final Country country) {
+        return new GetExchangeRateResponse(
                 country.getCountryName(),
                 country.getCountryFlag(),
                 exchangeRate.getCurrencyCode(),
                 exchangeRate.getRateValue(),
+                exchangeRate.getUnitAmount(),
+                exchangeRate.getDecimals(),
                 exchangeRate.getUpdatedAt());
     }
 }

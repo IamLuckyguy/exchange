@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-public class SearchCountryResponse {
+@AllArgsConstructor
+public class GetExchangeRateHistoryResponse {
 
-    private String currencyCode;
     private String countryName;
-    private String countryFlag;
-
+    private double rateValue;
+    private LocalDateTime updatedAt;
 }

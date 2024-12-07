@@ -392,20 +392,8 @@
 
 <script>
     $(document).ready(function () {
-        let currencies = [];
-        let selectedCurrencies = ["USD", "KRW", "JPY", "CNH", "AUD"];
+        let selectedCurrencies = ["USD", "KRW", "JPY(100)", "AUD"];
         let exchangeRates = [];
-
-        function initCurrencies(exchangeRates) {
-            exchangeRates.forEach(function (exchangeRate) {
-                currencies.push({
-                    code: exchangeRate.currencyCode,
-                    name: exchangeRate.country,
-                    flag: exchangeRate.countryFlag,
-                    decimal: 2
-                });
-            });
-        }
 
         // 통화 선택 드롭다운 초기화 함수 추가
         function initializeCurrencySelectors() {
@@ -414,11 +402,12 @@
                 const select = $(selector);
                 select.empty();
                 selectedCurrencies.forEach(code => {
-                    const currency = currencies.find(c => c.code === code);
-                    if (currency && currency.code !== 'USD') {
+                    const exchangeRate = exchangeRates.find(er => er.currencyCode === code);
+
+                    if (exchangeRate && exchangeRate.currencyCode !== 'USD') {
                         select.append(`
-                            <option value="${currency.code}">
-                                ${currency.flag} ${currency.code}
+                            <option value="${exchangeRate.countryName}">
+                                ${exchangeRate.countryFlag} ${exchangeRate.currencyCode}
                             </option>
                         `);
                     }
@@ -436,13 +425,41 @@
             });
         }
 
+        // 숫자만 입력하도록 처리
+        function allowOnlyPositiveNumbers(event) {
+            const input = event.target;
+            let value = input.value;
+
+            // 숫자 외의 문자는 제거
+            value = value.replace(/[^0-9]/g, '');
+
+            // 1000단위 쉼표 추가
+            if (value) {
+                value = parseInt(value, 10).toLocaleString();
+            }
+
+            // 업데이트
+            input.value = value;
+        }
+
+        // 동적으로 생성된 요소에 이벤트 리스너를 추가하는 함수
+        function attachInputListeners() {
+            document.querySelectorAll('.currency-input').forEach(input => {
+                input.addEventListener('input', allowOnlyPositiveNumbers);
+            });
+        }
+
+        // 페이지가 로드될 때 초기 이벤트 리스너를 설정
+        document.addEventListener('DOMContentLoaded', () => {
+            attachInputListeners();
+        });
+
         function init() {
             $.ajax({
                 url: "/api/exchange-rates",
                 method: "GET",
             }).done(function (data) {
                 initExchangeRates(data);
-                initCurrencies(exchangeRates);
                 updateCurrencyInputs();
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.error("Failed to fetch exchange rates:", textStatus, errorThrown);
@@ -455,12 +472,15 @@
         function updateCurrencyInputs() {
             $('#currencyInputs').empty();
             selectedCurrencies.forEach(code => {
-                const exchangeRate = exchangeRates.find(c => c.currencyCode === code);
+                const exchangeRate = exchangeRates.find(exchangeRate => exchangeRate.currencyCode === code);
                 if (exchangeRate) {
                     $('#currencyInputs').append(`
                             <div class="input-group">
                                 <label for="${code}">금액</label>
-                                <input type="text" id="${code}" value="${formatNumber(1000 / exchangeRate.rateValue, 2)}" class="currency-input" />
+                                <input type="text"
+                                       id="${code}"
+                                       value="${formatNumber((1000 / exchangeRate.rateValue) * exchangeRate.unitAmount, exchangeRate.decimals)}"
+                                       class="currency-input" />
                                 <button class="currency-btn">
                                     <span class="currency-flag">${exchangeRate.countryFlag}</span>
                                     <span class="currency-code">${exchangeRate.currencyCode}</span>
@@ -469,21 +489,22 @@
                         `);
                 }
             });
+            attachInputListeners();
             updateSelectedCount();
         }
 
         function updateCurrencyDialog() {
             $('.dialog-body').empty();
-            currencies.forEach(currency => {
+            exchangeRates.forEach(exchangeRate => {
                 $('.dialog-body').append(`
                         <label class="currency-item">
-                            <input type="checkbox" value="${currency.code}" ${selectedCurrencies.includes(currency.code) ? 'checked' : ''} />
+                            <input type="checkbox" value="${exchangeRate.currencyCode}" ${selectedCurrencies.includes(exchangeRate.currencyCode) ? 'checked' : ''} />
                             <div class="currency-info">
                                 <span>
-                                    <span class="currency-flag">${currency.flag}</span>
-                                    <span class="currency-code">${currency.code}</span>
+                                    <span class="currency-flag">${exchangeRate.countryFlag}</span>
+                                    <span class="currency-code">${exchangeRate.currencyCode}</span>
                                 </span>
-                                <span class="currency-name">${currency.name}</span>
+                                <span class="currency-name">${exchangeRate.countryName}</span>
                             </div>
                         </label>
                     `);
@@ -494,17 +515,12 @@
             $('#selectedCount').text(selectedCurrencies.length);
         }
 
-        function getRateValue(currencyCode) {
-            return exchangeRates
-                .find(c => c.currencyCode === currencyCode)
-                .rateValue;
-        }
-
-        function convertCurrency(amount, fromCurrency, toCurrency) {
-            if (fromCurrency === "KRW") {
-                return amount / getRateValue(toCurrency);
+        function convertCurrency(amount, from, to) {
+            if (from.currencyCode === "KRW") {
+                return amount * to.unitAmount / to.rateValue;
             }
-            return amount * getRateValue(fromCurrency) / getRateValue(toCurrency);
+
+            return ((amount * from.rateValue / from.unitAmount) / to.rateValue) * to.unitAmount;
         }
 
         function formatNumber(number, decimals) {
@@ -534,7 +550,7 @@
             const currencyCode = $(this).val();
             if (this.checked) {
                 if (!selectedCurrencies.includes(currencyCode)) {
-                    selectedCurrencies.selectedCurrencies.push(currencyCode);
+                    selectedCurrencies.push(currencyCode);
                 }
             } else {
                 selectedCurrencies = selectedCurrencies.filter(code => code !== currencyCode);
@@ -543,16 +559,21 @@
         });
 
         $(document).on('input', '.currency-input', function () {
-            const currencyCode = $(this).attr('id');
+            const fromCurrencyCode = $(this).attr('id');
             const inputValue = $(this).val().replace(/,/g, '');
             const amount = parseFloat(inputValue);
 
             if (!isNaN(amount) && amount >= 0) {
-                selectedCurrencies.forEach(code => {
-                    if (code !== currencyCode) {
-                        const convertedAmount = convertCurrency(amount, currencyCode, code);
-                        const targetCurrency = currencies.find(c => c.code === code);
-                        $(`#${code}`).val(formatNumber(convertedAmount, targetCurrency.decimals));
+                selectedCurrencies.forEach(toCurrencyCode => {
+                    if (toCurrencyCode !== fromCurrencyCode) {
+                        const to = exchangeRates.find(exchangeRate => exchangeRate.currencyCode === toCurrencyCode);
+                        const from = exchangeRates.find(exchangeRate => exchangeRate.currencyCode === fromCurrencyCode);
+
+                        console.log("init", to, from, fromCurrencyCode, toCurrencyCode);
+                        if (to && from) {
+                            const convertedAmount = convertCurrency(amount, from, to);
+                            $(`#${toCurrencyCode.replace(/([!"#$%&'()*+,./:;<=>?@[\]^`{|}~])/g, '\\$1')}`).val(formatNumber(convertedAmount, to.decimals));
+                        }
                     }
                 });
             }
