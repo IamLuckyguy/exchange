@@ -68,7 +68,8 @@ public class UpdateRateValueService implements UpdateRateValueUseCase {
                 .switchIfEmpty(Mono.just(ExchangeRate.withoutId(
                         null,
                         request.getCurrencyCode(),
-                        request.getRateValue())));
+                        request.getRateValue(),
+                        request.getFetchedAt())));
     }
 
     private Mono<ExchangeRate> doUpdateRateValue(@NonNull final ExchangeRate exchangeRate, final double rateValue) {

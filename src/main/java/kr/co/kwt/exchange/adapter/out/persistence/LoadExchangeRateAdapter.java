@@ -1,7 +1,7 @@
 package kr.co.kwt.exchange.adapter.out.persistence;
 
-import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateCustomRepository;
 import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateHistoryRepository;
+import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateRepository;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
 import kr.co.kwt.exchange.application.port.out.LoadExchangeRatePort;
@@ -21,7 +21,7 @@ import static kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse
 @RequiredArgsConstructor
 class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
-    private final ExchangeRateCustomRepository exchangeRateRepository;
+    private final ExchangeRateRepository exchangeRateRepository;
     private final ExchangeRateHistoryRepository exchangeRateHistoryRepository;
 
     @Override
@@ -71,7 +71,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
                 .stream()
                 .map(GetExchangeRateHistory::of)
                 .toList());
-        
+
         return response;
     }
 }

@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface ExchangeRateCustomRepository {
 
-    Mono<ExchangeRate> save(ExchangeRate exchangeRate);
-
     Mono<ExchangeRate> findByCurrencyCode(String currencyCode);
 
     Flux<GetExchangeRateResponse> getExchangeRates();

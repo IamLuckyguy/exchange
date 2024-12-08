@@ -37,11 +37,13 @@ public final class ExchangeRate {
     private Integer unitAmount;
     private Integer decimals;
     private Double rateValue;
+    private LocalDateTime fetchedAt;
     private LocalDateTime updatedAt;
 
     public static ExchangeRate withoutId(@Nullable final Country country,
                                          @NonNull final String currencyCode,
-                                         @Nullable final Double rate
+                                         @Nullable final Double rate,
+                                         @NonNull final LocalDateTime fetchedAt
     ) {
         return new ExchangeRate(null,
                 currencyCode,
@@ -49,6 +51,7 @@ public final class ExchangeRate {
                 calcUnitAmount(currencyCode),
                 calcDecimal(currencyCode),
                 calcRateValue(rate),
+                fetchedAt,
                 LocalDateTime.now());
     }
 
@@ -58,8 +61,9 @@ public final class ExchangeRate {
                                       @NonNull final Integer unitAmount,
                                       @NonNull final Integer decimals,
                                       @NonNull final double rateValue,
+                                      @NonNull final LocalDateTime fetchedAt,
                                       @NonNull final LocalDateTime updatedAt) {
-        return new ExchangeRate(id, currencyCode, country, unitAmount, decimals, rateValue, updatedAt);
+        return new ExchangeRate(id, currencyCode, country, unitAmount, decimals, rateValue, fetchedAt, updatedAt);
     }
 
     private static Double calcRateValue(final Double rate) {
