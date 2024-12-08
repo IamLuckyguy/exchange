@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -62,9 +65,13 @@ public class ExchangeRateApiService {
      * 환율 정보 패치
      */
     public Flux<FetchExchangeRateResponse> fetchExchangeRates(final FetchExchangeRateRequest request) {
+        LocalDateTime fetchedAt = LocalDateTime.parse(request.getSearchDate() + "000000",
+                DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+
         return callOpenApi(request)
-                .map(this::mapToUpdateRateValueRequest)
+                .map(response -> mapToUpdateRateValueRequest(response, fetchedAt))
                 .collectList()
+                .filter(list -> !list.isEmpty())
                 .flatMapMany(updateExchangeRateUseCase::bulkUpdateRateValues)
                 .map(this::mapToFetchExchangeRateResponse);
     }
@@ -79,13 +86,16 @@ public class ExchangeRateApiService {
                 .bodyToFlux(FetchExchangeRateOpenApiResponse.class);
     }
 
-    private UpdateRateValueRequest mapToUpdateRateValueRequest(FetchExchangeRateOpenApiResponse openApiResponse) {
+    private UpdateRateValueRequest mapToUpdateRateValueRequest(final FetchExchangeRateOpenApiResponse openApiResponse,
+                                                               final LocalDateTime fetchedAt
+    ) {
         return new UpdateRateValueRequest(
                 openApiResponse.getCurrencyCode(),
-                Double.parseDouble(openApiResponse.getTtb().replace(",", "")));
+                Double.parseDouble(openApiResponse.getTtb().replace(",", "")),
+                fetchedAt);
     }
 
-    private FetchExchangeRateResponse mapToFetchExchangeRateResponse(UpdateRateValueResponse updateRateValueResponse) {
+    private FetchExchangeRateResponse mapToFetchExchangeRateResponse(final UpdateRateValueResponse updateRateValueResponse) {
         return new FetchExchangeRateResponse(updateRateValueResponse.getCurrencyCode(),
                 updateRateValueResponse.getRateValue(),
                 updateRateValueResponse.getUpdateTime());

@@ -1,7 +1,7 @@
 package kr.co.kwt.exchange.adapter.out.persistence;
 
-import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateCustomRepository;
 import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateHistoryRepository;
+import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateRepository;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
 import kr.co.kwt.exchange.application.port.out.LoadExchangeRatePort;
@@ -21,7 +21,7 @@ import static kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse
 @RequiredArgsConstructor
 class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
-    private final ExchangeRateCustomRepository exchangeRateRepository;
+    private final ExchangeRateRepository exchangeRateRepository;
     private final ExchangeRateHistoryRepository exchangeRateHistoryRepository;
 
     @Override
@@ -31,7 +31,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
     @Override
     public Flux<ExchangeRate> findAllByCurrencyCode(List<String> currencyCodes) {
-        return exchangeRateRepository.findAllByCurrencyCode(currencyCodes);
+        return exchangeRateRepository.findAllByCurrencyCodeIn(currencyCodes);
     }
 
     @Override
@@ -59,7 +59,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
     private Mono<GetExchangeRateResponse> setHistories(final GetExchangeRateResponse response) {
         return exchangeRateHistoryRepository
-                .findTop365ByCurrencyCodeOrderByUpdatedAtDesc(response.getCurrencyCode())
+                .findTop365ByCurrencyCodeOrderByFetchedAtDesc(response.getCurrencyCode())
                 .collectList()
                 .map(histories -> doSetHistories(response, histories));
     }
@@ -71,7 +71,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
                 .stream()
                 .map(GetExchangeRateHistory::of)
                 .toList());
-        
+
         return response;
     }
 }

@@ -3,6 +3,7 @@ package kr.co.kwt.exchange.config;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import io.netty.resolver.DefaultAddressResolverGroup;
 import kr.co.kwt.exchange.config.properties.WebClientProperties;
 import kr.co.kwt.exchange.config.webclient.WebClientLoggingFilter;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class WebClientConfig {
                 .responseTimeout(Duration.ofMillis(properties.getReadTimeout()))
                 .doOnConnected(conn -> conn
                         .addHandlerLast(new ReadTimeoutHandler(properties.getReadTimeout(), TimeUnit.MILLISECONDS))
-                        .addHandlerLast(new WriteTimeoutHandler(properties.getWriteTimeout(), TimeUnit.MILLISECONDS)));
+                        .addHandlerLast(new WriteTimeoutHandler(properties.getWriteTimeout(), TimeUnit.MILLISECONDS)))
+                .resolver(DefaultAddressResolverGroup.INSTANCE);
     }
 }

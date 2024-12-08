@@ -21,6 +21,7 @@ public class GetExchangeRateResponse {
     private List<GetExchangeRateHistory> exchangeRateHistories;
     private Integer unitAmount;
     private Integer decimals;
+    private LocalDateTime fetchedAt;
     private LocalDateTime updatedAt;
 
     public static GetExchangeRateResponse of(final ExchangeRate exchangeRate,
@@ -33,6 +34,7 @@ public class GetExchangeRateResponse {
                 getExchangeRateHistories,
                 exchangeRate.getUnitAmount(),
                 exchangeRate.getDecimals(),
+                exchangeRate.getFetchedAt(),
                 exchangeRate.getUpdatedAt());
     }
 
@@ -41,11 +43,13 @@ public class GetExchangeRateResponse {
     @NoArgsConstructor
     public static class GetExchangeRateHistory {
         private double rateValue;
+        private LocalDateTime fetchedAt;
         private LocalDateTime updatedAt;
 
         public static GetExchangeRateHistory of(final ExchangeRateHistory exchangeRateHistory) {
             return new GetExchangeRateHistory(
                     exchangeRateHistory.getRateValue(),
+                    exchangeRateHistory.getFetchedAt(),
                     exchangeRateHistory.getUpdatedAt()
             );
         }

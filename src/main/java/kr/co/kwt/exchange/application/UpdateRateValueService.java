@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class UpdateRateValueService implements UpdateRateValueUseCase {
         return loadExchangeRatePort
                 .findByCurrencyCode(request.getCurrencyCode())
                 .switchIfEmpty(Mono.error(InvalidCurrencyCodeException::new))
-                .flatMap(exchangeRate -> doUpdateRateValue(exchangeRate, request.getRateValue()))
+                .flatMap(exchangeRate -> doUpdateRateValue(exchangeRate, request.getRateValue(), request.getFetchedAt()))
                 .map(UpdateRateValueResponse::of);
     }
 
@@ -50,6 +51,12 @@ public class UpdateRateValueService implements UpdateRateValueUseCase {
      */
     @Override
     public Flux<UpdateRateValueResponse> bulkUpdateRateValues(@NonNull final List<UpdateRateValueRequest> requests) {
+        LocalDateTime fetchedAt = requests
+                .stream()
+                .map(UpdateRateValueRequest::getFetchedAt)
+                .findFirst()
+                .orElseThrow();
+
         Map<String, Double> currencyCodeMap = requests
                 .stream()
                 .collect(toMap(UpdateRateValueRequest::getCurrencyCode, UpdateRateValueRequest::getRateValue));
@@ -58,7 +65,7 @@ public class UpdateRateValueService implements UpdateRateValueUseCase {
         return Flux
                 .fromIterable(requests)
                 .flatMap(this::getExchangeRate)
-                .flatMap(exchangeRate -> doUpdateRateValue(exchangeRate, currencyCodeMap.get(exchangeRate.getCurrencyCode())))
+                .flatMap(exchangeRate -> doUpdateRateValue(exchangeRate, currencyCodeMap.get(exchangeRate.getCurrencyCode()), fetchedAt))
                 .map(UpdateRateValueResponse::of);
     }
 
@@ -68,12 +75,16 @@ public class UpdateRateValueService implements UpdateRateValueUseCase {
                 .switchIfEmpty(Mono.just(ExchangeRate.withoutId(
                         null,
                         request.getCurrencyCode(),
-                        request.getRateValue())));
+                        request.getRateValue(),
+                        request.getFetchedAt())));
     }
 
-    private Mono<ExchangeRate> doUpdateRateValue(@NonNull final ExchangeRate exchangeRate, final double rateValue) {
+    private Mono<ExchangeRate> doUpdateRateValue(@NonNull final ExchangeRate exchangeRate,
+                                                 final double rateValue,
+                                                 @NonNull LocalDateTime fetchedAt
+    ) {
         return Mono
-                .just(exchangeRate.updateRate(rateValue))
+                .just(exchangeRate.updateRate(rateValue, fetchedAt))
                 .flatMap(saveExchangeRatePort::save)
                 .map(ExchangeRateHistory::of)
                 .flatMap(saveExchangeRateHistoryPort::save)
