@@ -48,7 +48,10 @@ public class AddExchangeRateService implements AddExchangeRateUseCase {
         return loadExchangeRatePort
                 .findCountryByCurrencyCode(request.getCurrencyCode())
                 .switchIfEmpty(Mono.error(InvalidCurrencyCodeException::new))
-                .map(country -> ExchangeRate.withoutId(country, request.getCurrencyCode(), request.getRateValue()))
+                .map(country -> ExchangeRate.withoutId(country,
+                        request.getCurrencyCode(),
+                        request.getRateValue(),
+                        request.getFetchedAt()))
                 .flatMap(saveExchangeRatePort::save);
     }
 }

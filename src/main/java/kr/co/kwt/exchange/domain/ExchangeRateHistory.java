@@ -19,6 +19,7 @@ public class ExchangeRateHistory {
     private Long id;
     private String currencyCode;
     private double rateValue;
+    private LocalDateTime fetchedAt;
     private LocalDateTime updatedAt;
 
     public static ExchangeRateHistory of(@NonNull final ExchangeRate exchangeRate) {
@@ -26,6 +27,7 @@ public class ExchangeRateHistory {
                 null,
                 exchangeRate.getCurrencyCode(),
                 exchangeRate.getRateValue(),
+                exchangeRate.getFetchedAt(),
                 exchangeRate.getUpdatedAt()
         );
     }

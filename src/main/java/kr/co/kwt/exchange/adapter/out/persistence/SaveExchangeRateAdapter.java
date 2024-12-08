@@ -1,6 +1,6 @@
 package kr.co.kwt.exchange.adapter.out.persistence;
 
-import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateCustomRepository;
+import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateRepository;
 import kr.co.kwt.exchange.application.port.out.SaveExchangeRatePort;
 import kr.co.kwt.exchange.domain.ExchangeRate;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 class SaveExchangeRateAdapter implements SaveExchangeRatePort {
 
-    private final ExchangeRateCustomRepository exchangeRateRepository;
+    private final ExchangeRateRepository exchangeRateRepository;
 
     @Override
     public Mono<ExchangeRate> save(@NonNull final ExchangeRate exchangeRate) {

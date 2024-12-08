@@ -21,34 +21,34 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
 
     private final DatabaseClient databaseClient;
 
-    @Override
-    public Mono<ExchangeRate> save(final ExchangeRate exchangeRate) {
-        return databaseClient.sql("insert into exchange_rates" +
-                        "(" +
-                        " currency_code, " +
-                        " unit_amount," +
-                        " decimals," +
-                        " rate_value," +
-                        " updated_at" +
-                        ") " +
-                        " values " +
-                        "(" +
-                        " :currencyCode," +
-                        " :unitAmount," +
-                        " :decimals," +
-                        " :rateValue," +
-                        " :updatedAt" +
-                        ")"
-                )
-                .bind("currencyCode", exchangeRate.getCurrencyCode())
-                .bind("unitAmount", exchangeRate.getUnitAmount())
-                .bind("decimals", exchangeRate.getDecimals())
-                .bind("rateValue", exchangeRate.getRateValue())
-                .bind("updatedAt", exchangeRate.getUpdatedAt())
-                .fetch()
-                .rowsUpdated()
-                .then(Mono.just(exchangeRate));
-    }
+//    @Override
+//    public Mono<ExchangeRate> save(final ExchangeRate exchangeRate) {
+//        return databaseClient.sql("insert into exchange_rates" +
+//                        "(" +
+//                        " currency_code, " +
+//                        " unit_amount," +
+//                        " decimals," +
+//                        " rate_value," +
+//                        " updated_at" +
+//                        ") " +
+//                        " values " +
+//                        "(" +
+//                        " :currencyCode," +
+//                        " :unitAmount," +
+//                        " :decimals," +
+//                        " :rateValue," +
+//                        " :updatedAt" +
+//                        ")"
+//                )
+//                .bind("currencyCode", exchangeRate.getCurrencyCode())
+//                .bind("unitAmount", exchangeRate.getUnitAmount())
+//                .bind("decimals", exchangeRate.getDecimals())
+//                .bind("rateValue", exchangeRate.getRateValue())
+//                .bind("updatedAt", exchangeRate.getUpdatedAt())
+//                .fetch()
+//                .rowsUpdated()
+//                .then(Mono.just(exchangeRate));
+//    }
 
     @Override
     public Mono<ExchangeRate> findByCurrencyCode(String currencyCode) {
@@ -57,6 +57,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                         " er.unit_amount as unit_amount," +
                         " er.decimals as decimals," +
                         " er.rate_value as rate_value," +
+                        " er.fetched_at as fetched_at," +
                         " er.updated_at as updated_at," +
                         " c.country_name as country_name," +
                         " c.country_flag as country_flag" +
@@ -79,6 +80,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                             (Integer) result.get("unit_amount"),
                             (Integer) result.get("decimals"),
                             (Double) result.get("rate_value"),
+                            (LocalDateTime) result.get("fetched_at"),
                             (LocalDateTime) result.get("updated_at")
                     );
 
@@ -103,6 +105,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                         " er.rate_value as rate_value," +
                         " er.unit_amount as unit_amount," +
                         " er.decimals as decimals," +
+                        " er.fetched_at as fetched_at," +
                         " er.updated_at as updated_at" +
                         " from exchange_rates as er" +
                         " join country as c on er.currency_code = c.currency_code" +
@@ -119,6 +122,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                         null,
                         (Integer) resultMap.get("unit_amount"),
                         (Integer) resultMap.get("decimals"),
+                        (LocalDateTime) resultMap.get("fetched_at"),
                         (LocalDateTime) resultMap.get("updated_at")
                 ));
     }
@@ -132,6 +136,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                         " er.rate_value as rate_value," +
                         " er.unit_amount as unit_amount," +
                         " er.decimals as decimals," +
+                        " er.fetched_at as fetched_at," +
                         " er.updated_at as updated_at " +
                         " from exchange_rates as er" +
                         " join country as c on er.currency_code = c.currency_code")
@@ -144,6 +149,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                         null,
                         (Integer) resultMap.get("unit_amount"),
                         (Integer) resultMap.get("decimals"),
+                        (LocalDateTime) resultMap.get("fetched_at"),
                         (LocalDateTime) resultMap.get("updated_at")
                 ));
     }
