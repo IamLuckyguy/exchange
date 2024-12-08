@@ -31,7 +31,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
     @Override
     public Flux<ExchangeRate> findAllByCurrencyCode(List<String> currencyCodes) {
-        return exchangeRateRepository.findAllByCurrencyCode(currencyCodes);
+        return exchangeRateRepository.findAllByCurrencyCodeIn(currencyCodes);
     }
 
     @Override
@@ -59,7 +59,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
     private Mono<GetExchangeRateResponse> setHistories(final GetExchangeRateResponse response) {
         return exchangeRateHistoryRepository
-                .findTop365ByCurrencyCodeOrderByUpdatedAtDesc(response.getCurrencyCode())
+                .findTop365ByCurrencyCodeOrderByFetchedAtDesc(response.getCurrencyCode())
                 .collectList()
                 .map(histories -> doSetHistories(response, histories));
     }

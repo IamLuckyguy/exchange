@@ -71,6 +71,7 @@ public class ExchangeRateApiService {
         return callOpenApi(request)
                 .map(response -> mapToUpdateRateValueRequest(response, fetchedAt))
                 .collectList()
+                .filter(list -> !list.isEmpty())
                 .flatMapMany(updateExchangeRateUseCase::bulkUpdateRateValues)
                 .map(this::mapToFetchExchangeRateResponse);
     }

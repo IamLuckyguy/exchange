@@ -2,6 +2,7 @@ package kr.co.kwt.exchange.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -26,6 +27,7 @@ import static lombok.AccessLevel.PRIVATE;
 @Getter
 @ToString
 @AllArgsConstructor(access = PRIVATE)
+@NoArgsConstructor
 public final class ExchangeRate {
 
     @Id
@@ -87,9 +89,10 @@ public final class ExchangeRate {
         return (currencyCode.contains("KRW") || currencyCode.contains("JPY")) ? 0 : 2;
     }
 
-    public ExchangeRate updateRate(final double newRateValue) {
+    public ExchangeRate updateRate(final double newRateValue, @NonNull final LocalDateTime newFetchedAt) {
         rateValue = calcRateValue(newRateValue);
         updatedAt = LocalDateTime.now();
+        fetchedAt = newFetchedAt;
         return this;
     }
 }
