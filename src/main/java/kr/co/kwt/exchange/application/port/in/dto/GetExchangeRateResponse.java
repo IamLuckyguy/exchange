@@ -2,11 +2,11 @@ package kr.co.kwt.exchange.application.port.in.dto;
 
 import kr.co.kwt.exchange.domain.Country;
 import kr.co.kwt.exchange.domain.ExchangeRate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import kr.co.kwt.exchange.domain.ExchangeRateHistory;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -16,19 +16,38 @@ public class GetExchangeRateResponse {
     private String countryName;
     private String countryFlag;
     private String currencyCode;
-    private double rateValue;
+
+    @Setter
+    private List<GetExchangeRateHistory> exchangeRateHistories;
     private Integer unitAmount;
     private Integer decimals;
     private LocalDateTime updatedAt;
 
-    public static GetExchangeRateResponse of(final ExchangeRate exchangeRate, final Country country) {
+    public static GetExchangeRateResponse of(final ExchangeRate exchangeRate,
+                                             final Country country,
+                                             List<GetExchangeRateHistory> getExchangeRateHistories) {
         return new GetExchangeRateResponse(
                 country.getCountryName(),
                 country.getCountryFlag(),
                 exchangeRate.getCurrencyCode(),
-                exchangeRate.getRateValue(),
+                getExchangeRateHistories,
                 exchangeRate.getUnitAmount(),
                 exchangeRate.getDecimals(),
                 exchangeRate.getUpdatedAt());
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class GetExchangeRateHistory {
+        private double rateValue;
+        private LocalDateTime updatedAt;
+
+        public static GetExchangeRateHistory of(final ExchangeRateHistory exchangeRateHistory) {
+            return new GetExchangeRateHistory(
+                    exchangeRateHistory.getRateValue(),
+                    exchangeRateHistory.getUpdatedAt()
+            );
+        }
     }
 }

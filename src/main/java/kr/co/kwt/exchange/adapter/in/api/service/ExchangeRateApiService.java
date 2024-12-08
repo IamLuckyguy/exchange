@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class ExchangeRateApiService {
+
     private static final String SERVICE_NAME = "ExchangeRateApiService";
 
     @Value("${exchange.api.key}")
