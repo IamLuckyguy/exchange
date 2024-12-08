@@ -108,7 +108,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                         " join country as c on er.currency_code = c.currency_code" +
                         " join exchange_rate_histories erh on c.currency_code = erh.currency_code" +
                         " where er.currency_code = :currencyCode" +
-                        " order by erh.updated_at desc limit 100")
+                        " order by erh.updated_at desc limit 365")
                 .bind("currencyCode", request.getCurrencyCode())
                 .fetch()
                 .one()
@@ -116,7 +116,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                         (String) resultMap.get("country_name"),
                         (String) resultMap.get("country_flag"),
                         (String) resultMap.get("currency_code"),
-                        (Double) resultMap.get("rate_value"),
+                        null,
                         (Integer) resultMap.get("unit_amount"),
                         (Integer) resultMap.get("decimals"),
                         (LocalDateTime) resultMap.get("updated_at")
@@ -141,7 +141,7 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                         (String) resultMap.get("country"),
                         (String) resultMap.get("country_flag"),
                         (String) resultMap.get("currency_code"),
-                        (Double) resultMap.get("rate_value"),
+                        null,
                         (Integer) resultMap.get("unit_amount"),
                         (Integer) resultMap.get("decimals"),
                         (LocalDateTime) resultMap.get("updated_at")
