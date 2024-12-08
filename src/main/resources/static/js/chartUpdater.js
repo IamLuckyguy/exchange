@@ -19,12 +19,13 @@ function preparedRowData(exchangeRate, days) {
 
     for (let i = 0; i < days; i++) {
         let history = exchangeRate.exchangeRateHistories[i];
+        console.log(history);
 
         if (!history) {
             continue;
         }
 
-        const date = new Date(history.updatedAt);
+        const date = new Date(history.fetchedAt);
         const rate = parseFloat(history.rateValue).toFixed(4);
 
         data.dates.push(date.toISOString().split('T')[0]);
