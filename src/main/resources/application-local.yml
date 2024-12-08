@@ -13,9 +13,9 @@ spring:
     cache: false
 
   r2dbc:
-    url: r2dbc:mysql://localhost:33306/exchange
-    username: exchange_user
-    password: exchange_password
+    url: r2dbc:mysql://192.168.100.100:30306/exchange
+    username: dev_user
+    password: qlalfqjsgh!486
     properties:
       initial-size: 5
       max-size: 10
