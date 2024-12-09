@@ -1,7 +1,5 @@
 // currencySelector.js
 function initializeCurrencySelector(exchangeRates, selectedChartCurrencies) {
-
-    console.log("설마 너니??");
     const container = $('#currencySelector');
     container.empty();
 
