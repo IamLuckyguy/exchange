@@ -1,9 +1,6 @@
 package kr.co.kwt.exchange.config;
 
 import io.netty.channel.ChannelOption;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.resolver.DefaultAddressResolverGroup;
@@ -17,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
-import javax.net.ssl.SSLException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
@@ -42,20 +38,8 @@ public class WebClientConfig {
                 .maxLifeTime(Duration.ofSeconds(60))
                 .build();
 
-        SslContext sslContext;
-
-        try {
-            sslContext = SslContextBuilder
-                    .forClient()
-                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                    .build();
-        } catch (SSLException e) {
-            throw new RuntimeException(e);
-        }
-
         return HttpClient.create(provider)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getConnectTimeout())
-                .secure(sslContextSpec -> sslContextSpec.sslContext(sslContext))
                 .responseTimeout(Duration.ofMillis(properties.getReadTimeout()))
                 .doOnConnected(conn -> conn
                         .addHandlerLast(new ReadTimeoutHandler(properties.getReadTimeout(), TimeUnit.MILLISECONDS))

@@ -43,42 +43,6 @@ public class UpdateRateValueService implements UpdateRateValueUseCase {
                 .map(UpdateRateValueResponse::of);
     }
 
-    /**
-     * 다중 환율값 업데이트, 최초 환율 업데이트시 환율 도메인 등록
-     *
-     * @param requests
-     * @return
-     */
-    @Override
-    public Flux<UpdateRateValueResponse> bulkUpdateRateValues(@NonNull final List<UpdateRateValueRequest> requests) {
-        LocalDateTime fetchedAt = requests
-                .stream()
-                .map(UpdateRateValueRequest::getFetchedAt)
-                .findFirst()
-                .orElseThrow();
-
-        Map<String, Double> currencyCodeMap = requests
-                .stream()
-                .collect(toMap(UpdateRateValueRequest::getCurrencyCode, UpdateRateValueRequest::getRateValue));
-
-        // TODO : 벌크성 쿼리 사용으로 변경 필요!
-        return Flux
-                .fromIterable(requests)
-                .flatMap(this::getExchangeRate)
-                .flatMap(exchangeRate -> doUpdateRateValue(exchangeRate, currencyCodeMap.get(exchangeRate.getCurrencyCode()), fetchedAt))
-                .map(UpdateRateValueResponse::of);
-    }
-
-    private Mono<ExchangeRate> getExchangeRate(@NonNull final UpdateRateValueRequest request) {
-        return loadExchangeRatePort
-                .findByCurrencyCode(request.getCurrencyCode())
-                .switchIfEmpty(Mono.just(ExchangeRate.withoutId(
-                        null,
-                        request.getCurrencyCode(),
-                        request.getRateValue(),
-                        request.getFetchedAt())));
-    }
-
     private Mono<ExchangeRate> doUpdateRateValue(@NonNull final ExchangeRate exchangeRate,
                                                  final double rateValue,
                                                  @NonNull LocalDateTime fetchedAt
@@ -89,5 +53,46 @@ public class UpdateRateValueService implements UpdateRateValueUseCase {
                 .map(ExchangeRateHistory::of)
                 .flatMap(saveExchangeRateHistoryPort::save)
                 .then(Mono.just(exchangeRate));
+    }
+
+    /**
+     * 다중 환율값 업데이트, 최초 환율 업데이트시 환율 도메인 등록
+     *
+     * @param requests
+     * @return
+     */
+    @Override
+    public Flux<UpdateRateValueResponse> bulkUpdateRateValues(@NonNull final List<UpdateRateValueRequest> requests) {
+        Map<String, Double> currencyCodeMap = requests
+                .stream()
+                .collect(toMap(UpdateRateValueRequest::getCurrencyCode, UpdateRateValueRequest::getRateValue));
+
+        return loadExchangeRatePort
+                .findAllByCurrencyCode(getCurrencyCodes(requests))
+                .flatMap(exchangeRate -> Flux.just(exchangeRate.updateRate(
+                        currencyCodeMap.get(exchangeRate.getCurrencyCode()),
+                        getFetchedAt(requests))))
+                .collectList()
+                .flatMapMany(exchangeRates -> saveExchangeRatePort
+                        .bulkSave(exchangeRates)
+                        .map(ExchangeRateHistory::of)
+                        .collectList()
+                        .flatMapMany(saveExchangeRateHistoryPort::bulkSave))
+                .map(UpdateRateValueResponse::of);
+    }
+
+    private List<String> getCurrencyCodes(List<UpdateRateValueRequest> requests) {
+        return requests
+                .stream()
+                .map(UpdateRateValueRequest::getCurrencyCode)
+                .toList();
+    }
+
+    private LocalDateTime getFetchedAt(List<UpdateRateValueRequest> requests) {
+        return requests
+                .stream()
+                .map(UpdateRateValueRequest::getFetchedAt)
+                .findFirst()
+                .orElseThrow();
     }
 }
