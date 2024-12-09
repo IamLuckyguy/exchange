@@ -17,7 +17,7 @@ function formatNumber(number, decimals) {
 }
 
 function getRateValue(exchangeRate) {
-    return exchangeRate.exchangeRateHistories[0].rateValue;
+    return exchangeRate.exchangeRateHistories[exchangeRate.exchangeRateHistories.length - 1].rateValue;
 }
 
 function convertCurrency(amount, from, to) {
