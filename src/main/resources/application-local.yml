@@ -29,6 +29,6 @@ exchange:
 
 logging:
   level:
-    org.springframework.r2dbc: DEBUG
+    org.springframework.r2dbc: INFO
     kr.co.kwt.exchange: DEBUG
-    io.r2dbc.pool: DEBUG
+    io.r2dbc.pool: INFO
