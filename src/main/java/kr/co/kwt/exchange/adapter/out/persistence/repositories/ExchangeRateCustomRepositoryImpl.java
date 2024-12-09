@@ -20,82 +20,6 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
 
     private final DatabaseClient databaseClient;
 
-//    @Override
-//    public Mono<ExchangeRate> save(final ExchangeRate exchangeRate) {
-//        return databaseClient.sql("insert into exchange_rates" +
-//                        "(" +
-//                        " currency_code, " +
-//                        " unit_amount," +
-//                        " decimals," +
-//                        " rate_value," +
-//                        " updated_at" +
-//                        ") " +
-//                        " values " +
-//                        "(" +
-//                        " :currencyCode," +
-//                        " :unitAmount," +
-//                        " :decimals," +
-//                        " :rateValue," +
-//                        " :updatedAt" +
-//                        ")"
-//                )
-//                .bind("currencyCode", exchangeRate.getCurrencyCode())
-//                .bind("unitAmount", exchangeRate.getUnitAmount())
-//                .bind("decimals", exchangeRate.getDecimals())
-//                .bind("rateValue", exchangeRate.getRateValue())
-//                .bind("updatedAt", exchangeRate.getUpdatedAt())
-//                .fetch()
-//                .rowsUpdated()
-//                .then(Mono.just(exchangeRate));
-//    }
-
-//    @Override
-//    public Mono<ExchangeRate> findByCurrencyCode(String currencyCode) {
-//        return databaseClient.sql("select er.id as id," +
-//                        " er.currency_code as currency_code," +
-//                        " er.unit_amount as unit_amount," +
-//                        " er.decimals as decimals," +
-//                        " er.rate_value as rate_value," +
-//                        " er.fetched_at as fetched_at," +
-//                        " er.updated_at as updated_at," +
-//                        " c.country_name as country_name," +
-//                        " c.country_flag as country_flag" +
-//                        " from exchange_rates as er" +
-//                        " join country as c on er.currency_code = c.currency_code" +
-//                        " where c.currency_code = :currencyCode")
-//                .bind("currencyCode", currencyCode)
-//                .fetch()
-//                .one()
-//                .map(result -> {
-//
-//                    ExchangeRate exchangeRate = ExchangeRate.withId(
-//                            (Long) result.get("id"),
-//                            (String) result.get("currency_code"),
-//                            new Country(
-//                                    (String) result.get("country_name"),
-//                                    (String) result.get("currency_code"),
-//                                    (String) result.get("country_flag")
-//                            ),
-//                            (Integer) result.get("unit_amount"),
-//                            (Integer) result.get("decimals"),
-//                            (Double) result.get("rate_value"),
-//                            (LocalDateTime) result.get("fetched_at"),
-//                            (LocalDateTime) result.get("updated_at")
-//                    );
-//
-//                    log.info("exchangeRate: {}", exchangeRate);
-//                    return exchangeRate;
-//                });
-//    }
-
-    // TODO : batch 쿼리로 수정 필요!
-//    @Override
-//    public Flux<ExchangeRate> findAllByCurrencyCode(final List<String> currencyCodes) {
-//        return Flux
-//                .fromIterable(currencyCodes)
-//                .flatMap(this::findByCurrencyCode);
-//    }
-
     @Override
     public Mono<GetExchangeRateResponse> getExchangeRate(final GetExchangeRateRequest request) {
         return databaseClient.sql("select c.country_name as country_name," +
@@ -153,9 +77,40 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
                 ));
     }
 
-    // TODO : 벌크성 쿼리로 수정이 필요
     @Override
-    public Flux<ExchangeRate> bulkUpdateRateValues(List<String> currencyCodes, List<Double> rateValues) {
-        return null;
+    public Flux<ExchangeRate> bulkSave(final List<ExchangeRate> exchangeRates) {
+        String sql = """
+                    INSERT INTO exchange_rates (id, currency_code, rate_value, fetched_at)
+                    VALUES %s
+                    ON DUPLICATE KEY UPDATE
+                        rate_value = VALUES(rate_value),
+                        fetched_at = VALUES(fetched_at)
+                """.formatted(generateValuesString(exchangeRates));
+
+        // SQL 실행
+        return databaseClient.sql(sql)
+                .fetch()
+                .rowsUpdated()
+                .flux()
+                .thenMany(Flux.fromIterable(exchangeRates));
+    }
+
+    private String generateValuesString(final List<ExchangeRate> exchangeRates) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (ExchangeRate exchangeRate : exchangeRates) {
+            stringBuilder.append("(");
+            stringBuilder.append(exchangeRate.getId());
+            stringBuilder.append(",");
+            stringBuilder.append("'").append(exchangeRate.getCurrencyCode()).append("'");
+            stringBuilder.append(",");
+            stringBuilder.append(exchangeRate.getRateValue());
+            stringBuilder.append(",");
+            stringBuilder.append("'").append(exchangeRate.getFetchedAt()).append("'");
+            stringBuilder.append("),");
+        }
+
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        return stringBuilder.toString();
     }
 }

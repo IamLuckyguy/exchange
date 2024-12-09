@@ -10,5 +10,7 @@ public interface SaveExchangeRatePort {
 
     Mono<ExchangeRate> save(ExchangeRate exchangeRate);
 
-    Flux<ExchangeRate> bulkUpdateRateValues(List<String> exchangeRates, List<Double> rateValues);
+    Flux<ExchangeRate> saveAll(Flux<ExchangeRate> exchangeRates);
+
+    Flux<ExchangeRate> bulkSave(List<ExchangeRate> exchangeRates);
 }

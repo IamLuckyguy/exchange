@@ -22,16 +22,14 @@ class SaveExchangeRateAdapter implements SaveExchangeRatePort {
         return exchangeRateRepository.save(exchangeRate);
     }
 
-    // TODO : 벌크성 쿼리로 수정이 필요
     @Override
-    public Flux<ExchangeRate> bulkUpdateRateValues(
-            @NonNull final List<String> currencyCodes,
-            @NonNull final List<Double> rateValues
-    ) {
-        if (currencyCodes.size() != rateValues.size()) {
-            return Flux.error(IllegalAccessError::new);
-        }
-
-        return exchangeRateRepository.bulkUpdateRateValues(currencyCodes, rateValues);
+    public Flux<ExchangeRate> saveAll(@NonNull final Flux<ExchangeRate> exchangeRates) {
+        return exchangeRateRepository.saveAll(exchangeRates);
     }
+
+    @Override
+    public Flux<ExchangeRate> bulkSave(@NonNull final List<ExchangeRate> exchangeRates) {
+        return exchangeRateRepository.bulkSave(exchangeRates);
+    }
+
 }

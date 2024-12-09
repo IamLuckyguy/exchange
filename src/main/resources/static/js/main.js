@@ -23,7 +23,6 @@ $(document).ready(function () {
     }
 
     function updateCurrencyInputs() {
-        console.log("설마 너야?");
         $('#currencyInputs').empty();
         selectedCurrencies.forEach(code => {
             const exchangeRate = exchangeRates.find(ex => ex.currencyCode === code);

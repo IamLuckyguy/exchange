@@ -59,7 +59,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
 
     private Mono<GetExchangeRateResponse> setHistories(final GetExchangeRateResponse response) {
         return exchangeRateHistoryRepository
-                .findTop365ByCurrencyCodeOrderByFetchedAtDesc(response.getCurrencyCode())
+                .findTop365ByCurrencyCodeOrderByFetchedAtAsc(response.getCurrencyCode())
                 .collectList()
                 .map(histories -> doSetHistories(response, histories));
     }

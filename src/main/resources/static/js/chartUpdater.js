@@ -19,7 +19,6 @@ function preparedRowData(exchangeRate, days) {
 
     for (let i = 0; i < days; i++) {
         let history = exchangeRate.exchangeRateHistories[i];
-        console.log(history);
 
         if (!history) {
             continue;

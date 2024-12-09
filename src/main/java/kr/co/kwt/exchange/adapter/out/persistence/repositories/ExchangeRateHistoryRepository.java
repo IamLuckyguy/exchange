@@ -9,4 +9,6 @@ public interface ExchangeRateHistoryRepository extends ReactiveCrudRepository<Ex
     Flux<ExchangeRateHistory> findTop365ByCurrencyCodeOrderByUpdatedAtDesc(String currencyCode);
 
     Flux<ExchangeRateHistory> findTop365ByCurrencyCodeOrderByFetchedAtDesc(String currencyCode);
+
+    Flux<ExchangeRateHistory> findTop365ByCurrencyCodeOrderByFetchedAtAsc(String currencyCode);
 }
