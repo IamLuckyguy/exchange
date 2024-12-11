@@ -8,9 +8,35 @@
         '<https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)>;
     })(window,document,'script','dataLayer','GTM-T6NHGMK4');</script>
     <!-- End Google Tag Manager -->
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>환율 계산기</title>
+
+    <!-- Primary Meta Tags -->
+    <title>실시간 환율 계산기 | 실시간 환율 그래프 - ExchangeCalc by KW Team</title>
+    <meta name="title" content="실시간 환율 계산기 | 실시간 환율 그래프 - ExchangeCalc by KW Team">
+    <meta name="description" content="실시간 환율 계산기로 N개국 통화를 즉시 계산해보세요. 최근 N개월간의 환율 변동 그래프를 무료로 제공합니다. 실시간 시장 환율 기준, 완전히 무료.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="현재 웹사이트 URL">
+    <meta property="og:title" content="실시간 환율 계산기 | ExchangeCalc">
+    <meta property="og:description" content="실시간 환율 계산기로 N개국 통화를 즉시 계산해보세요. 실시간 환율 그래프 무료 제공.">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="현재 웹사이트 URL">
+    <meta property="twitter:title" content="실시간 환율 계산기 | ExchangeCalc">
+    <meta property="twitter:description" content="실시간 환율 계산기로 N개국 통화를 즉시 계산해보세요. 실시간 환율 그래프 무료 제공.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/static/img/favicon-64x64.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="/static/img/favicon-128x128.png">
+    <link rel="icon" type="image/png" sizes="256x256" href="/static/img/favicon-256x256.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/img/favicon-256x256.png">
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -413,15 +439,18 @@
 <!-- End Google Tag Manager (noscript) -->
 
 <!-- 로딩 오버레이 추가 -->
-<div class="loading-overlay">
-    <div class="spinner"></div>
+<div class="loading-overlay" role="alert" aria-busy="true">
+    <div class="spinner" aria-label="로딩 중"></div>
 </div>
 
-<div class="container-fluid">
+<main class="container-fluid">
+    <h1 class="visually-hidden">실시간 환율 계산기</h1>
+
     <div class="calculator-wrapper">
         <!-- 계산기 카드 -->
-        <div class="card calculator-card">
-            <div class="card-content">
+        <section class="card calculator-card">
+            <header class="card-content">
+                <h2 class="visually-hidden">환율 계산</h2>
                 <div class="mb-4">
                     <button id="selectCurrencies" class="btn btn-outline">
                         <span>통화 선택 (<span id="selectedCount">5</span>)</span>
@@ -431,8 +460,8 @@
                 <div id="currencyInputs">
                     <!-- Currency inputs will be dynamically added here -->
                 </div>
-            </div>
-        </div>
+            </header>
+        </section>
 
         <!-- 차트 카드 수정 -->
         <div class="card chart-card">
@@ -466,7 +495,7 @@
             </div>
         </div>
     </div>
-</div>
+</main>
 
 <!-- 다이얼로그 -->
 <div id="currencyDialog" class="dialog">
