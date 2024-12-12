@@ -1,53 +1,333 @@
-body.dark-mode {
-    background-color: #121212;
-    color: #ffffff;
-    font-family: Arial, sans-serif;
+.container-fluid {
+    min-height: 100vh;
+    padding: 2rem;
 }
 
-.container {
-    max-width: 800px;
+.calculator-wrapper {
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+}
+
+.card {
+    background-color: #2a2a2a;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.card-content {
+    padding: 1.5rem;
+    overflow: hidden;
+}
+
+.btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: transparent;
+    border: 1px solid #4a4a4a;
+    border-radius: 0.25rem;
+    color: #ffffff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #3a3a3a;
+    border-color: #6a6a6a;
+    color: #00ff88;
+}
+
+.chevron-down {
+    font-size: 0.75rem;
+}
+
+.input-group {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem 0 0.75rem 1rem;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 0.25rem;
+    color: #ffffff;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.input-group .currency-btn {
+    position: absolute;
+    right: 0;
+    top: 1.8rem;
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.dialog {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.dialog-content {
+    background-color: #2a2a2a;
+    border-radius: 0.5rem;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #4a4a4a;
+}
+
+.dialog-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.close-btn {
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.dialog-body {
+    padding: 1rem;
+}
+
+.currency-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid #4a4a4a;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.currency-item:hover {
+    background-color: #3a3a3a;
+    border-color: #6a6a6a;
+}
+
+.currency-item:hover .currency-code {
+    color: #00ff88;
+}
+
+.currency-item:hover .currency-name {
+    color: #ffffff;
+}
+
+.currency-item input[type="checkbox"] {
+    margin-right: 0.75rem;
+}
+
+.currency-item .currency-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.currency-item .currency-code {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.currency-item .currency-name {
+    color: #a0a0a0;
+}
+
+.chart-section {
+    background-color: #2a2a2a;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.period-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.period-btn {
+    padding: 0.5rem 1rem;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 80px;
     text-align: center;
 }
 
-.exchange-form {
-    background: #1e1e1e;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
+.period-btn:hover {
+    background-color: #4a4a4a;
+    border-color: #00ff88;
+    color: #00ff88;
 }
 
-.currency-selector, .amount-input {
-    margin-bottom: 15px;
+.period-btn.selected {
+    background-color: #00ff88;
+    border-color: #00ff88;
+    color: #1a1a1a;
 }
 
-select, input[type="number"] {
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background: #2c2c2c;
+.chart-container {
+    position: relative;
+    height: 50vh;
+    min-height: 300px;
+    width: 100%;
+}
+
+#customDays {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 0.25rem;
     color: #ffffff;
 }
 
-.exchange-result ul {
-    list-style: none;
-    padding: 0;
-}
-
-.exchange-result li {
-    background: #1e1e1e;
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-@media (max-width: 768px) {
-    .container {
-        padding: 10px;
+/* 반응형 스타일 */
+@media (min-width: 768px) {
+    .calculator-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
     }
 
-    .exchange-form {
-        padding: 15px;
+    .calculator-card {
+        flex: 1;
+        min-width: 300px;
+        max-width: 500px;
     }
+
+    .chart-card {
+        flex: 2;
+        min-width: 500px;
+    }
+}
+
+@media (max-width: 767px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+
+    .card-content {
+        padding: 1rem;
+    }
+
+    .chart-container {
+        height: 40vh;
+    }
+
+    .period-btn {
+        font-size: 0.875rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+.currency-pair-selector select {
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #ffffff;
+    padding: 0.4rem;
+    margin-left: 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.currency-pair-selector select:hover {
+    border-color: #00ff88;
+}
+
+.form-check-input {
+    margin-top: 0.75rem;
+}
+
+.currency-pairs {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+    .currency-pairs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* 통화 선택 스타일 수정 */
+.currency-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.currency-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #3a3a3a;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.currency-option:hover {
+    background: #4a4a4a;
+}
+
+.currency-option.selected {
+    background: #2a2a2a;
+    border-color: #00ff88;
+}
+
+.currency-option.selected .currency-code {
+    color: #00ff88;
+}
+
+.currency-flag {
+    font-size: 1.2rem;
 }
