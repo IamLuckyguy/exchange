@@ -1,8 +1,10 @@
 package kr.co.kwt.exchange.adapter.in.api.service;
 
-import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateOpenApiResponse;
 import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateRequest;
 import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
+import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiClient;
+import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiResponse;
+import kr.co.kwt.exchange.adapter.in.openapi.koreaexim.KoreaEximOpenApiRequest;
 import kr.co.kwt.exchange.adapter.out.ExchangeRateWebClientCustomizer;
 import kr.co.kwt.exchange.application.port.in.AddExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.GetExchangeRateUseCase;
@@ -11,11 +13,11 @@ import kr.co.kwt.exchange.application.port.in.dto.*;
 import kr.co.kwt.exchange.config.webclient.WebClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -25,18 +27,12 @@ import java.time.format.DateTimeFormatter;
 public class ExchangeRateApiService {
 
     private static final String SERVICE_NAME = "ExchangeRateApiService";
-
-    @Value("${exchange.api.key}")
-    private String apiKey;
-
-    @Value("${exchange.api.base-url}")
-    private String baseUrl;
-
     private final WebClientService webClientService;
     private final ExchangeRateWebClientCustomizer webClientCustomizer;
     private final UpdateRateValueUseCase updateExchangeRateUseCase;
     private final GetExchangeRateUseCase getExchangeRateUseCase;
     private final AddExchangeRateUseCase addExchangeRateUseCase;
+    private final OpenApiClient openApiClient;
 
     /**
      * 모든 환율 정보 조회 (국가 정보 포함)
@@ -65,33 +61,25 @@ public class ExchangeRateApiService {
      * 환율 정보 패치
      */
     public Flux<FetchExchangeRateResponse> fetchExchangeRates(final FetchExchangeRateRequest request) {
-        LocalDateTime fetchedAt = LocalDateTime.parse(request.getSearchDate() + "000000",
-                DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDate fetchDate = LocalDate.parse(request.getSearchDate(), DateTimeFormatter.ISO_LOCAL_DATE);
+        LocalDateTime fetchDateTime = LocalDateTime.parse(request.getSearchDate() + " 00:00:00", dateTimeFormatter);
 
-        return callOpenApi(request)
-                .map(response -> mapToUpdateRateValueRequest(response, fetchedAt))
+        return openApiClient
+                .call(new KoreaEximOpenApiRequest(fetchDate))
+                .map(response -> mapToUpdateRateValueRequest(response, fetchDateTime))
                 .collectList()
                 .filter(list -> !list.isEmpty())
                 .flatMapMany(updateExchangeRateUseCase::bulkUpdateRateValues)
                 .map(this::mapToFetchExchangeRateResponse);
     }
 
-    private Flux<FetchExchangeRateOpenApiResponse> callOpenApi(final FetchExchangeRateRequest request) {
-        return webClientService
-                .getWebClient(baseUrl, webClientCustomizer)
-                .get()
-                .uri("/site/program/financial/exchangeJSON?authkey={apiKey}&searchdate={searchDate}&data=AP01",
-                        apiKey, request.getSearchDate())
-                .retrieve()
-                .bodyToFlux(FetchExchangeRateOpenApiResponse.class);
-    }
-
-    private UpdateRateValueRequest mapToUpdateRateValueRequest(final FetchExchangeRateOpenApiResponse openApiResponse,
+    private UpdateRateValueRequest mapToUpdateRateValueRequest(final OpenApiResponse openApiResponse,
                                                                final LocalDateTime fetchedAt
     ) {
         return new UpdateRateValueRequest(
                 openApiResponse.getCurrencyCode(),
-                Double.parseDouble(openApiResponse.getTtb().replace(",", "")),
+                openApiResponse.getRateValue(),
                 fetchedAt);
     }
 
