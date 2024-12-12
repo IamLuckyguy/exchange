@@ -4,7 +4,7 @@ import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateRequest;
 import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiClient;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiResponse;
-import kr.co.kwt.exchange.adapter.in.openapi.koreaexim.KoreaEximOpenApiRequest;
+import kr.co.kwt.exchange.adapter.in.openapi.naver.NaverOpenApiRequest;
 import kr.co.kwt.exchange.adapter.out.ExchangeRateWebClientCustomizer;
 import kr.co.kwt.exchange.application.port.in.AddExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.GetExchangeRateUseCase;
@@ -66,7 +66,7 @@ public class ExchangeRateApiService {
         LocalDateTime fetchDateTime = LocalDateTime.parse(request.getSearchDate() + " 00:00:00", dateTimeFormatter);
 
         return openApiClient
-                .call(new KoreaEximOpenApiRequest(fetchDate))
+                .call(new NaverOpenApiRequest(fetchDate))
                 .map(response -> mapToUpdateRateValueRequest(response, fetchDateTime))
                 .collectList()
                 .filter(list -> !list.isEmpty())
