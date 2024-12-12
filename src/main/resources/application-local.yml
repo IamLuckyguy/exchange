@@ -11,6 +11,10 @@ spring:
 
   thymeleaf:
     cache: false
+  web:
+    resources:
+      chain:
+        cache: false
 
   r2dbc:
     url: r2dbc:mysql://192.168.100.100:30306/exchange
