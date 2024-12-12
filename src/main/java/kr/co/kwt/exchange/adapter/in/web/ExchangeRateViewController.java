@@ -20,6 +20,6 @@ public class ExchangeRateViewController {
     ) {
         model.addAttribute("baseUrl", webUtils.getBaseUrl(request));
         model.addAttribute("activeProfile", webUtils.getActiveProfile());
-        return "exchangeRate";
+        return "pages/exchangeRate";
     }
 }
