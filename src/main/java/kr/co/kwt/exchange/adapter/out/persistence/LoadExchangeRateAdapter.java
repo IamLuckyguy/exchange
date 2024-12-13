@@ -52,7 +52,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
     @Override
     public Mono<GetExchangeRateResponse> getExchangeRate(final GetExchangeRateRequest request) {
         return exchangeRateRepository
-                .getExchangeRate(request)
+                .getExchangeRate(request.getCurrencyCode())
                 .flatMap(this::setHistories);
     }
 

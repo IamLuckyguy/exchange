@@ -17,9 +17,9 @@ spring:
         cache: false
 
   r2dbc:
-    url: r2dbc:mysql://localhost:33306/exchange
+    url: r2dbc:mysql://mysql-cluster.kwt-dev:6446/exchange
     username: root
-    password: rootpassword
+    password: rootqlalfqjsgh486
     pool:
       initial-size: 10
       max-size: 20
