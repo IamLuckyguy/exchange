@@ -8,10 +8,12 @@ import kr.co.kwt.exchange.application.port.in.dto.AddExchangeRateResponse;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class ExchangeRateApiController {
     public Flux<FetchExchangeRateResponse> fetchExchangeRates(
             @RequestBody final FetchExchangeRateRequest fetchExchangeRateRequest
     ) {
+        log.info("fetchExchangeRates 호출 성공 : {}", fetchExchangeRateRequest.getFetchDateTime());
         return exchangeRateApiService.fetchExchangeRates(fetchExchangeRateRequest);
     }
 }
