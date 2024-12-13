@@ -7,7 +7,6 @@ import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
 import kr.co.kwt.exchange.application.port.out.LoadExchangeRatePort;
 import kr.co.kwt.exchange.domain.Country;
 import kr.co.kwt.exchange.domain.ExchangeRate;
-import kr.co.kwt.exchange.domain.ExchangeRateHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -65,13 +64,9 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
     }
 
     private GetExchangeRateResponse doSetHistories(final GetExchangeRateResponse response,
-                                                   final List<ExchangeRateHistory> histories
+                                                   final List<GetExchangeRateHistory> histories
     ) {
-        response.setExchangeRateHistories(histories
-                .stream()
-                .map(GetExchangeRateHistory::of)
-                .toList());
-
+        response.setExchangeRateHistories(histories);
         return response;
     }
 }

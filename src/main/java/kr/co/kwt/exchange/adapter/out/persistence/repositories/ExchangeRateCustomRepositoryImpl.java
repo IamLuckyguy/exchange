@@ -96,6 +96,10 @@ public class ExchangeRateCustomRepositoryImpl implements ExchangeRateCustomRepos
     }
 
     private String generateValuesString(final List<ExchangeRate> exchangeRates) {
+        if (exchangeRates == null || exchangeRates.isEmpty()) {
+            return "";
+        }
+
         StringBuilder stringBuilder = new StringBuilder();
 
         for (ExchangeRate exchangeRate : exchangeRates) {

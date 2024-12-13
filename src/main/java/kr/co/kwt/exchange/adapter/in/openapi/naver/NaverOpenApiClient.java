@@ -6,12 +6,14 @@ import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiResponse;
 import kr.co.kwt.exchange.config.webclient.WebClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "openapi.naver.enable", havingValue = "true")
 public class NaverOpenApiClient implements OpenApiClient {
 
     private final NaverApiUrlProvider apiUrlProvider;

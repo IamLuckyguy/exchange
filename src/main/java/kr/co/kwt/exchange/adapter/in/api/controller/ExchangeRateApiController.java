@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-class ExchangeRateApiController {
+public class ExchangeRateApiController {
 
     private final ExchangeRateApiService exchangeRateApiService;
 

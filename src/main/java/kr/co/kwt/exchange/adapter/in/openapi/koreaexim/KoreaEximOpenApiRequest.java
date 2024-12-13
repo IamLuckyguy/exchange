@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -14,5 +14,5 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class KoreaEximOpenApiRequest implements OpenApiRequest {
 
-    private LocalDate fetchDate;
+    private LocalDateTime fetchDate;
 }

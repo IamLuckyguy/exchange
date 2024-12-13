@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Service
@@ -61,13 +59,9 @@ public class ExchangeRateApiService {
      * 환율 정보 패치
      */
     public Flux<FetchExchangeRateResponse> fetchExchangeRates(final FetchExchangeRateRequest request) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDate fetchDate = LocalDate.parse(request.getSearchDate(), DateTimeFormatter.ISO_LOCAL_DATE);
-        LocalDateTime fetchDateTime = LocalDateTime.parse(request.getSearchDate() + " 00:00:00", dateTimeFormatter);
-
         return openApiClient
-                .call(new NaverOpenApiRequest(fetchDate))
-                .map(response -> mapToUpdateRateValueRequest(response, fetchDateTime))
+                .call(new NaverOpenApiRequest(request.getFetchDateTime()))
+                .map(response -> mapToUpdateRateValueRequest(response, request.getFetchDateTime()))
                 .collectList()
                 .filter(list -> !list.isEmpty())
                 .flatMapMany(updateExchangeRateUseCase::bulkUpdateRateValues)
