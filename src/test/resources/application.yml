@@ -1,7 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: prod
   r2dbc:
     pool:
       initial-size: 10
@@ -36,5 +33,5 @@ openapi:
 logging:
   level:
     org.springframework.r2dbc: INFO
-    kr.co.kwt.exchange: INFO
+    kr.co.kwt.exchange: DEBUG
     io.r2dbc.pool: INFO
