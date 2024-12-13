@@ -17,9 +17,9 @@ spring:
         cache: false
 
   r2dbc:
-    url: r2dbc:mysql://192.168.100.100:30306/exchange
-    username: dev_user
-    password: qlalfqjsgh!486
+    url: r2dbc:mysql://mysql-cluster.kwt-dev:6446/exchange
+    username: root
+    password: rootqlalfqjsgh486
     pool:
       initial-size: 10
       max-size: 20
@@ -34,10 +34,16 @@ spring:
       connect-timeout: 3s
       ssl: false               # SSL 설정이 불필요한 경우
 
-exchange:
-  api:
+openapi:
+  koreaexim:
+    enable: false
     key: MTTECKpBsABg74lVDXK6w0NxJrY6LE2p
     base-url: https://www.koreaexim.go.kr
+
+  naver:
+    enable: true
+    key:
+    base-url: https://m.stock.naver.com/front-api/marketIndex/exchange/new
 
 logging:
   level:

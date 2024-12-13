@@ -20,7 +20,6 @@ function initializeCurrencySelector(exchangeRates, selectedChartCurrencies) {
 }
 
 function updateCurrencyDialog(exchangeRates, selectedCurrencies) {
-    console.log("누구야")
     $('.dialog-body').empty();
     exchangeRates.forEach(exchangeRate => {
         $('.dialog-body').append(`
