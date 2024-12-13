@@ -17,7 +17,10 @@ function formatNumber(number, decimals) {
 }
 
 function getRateValue(exchangeRate) {
-    return exchangeRate.exchangeRateHistories[exchangeRate.exchangeRateHistories.length - 1].rateValue;
+    if (exchangeRate.currencyCode === 'KRW') {
+        return 1;
+    }
+    return exchangeRate.exchangeRateHistories[exchangeRate.exchangeRateHistories.length - 1].maxRateValue;
 }
 
 function convertCurrency(amount, from, to) {

@@ -25,7 +25,7 @@ function preparedRowData(exchangeRate, days) {
         }
 
         const date = new Date(history.fetchedAt);
-        const rate = parseFloat(history.rateValue).toFixed(4);
+        const rate = parseFloat(history.maxRateValue).toFixed(4);
 
         data.dates.push(date.toISOString().split('T')[0]);
         data.rates.push(rate);
@@ -48,6 +48,10 @@ function updateChart(ctx, exchangeRates, selectedChartCurrencies, days) {
 
     const selectedArray = Array.from(selectedChartCurrencies);
     selectedArray.forEach((currencyCode, index) => {
+        if (currencyCode === 'KRW') {
+            currencyCode = 'USD';
+        }
+
         const exchangeRate = exchangeRates.find(rate => rate.currencyCode === currencyCode);
         const rawData = preparedRowData(exchangeRate, days);
         const changeRates = calculateExchangeRateChange(rawData);
@@ -67,7 +71,11 @@ function updateChart(ctx, exchangeRates, selectedChartCurrencies, days) {
         window.exchangeRateChart.destroy();
     }
 
-    const firstCurrencyCode = selectedArray[0];
+    let firstCurrencyCode = selectedArray[0];
+    if (firstCurrencyCode === 'KRW') {
+        firstCurrencyCode = 'USD';
+    }
+
     const firstExchangeRate = exchangeRates.find(rate => rate.currencyCode === firstCurrencyCode);
     const firstData = preparedRowData(firstExchangeRate, days);
 

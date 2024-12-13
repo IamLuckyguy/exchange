@@ -30,7 +30,7 @@ const StorageUtil = {
             const exchangeRates = localStorage.getItem(STORAGE_KEYS.EXCHANGE_RATES);
 
             return {
-                selectedCurrencies: savedSelected ? JSON.parse(savedSelected) : ["USD", "KRW", "JPY(100)", "AUD"],
+                selectedCurrencies: savedSelected ? JSON.parse(savedSelected) : ["USD", "KRW", "JPY", "AUD"],
                 chartCurrencies: savedChart ? new Set(JSON.parse(savedChart)) : new Set(),
                 displayPeriod: savedPeriod || '7',
                 customPeriod: savedCustomPeriod || '',
@@ -39,7 +39,7 @@ const StorageUtil = {
         } catch (error) {
             console.error('Error loading settings:', error);
             return {
-                selectedCurrencies: ["USD", "KRW", "JPY(100)", "AUD"],
+                selectedCurrencies: ["USD", "KRW", "JPY", "AUD"],
                 chartCurrencies: new Set(),
                 displayPeriod: '7',
                 customPeriod: '',

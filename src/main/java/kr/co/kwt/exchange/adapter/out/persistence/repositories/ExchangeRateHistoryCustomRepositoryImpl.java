@@ -29,6 +29,10 @@ public class ExchangeRateHistoryCustomRepositoryImpl implements ExchangeRateHist
     }
 
     private String generateValues(final List<ExchangeRateHistory> histories) {
+        if (histories == null || histories.isEmpty()) {
+            return "";
+        }
+
         StringBuilder stringBuilder = new StringBuilder();
 
         for (ExchangeRateHistory history : histories) {

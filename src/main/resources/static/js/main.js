@@ -24,15 +24,22 @@ $(document).ready(function () {
 
     function updateCurrencyInputs() {
         $('#currencyInputs').empty();
+        let baseEx = exchangeRates.find(ex => ex.currencyCode === 'USD');
+
+        console.log("baseEx", baseEx);
+        console.log("baseEx", getRateValue(baseEx));
+
         selectedCurrencies.forEach(code => {
             const exchangeRate = exchangeRates.find(ex => ex.currencyCode === code);
             if (exchangeRate) {
-                $('#currencyInputs').append(`
+                if (code === 'KRW') {
+                    console.log(code, exchangeRate, (getRateValue(baseEx) * baseEx.unitAmount, baseEx.decimals));
+                    $('#currencyInputs').append(`
                     <div class="input-group">
                         <label for="${code}">금액</label>
                         <input type="text"
                                id="${code}"
-                               value="${formatNumber((1000 / getRateValue(exchangeRate)) * exchangeRate.unitAmount, exchangeRate.decimals)}"
+                               value="${formatNumber(getRateValue(baseEx) * baseEx.unitAmount, baseEx.decimals)}"
                                class="currency-input" />
                         <button class="currency-btn">
                             <span class="currency-flag">${exchangeRate.countryFlag}</span>
@@ -40,6 +47,21 @@ $(document).ready(function () {
                         </button>
                     </div>
                 `);
+                } else {
+                    $('#currencyInputs').append(`
+                    <div class="input-group">
+                        <label for="${code}">금액</label>
+                        <input type="text"
+                               id="${code}"
+                               value="${formatNumber(getRateValue(baseEx) / getRateValue(exchangeRate) * exchangeRate.unitAmount, exchangeRate.decimals)}"
+                               class="currency-input" />
+                        <button class="currency-btn">
+                            <span class="currency-flag">${exchangeRate.countryFlag}</span>
+                            <span class="currency-code">${exchangeRate.currencyCode}</span>
+                        </button>
+                    </div>
+                `);
+                }
             }
         });
         attachInputListeners();
@@ -137,6 +159,7 @@ $(document).ready(function () {
                 if (toCurrencyCode !== fromCurrencyCode) {
                     const toEx = exchangeRates.find(ex => ex.currencyCode === toCurrencyCode);
                     const fromEx = exchangeRates.find(ex => ex.currencyCode === fromCurrencyCode);
+                    // const baseEx = exchangeRates.find(ex => ex.currencyCode === 'USD');
 
                     if (toEx && fromEx) {
                         const convertedAmount = convertCurrency(amount, fromEx, toEx);

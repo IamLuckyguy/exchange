@@ -2,7 +2,6 @@ package kr.co.kwt.exchange.application.port.in.dto;
 
 import kr.co.kwt.exchange.domain.Country;
 import kr.co.kwt.exchange.domain.ExchangeRate;
-import kr.co.kwt.exchange.domain.ExchangeRateHistory;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -42,16 +41,9 @@ public class GetExchangeRateResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class GetExchangeRateHistory {
-        private double rateValue;
+        private double maxRateValue;
+        private double minRateValue;
+        private double avgRateValue;
         private LocalDateTime fetchedAt;
-        private LocalDateTime updatedAt;
-
-        public static GetExchangeRateHistory of(final ExchangeRateHistory exchangeRateHistory) {
-            return new GetExchangeRateHistory(
-                    exchangeRateHistory.getRateValue(),
-                    exchangeRateHistory.getFetchedAt(),
-                    exchangeRateHistory.getUpdatedAt()
-            );
-        }
     }
 }
