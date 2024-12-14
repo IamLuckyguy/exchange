@@ -21,7 +21,8 @@ public class NaverOpenApiClient implements OpenApiClient {
 
     @Override
     public Flux<OpenApiResponse> call(final OpenApiRequest openApiRequest) {
-        return webClientService.getWebClient(apiUrlProvider.getBaseUrl())
+        return webClientService
+                .getWebClient(apiUrlProvider.getBaseUrl(), new NaverOpenApiWebClientCustomizer())
                 .get()
                 .retrieve()
                 .bodyToFlux(NaverOpenApiBody.class)
