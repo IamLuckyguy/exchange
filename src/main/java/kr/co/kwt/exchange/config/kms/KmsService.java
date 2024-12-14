@@ -17,7 +17,7 @@ public class KmsService {
 
     public GetKmsResponse<KmsDbSecretValue> getKmsDBSecrets() {
         return webClientService
-                .getWebClient(kmsProperties.getUrl(), new KmsWebClientCustomizer(kmsProperties))
+                .getWebClient(kmsProperties.getUrl(), new KmsWebClientCustomizer(kmsProperties.getApiKey()))
                 .get()
                 .retrieve()
                 .bodyToFlux(new ParameterizedTypeReference<GetKmsResponse<KmsDbSecretValue>>() {
