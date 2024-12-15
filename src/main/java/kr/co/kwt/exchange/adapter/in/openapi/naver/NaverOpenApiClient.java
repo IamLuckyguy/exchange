@@ -26,6 +26,7 @@ public class NaverOpenApiClient implements OpenApiClient {
                 .get()
                 .retrieve()
                 .bodyToFlux(NaverOpenApiBody.class)
+                .log("WebClient Request")
                 .flatMap(naverOpenApiBody -> Flux.fromIterable(naverOpenApiBody.getResults()))
                 .filter(naverOpenApiResponseResult -> naverOpenApiResponseResult.getCurrencyCode() != null)
                 .cast(OpenApiResponse.class);

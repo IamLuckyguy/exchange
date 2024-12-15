@@ -17,6 +17,7 @@ public class WebClientLoggingFilter {
         return ExchangeFilterFunction.ofRequestProcessor(request -> {
             long requestId = REQUEST_ID.incrementAndGet();
             logRequestDetails(requestId, request);
+            logRequestHeaders(requestId, request);
             return Mono.just(ClientRequest.from(request)
                     .header("X-Request-ID", String.valueOf(requestId))
                     .build());
@@ -29,6 +30,7 @@ public class WebClientLoggingFilter {
                     .findFirst()
                     .orElse("N/A");
             logResponseDetails(requestId, response);
+            logResponseHeaders(requestId, response);
             return Mono.just(response);
         });
     }
@@ -48,8 +50,26 @@ public class WebClientLoggingFilter {
         }
     }
 
+    private static void logRequestHeaders(long requestId, ClientRequest request) {
+        log.debug("[{}] Request Headers:", requestId);
+        request.headers().forEach((name, values) -> {
+            values.forEach(value -> {
+                log.debug("[{}] {} : {}", requestId, name, value);
+            });
+        });
+    }
+
     private static void logResponseDetails(String requestId, ClientResponse response) {
         log.info("[{}] Response Status: {}", requestId, response.statusCode());
+    }
+
+    private static void logResponseHeaders(String requestId, ClientResponse response) {
+        log.debug("[{}] Response Headers:", requestId);
+        response.headers().asHttpHeaders().forEach((name, values) -> {
+            values.forEach(value -> {
+                log.debug("[{}] {} : {}", requestId, name, value);
+            });
+        });
     }
 
     private static boolean isGetMethod(ClientRequest request) {
