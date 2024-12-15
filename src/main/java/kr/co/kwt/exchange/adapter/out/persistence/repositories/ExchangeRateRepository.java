@@ -15,7 +15,7 @@ public interface ExchangeRateRepository extends ReactiveCrudRepository<ExchangeR
 
     Flux<ExchangeRate> findAllByCurrencyCodeIn(List<String> currencyCode);
 
-    @Query("select c.country_name as country," +
+    @Query("select c.country_name as country_name," +
             " c.country_flag as country_flag," +
             " er.currency_code as currency_code," +
             " er.rate_value as rate_value," +

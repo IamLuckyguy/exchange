@@ -69,24 +69,15 @@ public final class ExchangeRate {
     }
 
     private static Double calcRateValue(final Double rate) {
-        return BigDecimal
-                .valueOf(rate)
-                .compareTo(BigDecimal.ZERO) == 0
-                ? Double.parseDouble("1") : rate;
+        return BigDecimal.valueOf(rate).compareTo(BigDecimal.ZERO) == 0 ? Double.parseDouble("1") : rate;
     }
 
     private static int calcUnitAmount(@NonNull final String currencyCode) {
-        return hasUnitAmount(currencyCode)
-                ? Integer.parseInt(currencyCode.substring(currencyCode.indexOf("(") + 1, currencyCode.indexOf(")")))
-                : 1;
-    }
-
-    private static boolean hasUnitAmount(@NonNull final String currencyCode) {
-        return currencyCode.contains("(") && currencyCode.contains(")");
+        return "JPY".equals(currencyCode) || "IDR".equals(currencyCode) ? 100 : 1;
     }
 
     private static int calcDecimal(@NonNull final String currencyCode) {
-        return (currencyCode.contains("KRW") || currencyCode.contains("JPY")) ? 0 : 2;
+        return "KRW".equals(currencyCode) || "JPY".equals(currencyCode) ? 0 : 2;
     }
 
     public ExchangeRate updateRate(final double newRateValue, @NonNull final LocalDateTime newFetchedAt) {

@@ -5,12 +5,10 @@ import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiClient;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiResponse;
 import kr.co.kwt.exchange.adapter.in.openapi.naver.NaverOpenApiRequest;
-import kr.co.kwt.exchange.adapter.out.ExchangeRateWebClientCustomizer;
 import kr.co.kwt.exchange.application.port.in.AddExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.GetExchangeRateUseCase;
 import kr.co.kwt.exchange.application.port.in.UpdateRateValueUseCase;
 import kr.co.kwt.exchange.application.port.in.dto.*;
-import kr.co.kwt.exchange.config.webclient.WebClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,8 +23,6 @@ import java.time.LocalDateTime;
 public class ExchangeRateApiService {
 
     private static final String SERVICE_NAME = "ExchangeRateApiService";
-    private final WebClientService webClientService;
-    private final ExchangeRateWebClientCustomizer webClientCustomizer;
     private final UpdateRateValueUseCase updateExchangeRateUseCase;
     private final GetExchangeRateUseCase getExchangeRateUseCase;
     private final AddExchangeRateUseCase addExchangeRateUseCase;
