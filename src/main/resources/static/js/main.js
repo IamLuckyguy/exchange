@@ -18,6 +18,13 @@ $(document).ready(function () {
         });
     }
 
+    function updateCalculatorTitle(currencyCode, amount) {
+        const exchangeRate = exchangeRates.find(ex => ex.currencyCode === currencyCode);
+        const formattedAmount = formatNumber(amount, exchangeRate.decimals);
+        $('#calculatorTitle').text(`${currencyCode} ${formattedAmount} 기준 환율`);
+        $('#baseFlag').text(exchangeRate.countryFlag);
+    }
+
     function updateSelectedCount() {
         $('#selectedCount').text(selectedCurrencies.length);
     }
@@ -36,7 +43,6 @@ $(document).ready(function () {
                     console.log(code, exchangeRate, (getRateValue(baseEx) * baseEx.unitAmount, baseEx.decimals));
                     $('#currencyInputs').append(`
                     <div class="input-group">
-                        <label for="${code}">금액</label>
                         <input type="text"
                                id="${code}"
                                value="${formatNumber(getRateValue(baseEx) * baseEx.unitAmount, baseEx.decimals)}"
@@ -50,7 +56,6 @@ $(document).ready(function () {
                 } else {
                     $('#currencyInputs').append(`
                     <div class="input-group">
-                        <label for="${code}">금액</label>
                         <input type="text"
                                id="${code}"
                                value="${formatNumber(getRateValue(baseEx) / getRateValue(exchangeRate) * exchangeRate.unitAmount, exchangeRate.decimals)}"
@@ -78,6 +83,15 @@ $(document).ready(function () {
             updateCurrencyInputs();
             initializeCurrencySelector(exchangeRates, selectedChartCurrencies);
             updateChart(document.getElementById('exchangeRateChart'), exchangeRates, selectedChartCurrencies, getCurrentPeriod());
+            const lastInput = StorageUtil.loadLastInput();
+
+            if (lastInput) {
+                updateCalculatorTitle(lastInput.currencyCode, lastInput.amount);
+                const input = $(`#${lastInput.currencyCode}`);
+                if (input.length) {
+                    input.val(lastInput.amount).trigger('input');
+                }
+            }
 
             if (settings.customPeriod) {
                 $('#customDays').val(settings.customPeriod);
@@ -155,6 +169,12 @@ $(document).ready(function () {
         const amount = parseFloat(inputValue);
 
         if (!isNaN(amount) && amount >= 0) {
+            // 타이틀 업데이트
+            updateCalculatorTitle(fromCurrencyCode, amount);
+
+            // 로컬 스토리지에 마지막 입력값 저장
+            StorageUtil.saveLastInput(fromCurrencyCode, amount);
+
             selectedCurrencies.forEach(toCurrencyCode => {
                 if (toCurrencyCode !== fromCurrencyCode) {
                     const toEx = exchangeRates.find(ex => ex.currencyCode === toCurrencyCode);
@@ -204,5 +224,36 @@ $(document).ready(function () {
             selectedChartCurrencies,
             period.toString()
         );
+    });
+
+    $('#selectAllCurrencies').on('change', function() {
+        const isChecked = $(this).prop('checked');
+        $('.dialog-body input[type="checkbox"]').prop('checked', isChecked);
+        
+        if (isChecked) {
+            $('.dialog-body input[type="checkbox"]').each(function() {
+                const currencyCode = $(this).val();
+                if (!selectedCurrencies.includes(currencyCode)) {
+                    selectedCurrencies.push(currencyCode);
+                }
+            });
+        } else {
+            selectedCurrencies = [];
+        }
+        
+        updateCurrencyInputs();
+        StorageUtil.saveSettings(
+            selectedCurrencies,
+            selectedChartCurrencies,
+            getCurrentPeriod(),
+            $('#customDays').val()
+        );
+    });
+
+    $(document).on('change', '.dialog-body input[type="checkbox"]', function() {
+        const totalCheckboxes = $('.dialog-body input[type="checkbox"]').length;
+        const checkedCheckboxes = $('.dialog-body input[type="checkbox"]:checked').length;
+        
+        $('#selectAllCurrencies').prop('checked', totalCheckboxes === checkedCheckboxes);
     });
 });

@@ -4,7 +4,9 @@ const STORAGE_KEYS = {
     CHART_CURRENCIES: 'chartCurrencies',
     DISPLAY_PERIOD: 'displayPeriod',
     CUSTOM_PERIOD: 'customPeriod',
-    EXCHANGE_RATES: 'exchangeRates'
+    EXCHANGE_RATES: 'exchangeRates',
+    LAST_INPUT: 'lastInput',
+    LAST_CURRENCY: 'lastCurrency'
 };
 
 const StorageUtil = {
@@ -46,5 +48,20 @@ const StorageUtil = {
                 exchangeRates: [],
             };
         }
+    },
+
+    saveLastInput(currencyCode, amount) {
+        localStorage.setItem(STORAGE_KEYS.LAST_INPUT, JSON.stringify({
+            currencyCode: currencyCode,
+            amount: amount
+        }));
+    },
+
+    loadLastInput() {
+        const saved = localStorage.getItem(STORAGE_KEYS.LAST_INPUT);
+        return saved ? JSON.parse(saved) : {
+            currencyCode: 'USD',
+            amount: 1
+        };
     }
 };

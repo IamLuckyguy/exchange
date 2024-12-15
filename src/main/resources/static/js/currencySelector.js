@@ -4,18 +4,16 @@ function initializeCurrencySelector(exchangeRates, selectedChartCurrencies) {
     container.empty();
 
     exchangeRates.forEach(rate => {
-        if (rate.currencyCode !== 'USD') {
-            const option = $(`
-                <div class="currency-option" data-currency="${rate.currencyCode}">
-                    <span class="currency-flag">${rate.countryFlag}</span>
-                    <span class="currency-code">${rate.currencyCode}</span>
-                </div>
-            `);
-            if (selectedChartCurrencies.has(rate.currencyCode)) {
-                option.addClass('selected');
-            }
-            container.append(option);
+        const option = $(`
+            <div class="currency-option" data-currency="${rate.currencyCode}">
+                <span class="currency-flag">${rate.countryFlag}</span>
+                <span class="currency-code">${rate.currencyCode}</span>
+            </div>
+        `);
+        if (selectedChartCurrencies.has(rate.currencyCode)) {
+            option.addClass('selected');
         }
+        container.append(option);
     });
 }
 

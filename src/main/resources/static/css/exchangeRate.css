@@ -72,7 +72,6 @@
 .input-group .currency-btn {
     position: absolute;
     right: 0;
-    top: 1.8rem;
     background-color: transparent;
     border: none;
     color: #ffffff;
@@ -330,4 +329,36 @@
 
 .currency-flag {
     font-size: 1.2rem;
+}
+
+.select-all-wrapper {
+    padding: 1rem;
+    border-bottom: 1px solid #4a4a4a;
+}
+
+.select-all-wrapper .currency-item {
+    margin: 0;
+}
+
+.base-currency-title {
+    font-size: 0.9rem;
+    color: #00ff88;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: rgba(0, 255, 136, 0.1);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.base-currency-title .currency-flag {
+    font-size: 1.2rem;
+}
+
+#calculatorTitle {
+    font-weight: 1000;
 }

@@ -23,7 +23,10 @@
         <!-- 계산기 카드 -->
         <section class="card calculator-card">
             <header class="card-content">
-                <h2 class="visually-hidden">환율 계산</h2>
+                <div class="base-currency-title">
+                    <span id="baseFlag" class="currency-flag"></span>
+                    <span id="calculatorTitle"></span>
+                </div>
                 <div class="mb-4">
                     <button id="selectCurrencies" class="btn btn-outline">
                         <span>통화 선택 (<span id="selectedCount">5</span>)</span>
@@ -73,6 +76,14 @@
             <div class="dialog-header">
                 <h2>통화 선택</h2>
                 <button id="closeDialog" class="close-btn">&times;</button>
+            </div>
+            <div class="select-all-wrapper">
+                <label class="currency-item">
+                    <input type="checkbox" id="selectAllCurrencies" />
+                    <div class="currency-info">
+                        <span>전체 선택</span>
+                    </div>
+                </label>
             </div>
             <div class="dialog-body">
                 <!-- Currency checkboxes will be dynamically added here -->
