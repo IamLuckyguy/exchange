@@ -1,3 +1,4 @@
+<!-- exchangeRate.html -->
 <!DOCTYPE html>
 <html th:replace="~{layout :: layout(~{::title}, ~{::main}, ~{::meta}, ~{::css}, ~{::scripts})}">
 <head>
@@ -44,24 +45,56 @@
             <div class="card-content">
                 <div class="chart-section">
                     <div class="mb-3">
-                        <h6 class="text-light mb-2">차트에 표시할 통화 선택</h6>
-                        <div id="currencySelector" class="currency-selector">
-                            <!-- 동적으로 추가될 통화 옵션들 -->
+                        <div class="chart-type-selector mb-3">
+                            <h6 class="text-light mb-2">차트 유형</h6>
+                            <div class="btn-group">
+                                <button class="chart-type-btn" data-type="trend">환율 추이 차트</button>
+                                <button class="chart-type-btn" data-type="change">변동률 차트</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 환율 추이 차트 설정 -->
+                        <div id="trendChartSettings" class="chart-settings mb-3">
+                            <div class="currency-pair-selector">
+                                <div class="base-currency-select mb-2">
+                                    <label class="text-light">기준 통화</label>
+                                    <select id="baseCurrency" class="form-select">
+                                        <!-- 동적으로 통화 옵션 추가 -->
+                                    </select>
+                                </div>
+                                <div class="target-currency-select">
+                                    <label class="text-light">비교 통화</label>
+                                    <select id="targetCurrency" class="form-select">
+                                        <!-- 동적으로 통화 옵션 추가 -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- 변동률 차트 설정 -->
+                        <div id="changeChartSettings" class="chart-settings mb-3" style="display: none;">
+                            <h6 class="text-light mb-2">차트에 표시할 통화 선택</h6>
+                            <div id="currencySelector" class="currency-selector">
+                                <!-- 동적으로 추가될 통화 옵션들 -->
+                            </div>
+                        </div>
+
+                        <!-- 기간 선택 (공통) -->
+                        <div class="period-selector mb-3">
+                            <h6 class="text-light mb-2">기간 선택</h6>
+                            <div class="period-buttons">
+                                <button class="period-btn" data-period="7">1주일</button>
+                                <button class="period-btn" data-period="30">1개월</button>
+                                <button class="period-btn" data-period="90">3개월</button>
+                                <button class="period-btn" data-period="180">6개월</button>
+                                <button class="period-btn" data-period="365">1년</button>
+                            </div>
+                            <div class="mt-2">
+                                <input type="number" id="customDays" placeholder="직접 입력 (일)" min="1" max="365">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="chart-controls">
-                        <div class="period-buttons mb-3">
-                            <button class="period-btn" data-period="7">1주일</button>
-                            <button class="period-btn" data-period="30">1개월</button>
-                            <button class="period-btn" data-period="180">6개월</button>
-                            <button class="period-btn" data-period="365">1년</button>
-                            <button class="period-btn" data-period="all">전체</button>
-                        </div>
-                        <div class="custom-period">
-                            <input type="number" id="customDays" placeholder="일수 입력 (2-365)" min="2" max="365">
-                        </div>
-                    </div>
                     <div class="chart-container">
                         <canvas id="exchangeRateChart"></canvas>
                     </div>
@@ -93,12 +126,32 @@
 </main>
 
 <th:block th:fragment="scripts">
-    <script th:src="@{/js/main.js}"></script>
+    <!-- 기본 유틸리티와 모델 -->
+    <script th:src="@{/js/commonLibrary.js}"></script>
+    <script th:src="@{/js/object.js}"></script>
+    <script th:src="@{/js/model.js}"></script>
+
+    <!-- 유틸리티 -->
+    <script th:src="@{/js/helper.js}"></script>
     <script th:src="@{/js/storageUtil.js}"></script>
-    <script th:src="@{/js/loadingUtil.js}"></script>
-    <script th:src="@{/js/currencyUtil.js}"></script>
-    <script th:src="@{/js/currencySelector.js}"></script>
-    <script th:src="@{/js/chartUpdater.js}"></script>
+
+    <!-- API와 서비스 -->
+    <script th:src="@{/js/api.js}"></script>
+    <script th:src="@{/js/service.js}"></script>
+
+    <!-- UI 관련 -->
+    <script th:src="@{/js/dom.js}"></script>
+    <script th:src="@{/js/eventHandler.js}"></script>
+
+    <!-- 초기화 -->
+    <script>
+        $(document).ready(function() {
+            Service.initialize().catch(error => {
+                console.error('Failed to initialize application:', error);
+                CommonLibrary.showAlert('애플리케이션 초기화에 실패했습니다.');
+            });
+        });
+    </script>
 </th:block>
 </body>
 </html>

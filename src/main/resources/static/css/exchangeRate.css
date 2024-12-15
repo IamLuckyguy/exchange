@@ -362,3 +362,51 @@
 #calculatorTitle {
     font-weight: 1000;
 }
+
+.chart-type-selector .btn-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chart-type-btn {
+    padding: 0.5rem 1rem;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    border-radius: 4px;
+}
+
+.chart-type-btn:hover {
+    background-color: #4a4a4a;
+    border-color: #00ff88;
+    color: #00ff88;
+}
+
+.chart-type-btn.active {
+    background-color: #00ff88;
+    border-color: #00ff88;
+    color: #1a1a1a;
+}
+
+.currency-pair-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-select {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+.form-select:focus {
+    border-color: #00ff88;
+    outline: none;
+}
