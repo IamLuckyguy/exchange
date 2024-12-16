@@ -2,6 +2,7 @@ package kr.co.kwt.exchange.adapter.out.persistence;
 
 import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateHistoryRepository;
 import kr.co.kwt.exchange.adapter.out.persistence.repositories.ExchangeRateRepository;
+import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateHistoryResponse;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateRequest;
 import kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse;
 import kr.co.kwt.exchange.application.port.out.LoadExchangeRatePort;
@@ -13,8 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-
-import static kr.co.kwt.exchange.application.port.in.dto.GetExchangeRateResponse.GetExchangeRateHistory;
 
 @Component
 @RequiredArgsConstructor
@@ -64,7 +63,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
     }
 
     private GetExchangeRateResponse doSetHistories(final GetExchangeRateResponse response,
-                                                   final List<GetExchangeRateHistory> histories
+                                                   final List<GetExchangeRateHistoryResponse> histories
     ) {
         response.setExchangeRateHistories(histories);
         return response;
