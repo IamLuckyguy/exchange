@@ -19,7 +19,7 @@ const Service = {
             Dom.initializeUI();
 
             // 마지막 입력값 복원 및 계산
-            const { lastInput } = settings.calculator;
+            const {lastInput} = settings.calculator;
             if (lastInput && lastInput.amount) {
                 this.updateCalculations(lastInput.amount, lastInput.currencyCode);
             } else {
@@ -42,10 +42,10 @@ const Service = {
     },
 
     async updateChart() {
-        const { type, period, baseCurrency, targetCurrency } = Model.currentState.chartSettings;
+        const {type, period, baseCurrency, targetCurrency} = Model.currentState.chartSettings;
         const chartSelectedCurrencies = Model.getChartSelectedCurrencies();  // 수정된 부분
         const ctx = document.getElementById('exchangeRateChart');
-        
+
         try {
             if (type === 'trend') {
                 this.updateTrendChart(ctx, baseCurrency, targetCurrency, period);
@@ -61,7 +61,7 @@ const Service = {
     updateTrendChart(ctx, baseCurrency, targetCurrency, days) {
         const baseRate = Model.getCurrentExchangeRate(baseCurrency);
         const targetRate = Model.getCurrentExchangeRate(targetCurrency);
-        
+
         if (!baseRate || !targetRate) {
             console.error('Could not find exchange rates for selected currencies');
             return;
@@ -82,7 +82,7 @@ const Service = {
         const labels = Helper.prepareHistoricalData(
             Model.getCurrentExchangeRate(Array.from(selectedCurrencies)[0]),
             days
-        ).map(history => Helper.formatDate(history.fetchedAt));
+        ).map(history => Helper.formatDate(history.at));
 
         Dom.renderChart(ctx, {
             labels,
@@ -93,7 +93,7 @@ const Service = {
     updateCalculations(amount, currencyCode) {
         Model.setAmount(amount);
         Model.setSelectedCurrency(currencyCode);
-        
+
         const exchangeRate = Model.getCurrentExchangeRate(currencyCode);
         if (!exchangeRate) return;
 
