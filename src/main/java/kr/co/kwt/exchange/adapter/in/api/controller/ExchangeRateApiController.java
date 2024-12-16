@@ -40,7 +40,7 @@ public class ExchangeRateApiController {
         return exchangeRateApiService.addExchangeRate(addExchangeRateRequest);
     }
 
-    @PostMapping("/exchange-rates/fetch")
+    @PostMapping(value = "/exchange-rates/fetch")
     public Flux<FetchExchangeRateResponse> fetchExchangeRates(
             @RequestBody final FetchExchangeRateRequest fetchExchangeRateRequest
     ) {

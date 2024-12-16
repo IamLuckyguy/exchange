@@ -2,7 +2,10 @@ package kr.co.kwt.exchange.application.port.in.dto;
 
 import kr.co.kwt.exchange.domain.Country;
 import kr.co.kwt.exchange.domain.ExchangeRate;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +20,7 @@ public class GetExchangeRateResponse {
     private String currencyCode;
 
     @Setter
-    private List<GetExchangeRateHistory> exchangeRateHistories;
+    private List<GetExchangeRateHistoryResponse> exchangeRateHistories;
     private Integer unitAmount;
     private Integer decimals;
     private LocalDateTime fetchedAt;
@@ -25,7 +28,7 @@ public class GetExchangeRateResponse {
 
     public static GetExchangeRateResponse of(final ExchangeRate exchangeRate,
                                              final Country country,
-                                             List<GetExchangeRateHistory> getExchangeRateHistories) {
+                                             final List<GetExchangeRateHistoryResponse> getExchangeRateHistories) {
         return new GetExchangeRateResponse(
                 country.getCountryName(),
                 country.getCountryFlag(),
@@ -35,15 +38,5 @@ public class GetExchangeRateResponse {
                 exchangeRate.getDecimals(),
                 exchangeRate.getFetchedAt(),
                 exchangeRate.getUpdatedAt());
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class GetExchangeRateHistory {
-        private double maxRateValue;
-        private double minRateValue;
-        private double avgRateValue;
-        private LocalDateTime fetchedAt;
     }
 }

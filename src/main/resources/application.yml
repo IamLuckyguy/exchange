@@ -5,6 +5,12 @@ spring:
   application:
     name: exchange-rate-service
 
+server:
+  compression:
+    enabled: true          # 압축 활성화
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain # 압축을 허용할 mime-type
+    min-response-size: 1024  # 최소 응답 크기 (1KB 이상일 때 압축)
+
 webclient:
   connect-timeout: 5000
   read-timeout: 5000
