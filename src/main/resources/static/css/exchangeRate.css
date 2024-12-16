@@ -1,3 +1,42 @@
+.visually-hidden {
+    display: none;
+}
+
+.title-container {
+    text-align: center; /* 제목 컨테이너 중앙 정렬 */
+    margin: 1rem 0;
+}
+
+.calculator-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #00ff88;
+    display: inline-block; /* 인라인 블록으로 변경 */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    position: relative; /* 상대 위치 설정 */
+}
+
+.cursor {
+    display: inline-block;
+    width: 2px;
+    height: 2rem;
+    background-color: #00ff88;
+    margin-left: 2px; /* 커서와 텍스트 사이 간격 */
+    position: relative; /* 상대 위치 설정 */
+    top: 4px; /* 커서 위치 미세 조정 */
+    animation: blink 0.7s infinite; /* 애니메이션 수정 */
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
 .container-fluid {
     min-height: 100vh;
     padding: 2rem;
@@ -173,7 +212,6 @@
 .chart-section {
     background-color: #2a2a2a;
     border-radius: 0.5rem;
-    padding: 1.5rem;
     margin-top: 2rem;
 }
 
@@ -268,7 +306,6 @@
     border: 1px solid #4a4a4a;
     color: #ffffff;
     padding: 0.4rem;
-    margin-left: 0.5rem;
     border-radius: 0.25rem;
     cursor: pointer;
 }
@@ -296,8 +333,8 @@
 
 /* 통화 선택 스타일 수정 */
 .currency-selector {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin-bottom: 1rem;
 }
@@ -312,6 +349,18 @@
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid transparent;
+    justify-content: center;
+}
+
+@media (max-width: 500px) {
+    .currency-selector {
+        grid-template-columns: repeat(3, 1fr); /* 500 이하일 때 3개 */
+        gap: 0.5rem;
+    }
+
+    .currency-option {
+        padding: 0.5rem; /* 버튼 크기 조정 */
+    }
 }
 
 .currency-option:hover {

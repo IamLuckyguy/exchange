@@ -7,7 +7,7 @@ const EventHandler = {
         this.setupAmountInputs();
         this.setupCurrencyOptions();
         this.setupCustomPeriodInput();
-        this.setupCurrencyDialog();
+        this.setupCurrencyDialog();        
     },
 
     setupCurrencyDialog() {
@@ -37,18 +37,15 @@ const EventHandler = {
             if (isChecked) {
                 $('.dialog-body input[type="checkbox"]').each(function () {
                     const currencyCode = $(this).val();
-                    if (!Model.getSelectedCurrencies().includes(currencyCode)) {
-                        Model.addSelectedCurrency(currencyCode);
-                    }
+                    Model.addCalculatorCurrency(currencyCode);  // 계산기용으로만 추가
                 });
             } else {
-                Model.currentState.chartSettings.selectedCurrencies = new Set();
+                Model.currentState.calculator.selectedCurrencies = new Set();
             }
-
+    
             Dom.updateSelectedCurrencies();
-            await Service.updateChart();
-            StorageUtil.updateChartSettings({
-                selectedCurrencies: Array.from(Model.getSelectedCurrencies())
+            StorageUtil.updateCalculatorSettings({
+                selectedCurrencies: Model.getCalculatorCurrencies()
             });
         });
 
@@ -56,9 +53,9 @@ const EventHandler = {
         $(document).on('change', '.dialog-body input[type="checkbox"]', function() {
             const currencyCode = $(this).val();
             if (this.checked) {
-                Model.addSelectedCurrency(currencyCode);
+                Model.addCalculatorCurrency(currencyCode);
             } else {
-                Model.removeSelectedCurrency(currencyCode);
+                Model.removeCalculatorCurrency(currencyCode);
             }
 
             // 전체 선택 체크박스 상태 업데이트
@@ -68,9 +65,8 @@ const EventHandler = {
 
             // UI와 저장소 업데이트
             Dom.updateSelectedCurrencies();
-            Service.updateChart();
-            StorageUtil.updateChartSettings({
-                selectedCurrencies: Array.from(Model.getSelectedCurrencies())
+            StorageUtil.updateCalculatorSettings({
+                selectedCurrencies: Model.getCalculatorCurrencies()
             });
         });
     },
@@ -95,23 +91,23 @@ const EventHandler = {
     },
 
     setupChartTypeButtons() {
-        $('.chart-type-btn').on('click', function() {
+        $('.chart-type-btn').on('click', async function () {
             $('.chart-type-btn').removeClass('active');
             $(this).addClass('active');
-            
+
             const type = $(this).data('type');
-            Service.updateChartType(type);
+            await Service.updateChartType(type);
             Dom.updateChartSettingsVisibility();
         });
     },
 
     setupPeriodButtons() {
-        $('.period-btn').on('click', function() {
+        $('.period-btn').on('click', async function () {
             $('.period-btn').removeClass('selected');
             $(this).addClass('selected');
-            
+
             const period = parseInt($(this).data('period'));
-            Service.updatePeriod(period);
+            await Service.updatePeriod(period);
         });
     },
 
@@ -204,23 +200,22 @@ const EventHandler = {
             const currencyCode = $(this).data('currency');
 
             if ($(this).hasClass('selected')) {
-                if (Model.getSelectedCurrencies().length > 1) {
-                    Model.removeSelectedCurrency(currencyCode);
+                if (Model.getChartSelectedCurrencies().length > 1) {
+                    Model.removeChartSelectedCurrency(currencyCode);
                     $(this).removeClass('selected');
                 }
             } else {
-                if (Model.getSelectedCurrencies().length < 8) {
-                    Model.addSelectedCurrency(currencyCode);
+                if (Model.getChartSelectedCurrencies().length < 8) {
+                    Model.addChartSelectedCurrency(currencyCode);
                     $(this).addClass('selected');
                 } else {
                     CommonLibrary.showAlert('최대 8개까지 선택할 수 있습니다.');
                 }
             }
-
-            Dom.updateSelectedCurrencies();
+    
             await Service.updateChart();
             StorageUtil.updateChartSettings({
-                selectedCurrencies: Array.from(Model.getSelectedCurrencies())
+                chartSelectedCurrencies: Model.getChartSelectedCurrencies()
             });
         });
     },
@@ -233,8 +228,8 @@ const EventHandler = {
             let days = parseInt(value);
             if (isNaN(days)) {
                 days = 7;
-            } else if (days < 2) {
-                days = 2;
+            } else if (days < 1) {
+                days = 1;
             } else if (days > 365) {
                 days = 365;
             }
@@ -247,15 +242,6 @@ const EventHandler = {
             });
         });
     },
-
-    allowOnlyNumeric(e) {
-        const value = e.target.value;
-        const sanitizedValue = value.replace(/[^0-9]/g, '');
-        if (sanitizedValue !== value) {
-            e.target.value = sanitizedValue;
-            e.preventDefault();
-        }
-    }
 };
 
 $(document).ready(() => {

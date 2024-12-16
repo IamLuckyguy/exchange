@@ -20,59 +20,50 @@ const CommonLibrary = {
         );
     },
 
-    ensureMinLoadingTime(promise, minTime = 500) {
-        const timeoutPromise = new Promise(resolve => 
-            setTimeout(resolve, minTime)
-        );
-        
-        Dom.showLoading();
-        
-        return Promise.all([promise, timeoutPromise])
-            .then(([result]) => result)
-            .finally(() => Dom.hideLoading());
-    },
+    MIN_LOADING_TIME: 1000,
 
-    createProxySection(section, renderFunction, propertiesToWatch = null) {
-        return new Proxy(section, {
-            set(target, property, value) {
-                target[property] = value;
-                if (!propertiesToWatch || propertiesToWatch.includes(property)) {
-                    renderFunction();
+    toggleLoading(show) {
+        const overlay = document.querySelector('.loading-overlay');
+        if (show) {
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => {
+                overlay.classList.add('visible');
+            });
+        } else {
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                if (!overlay.classList.contains('visible')) {
+                    overlay.style.display = 'none';
                 }
-                return true;
-            }
-        });
-    },
-
-    formatDate(date) {
-        return new Date(date.getTime() + 9 * 60 * 60 * 1000)
-            .toISOString()
-            .split('T')[0];
-    },
-
-    formattedDateFactory(dateDifference) {
-        const today = new Date();
-        return new Date(today.getTime() + (dateDifference * 24 * 60 * 60 * 1000))
-            .toISOString()
-            .split('T')[0];
-    },
-
-    numberWithCommas(value, defaultValue = '') {
-        if (value === '' || value === null || value === undefined) {
-            return defaultValue;
+            }, 300);
         }
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     },
 
-    getErrorMessage(error) {
-        if (!error.responseJSON?.data?.exceptionMessage) {
-            return '오류가 발생했습니다. 관리자에게 문의하세요.';
-        }
+    typeWriter(text, element, delay) {
+        let index = 0;
+        element.innerHTML = ''; // 초기화
+        const cursor = $('.cursor');
         
-        const message = error.responseJSON.data.exceptionMessage;
-        return message.length > 50 
-            ? '오류가 발생했습니다. 관리자에게 문의하세요.'
-            : message;
+        const type = () => {
+            if (index < text.length) {
+                element.innerHTML += text.charAt(index);
+                index++;
+                setTimeout(type, delay);
+            }
+        };
+        type();
+    },
+
+    ensureMinLoadingTime(promise, minLoadingTime = 1000) {
+        const startTime = Date.now();
+        return Promise.all([
+            promise,
+            new Promise(resolve => {
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, minLoadingTime - elapsed);
+                setTimeout(resolve, remaining);
+            })
+        ]).then(([result]) => result);
     },
 
     showAlert(message, duration = 1500) {
@@ -104,21 +95,5 @@ const CommonLibrary = {
                 this.blink(selector, times - 1, speed);
             });
         }
-    },
-
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
-
-    validateNumber(value) {
-        return !isNaN(parseFloat(value)) && isFinite(value);
     },
 };

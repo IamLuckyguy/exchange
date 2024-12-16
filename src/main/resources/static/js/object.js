@@ -5,7 +5,7 @@ const Objects = {
             currencyCode: 'USD',
             amount: 1
         },
-        selectedCurrencies: new Set(['USD', 'KRW', 'JPY']),
+        selectedCurrencies: ['USD', 'KRW', 'JPY'],
         chartType: 'trend',
         baseCurrency: 'USD',
         targetCurrency: 'KRW',
@@ -69,9 +69,10 @@ const Objects = {
     ChartColors: ['#00ff88', '#ff8800', '#ff00ff', '#00ffff', '#ffff00'],
 
     Periods: {
+        DAY: 1,
         WEEK: 7,
         MONTH: 30,
-        HALF_YEAR: 180,
+        QUARTER: 90,
         YEAR: 365
     }
 };

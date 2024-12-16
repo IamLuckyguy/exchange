@@ -146,10 +146,17 @@ const Helper = {
         return period;
     },
 
-    formatDate(date) {
+    formatDate(date, period = 7) {
         const d = new Date(date);
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
+        
+        if (period === 1) {
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+        
         return `${month}.${day}`;
     }
 }; 

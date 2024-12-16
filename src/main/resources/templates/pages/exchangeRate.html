@@ -18,7 +18,10 @@
 </head>
 <body>
 <main class="container-fluid">
-    <h1 class="visually-hidden">실시간 환율 계산기</h1>
+    <div class="title-container">
+        <h1 class="visually-hidden">실시간 환율 계산기</h1>
+        <div class="calculator-title" id="animatedTitle"></div><span class="cursor"></span>
+    </div>
 
     <div class="calculator-wrapper">
         <!-- 계산기 카드 -->
@@ -83,10 +86,10 @@
                         <div class="period-selector mb-3">
                             <h6 class="text-light mb-2">기간 선택</h6>
                             <div class="period-buttons">
+                                <button class="period-btn" data-period="1">1일</button>
                                 <button class="period-btn" data-period="7">1주일</button>
                                 <button class="period-btn" data-period="30">1개월</button>
                                 <button class="period-btn" data-period="90">3개월</button>
-                                <button class="period-btn" data-period="180">6개월</button>
                                 <button class="period-btn" data-period="365">1년</button>
                             </div>
                             <div class="mt-2">

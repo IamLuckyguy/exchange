@@ -2,7 +2,9 @@
 const Service = {
     async initialize() {
         try {
-            Dom.showLoading();
+            // 로딩
+            CommonLibrary.toggleLoading(true);
+            await CommonLibrary.ensureMinLoadingTime(1000);
 
             // 환율 데이터 로드
             const rates = await Api.fetchExchangeRates();
@@ -34,19 +36,21 @@ const Service = {
             CommonLibrary.showAlert("환율 정보를 가져오는 데 실패했습니다.");
             throw error;
         } finally {
-            Dom.hideLoading();
+            CommonLibrary.toggleLoading(false);
+            CommonLibrary.typeWriter("실시간 환율 계산기", document.getElementById('animatedTitle'), 100);
         }
     },
 
     async updateChart() {
-        const { type, period, baseCurrency, targetCurrency, selectedCurrencies } = Model.currentState.chartSettings;
+        const { type, period, baseCurrency, targetCurrency } = Model.currentState.chartSettings;
+        const chartSelectedCurrencies = Model.getChartSelectedCurrencies();  // 수정된 부분
         const ctx = document.getElementById('exchangeRateChart');
         
         try {
             if (type === 'trend') {
                 this.updateTrendChart(ctx, baseCurrency, targetCurrency, period);
             } else {
-                this.updateChangeRateChart(ctx, selectedCurrencies, period);
+                this.updateChangeRateChart(ctx, chartSelectedCurrencies, period);  // 수정된 부분
             }
         } catch (error) {
             console.error('Failed to update chart:', error);

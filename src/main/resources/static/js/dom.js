@@ -62,9 +62,9 @@ const Dom = {
     initializeCurrencySelector() {
         const container = $('#currencySelector');
         container.empty();
-
+    
         Model.exchangeRates.forEach(rate => {
-            const isSelected = Model.currentState.chartSettings.selectedCurrencies.has(rate.currencyCode);
+            const isSelected = Model.getChartSelectedCurrencies().includes(rate.currencyCode);
             container.append(`
                 <div class="currency-option ${isSelected ? 'selected' : ''}" 
                      data-currency="${rate.currencyCode}">
@@ -73,8 +73,6 @@ const Dom = {
                 </div>
             `);
         });
-
-        this.updateSelectedCurrencies();
     },
 
     initializePeriodButtons() {
@@ -97,32 +95,32 @@ const Dom = {
     updateCurrencyDialog() {
         const dialogBody = $('.dialog-body');
         dialogBody.empty();
-
+    
         Model.exchangeRates.forEach(exchangeRate => {
             dialogBody.append(`
-            <label class="currency-item">
-                <input type="checkbox" 
-                       value="${exchangeRate.currencyCode}" 
-                       ${Model.getSelectedCurrencies().includes(exchangeRate.currencyCode) ? 'checked' : ''} />
-                <div class="currency-info">
-                    <span>
-                        <span class="currency-flag">${exchangeRate.countryFlag}</span>
-                        <span class="currency-code">${exchangeRate.currencyCode}</span>
-                    </span>
-                    <span class="currency-name">${exchangeRate.countryName}</span>
-                </div>
-            </label>
-        `);
+                <label class="currency-item">
+                    <input type="checkbox" 
+                           value="${exchangeRate.currencyCode}" 
+                           ${Model.getCalculatorCurrencies().includes(exchangeRate.currencyCode) ? 'checked' : ''} />
+                    <div class="currency-info">
+                        <span>
+                            <span class="currency-flag">${exchangeRate.countryFlag}</span>
+                            <span class="currency-code">${exchangeRate.currencyCode}</span>
+                        </span>
+                        <span class="currency-name">${exchangeRate.countryName}</span>
+                    </div>
+                </label>
+            `);
         });
     },
 
     updateSelectedCurrencies() {
-        const selectedCurrencies = Model.getSelectedCurrencies();
+        const selectedCurrencies = Model.getCalculatorCurrencies();
         $('#selectedCount').text(selectedCurrencies.length);
-
+    
         // 모든 input-group 숨김
         $('.input-group').hide();
-
+    
         // 선택된 통화만 보이게 처리
         selectedCurrencies.forEach(code => {
             $(`#${code}`).closest('.input-group').show();
@@ -154,14 +152,6 @@ const Dom = {
 
         const formattedAmount = Helper.formatNumber(amount, exchangeRate.decimals, 'floor');
         $(`#${code}`).val(formattedAmount);
-    },
-
-    showLoading() {
-        $('#loadingSpinner').show();
-    },
-
-    hideLoading() {
-        $('#loadingSpinner').hide();
     },
 
     attachEventListeners() {

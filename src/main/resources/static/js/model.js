@@ -4,12 +4,15 @@ const Model = {
     currentState: {
         selectedCurrency: 'USD',
         currentAmount: 1,
+        calculator: {
+            selectedCurrencies: ['USD', 'KRW', 'JPY', 'CNY']
+        },
         chartSettings: {
             type: 'trend',
             period: 7,
             baseCurrency: 'USD',
             targetCurrency: 'KRW',
-            selectedCurrencies: new Set(['USD', 'KRW', 'JPY'])
+            chartSelectedCurrencies: ['USD', 'KRW']
         }
     },
 
@@ -19,15 +22,13 @@ const Model = {
 
     updateChartSettings(settings) {
         try {
-            if (settings.selectedCurrencies) {
-                const currencies = Array.isArray(settings.selectedCurrencies)
-                    ? settings.selectedCurrencies
-                    : Object.values(settings.selectedCurrencies);
+            // 차트용 선택된 통화 설정
+            if (settings.chartSelectedCurrencies) {
+                const chartCurrencies = Array.isArray(settings.chartSelectedCurrencies)
+                    ? settings.chartSelectedCurrencies
+                    : Object.values(settings.chartSelectedCurrencies);
 
-                settings = {
-                    ...settings,
-                    selectedCurrencies: new Set(currencies)
-                };
+                settings.chartSelectedCurrencies = chartCurrencies;
             }
 
             this.currentState.chartSettings = {
@@ -37,24 +38,59 @@ const Model = {
         } catch (error) {
             CommonLibrary.showAlert('차트 설정 업데이트에 실패했습니다. (EM_001)');
             // 기본값으로 복구
-            this.currentState.chartSettings.selectedCurrencies = new Set(['USD', 'KRW', 'JPY']);
+            this.currentState.chartSettings.type = 'trend';
+            this.currentState.chartSettings.chartSelectedCurrencies = ['USD', 'KRW'];
+        }
+    },
+
+    // 계산기용 메서드
+    getCalculatorCurrencies() {
+        return this.currentState.calculator.selectedCurrencies || ['USD', 'KRW', 'JPY'];
+    },
+
+    addCalculatorCurrency(currencyCode) {
+        if (!this.currentState.calculator.selectedCurrencies) {
+            this.currentState.calculator.selectedCurrencies = [];
+        }
+        if (!this.currentState.calculator.selectedCurrencies.includes(currencyCode)) {
+            this.currentState.calculator.selectedCurrencies.push(currencyCode);
+        }
+    },
+
+    removeCalculatorCurrency(currencyCode) {
+        if (this.currentState.calculator.selectedCurrencies) {
+            const index = this.currentState.calculator.selectedCurrencies.indexOf(currencyCode);
+            if (index > -1) {
+                this.currentState.calculator.selectedCurrencies.splice(index, 1);
+            }
+        }
+    },
+
+    // 차트용 메서드
+    getChartSelectedCurrencies() {
+        return this.currentState.chartSettings.chartSelectedCurrencies || ['USD', 'KRW'];
+    },
+
+    addChartSelectedCurrency(currencyCode) {
+        if (!this.currentState.chartSettings.chartSelectedCurrencies) {
+            this.currentState.chartSettings.chartSelectedCurrencies = [];
+        }
+        if (!this.currentState.chartSettings.chartSelectedCurrencies.includes(currencyCode)) {
+            this.currentState.chartSettings.chartSelectedCurrencies.push(currencyCode);
+        }
+    },
+
+    removeChartSelectedCurrency(currencyCode) {
+        if (this.currentState.chartSettings.chartSelectedCurrencies) {
+            const index = this.currentState.chartSettings.chartSelectedCurrencies.indexOf(currencyCode);
+            if (index > -1) {
+                this.currentState.chartSettings.chartSelectedCurrencies.splice(index, 1);
+            }
         }
     },
 
     getCurrentExchangeRate(currencyCode) {
         return this.exchangeRates.find(rate => rate.currencyCode === currencyCode);
-    },
-
-    getSelectedCurrencies() {
-        return Array.from(this.currentState.chartSettings.selectedCurrencies);
-    },
-
-    addSelectedCurrency(currencyCode) {
-        this.currentState.chartSettings.selectedCurrencies.add(currencyCode);
-    },
-
-    removeSelectedCurrency(currencyCode) {
-        this.currentState.chartSettings.selectedCurrencies.delete(currencyCode);
     },
 
     setAmount(amount) {
