@@ -1,5 +1,6 @@
 package kr.co.kwt.exchange.application.port.in.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class GetExchangeRateHistoryResponse {
 
-    private String countryName;
+    @JsonProperty("rv")
     private double rateValue;
-    private LocalDateTime updatedAt;
+    @JsonProperty("at")
+    private LocalDateTime fetchedAt;
 }

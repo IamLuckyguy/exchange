@@ -7,7 +7,7 @@ const Helper = {
 
         // 올림, 반올림, 내림 처리
         let rounded;
-        switch(roundingType.toLowerCase()) {
+        switch (roundingType.toLowerCase()) {
             case 'ceil':
                 rounded = Math.ceil(number * multiplier) / multiplier;
                 break;
@@ -53,12 +53,12 @@ const Helper = {
         const validTargetHistories = targetHistories.slice(0, minLength);
 
         return {
-            labels: validBaseHistories.map(history => this.formatDate(history.fetchedAt)),
+            labels: validBaseHistories.map(history => this.formatDate(history.at)),
             datasets: [{
                 label: `${baseRate.currencyCode}/${targetRate.currencyCode}`,
                 data: validBaseHistories.map((history, index) => {
-                    const baseValue = parseFloat(history.maxRateValue || history.rateValue);
-                    const targetValue = parseFloat(validTargetHistories[index].maxRateValue || validTargetHistories[index].rateValue);
+                    const baseValue = parseFloat(history.rv);
+                    const targetValue = parseFloat(validTargetHistories[index].rv);
                     return baseValue / targetValue;
                 }),
                 borderColor: Objects.ChartColors[0],
@@ -73,12 +73,12 @@ const Helper = {
         const histories = this.prepareHistoricalData(exchangeRate, days);
         if (!histories.length) return null;
 
-        const baseValue = parseFloat(histories[0].maxRateValue || histories[0].rateValue);
-        
+        const baseValue = parseFloat(histories[0].rv);
+
         return {
             label: `${currencyCode} 변화율 (%)`,
             data: histories.map(history => {
-                const currentValue = parseFloat(history.maxRateValue || history.rateValue);
+                const currentValue = parseFloat(history.rv);
                 return ((currentValue - baseValue) / baseValue * 100).toFixed(2);
             }),
             borderColor: Objects.ChartColors[index % Objects.ChartColors.length],
@@ -97,7 +97,7 @@ const Helper = {
         // 최근 days일 만큼의 데이터만 사용
         return exchangeRate.exchangeRateHistories
             .slice(0, days)
-            .sort((a, b) => new Date(a.fetchedAt) - new Date(b.fetchedAt));
+            .sort((a, b) => new Date(a.at) - new Date(b.at));
     },
 
     calculateExchangeAmount(amount, baseRate, targetRate) {
@@ -137,7 +137,7 @@ const Helper = {
         }
 
         const lastHistory = exchangeRate.exchangeRateHistories[exchangeRate.exchangeRateHistories.length - 1];
-        return parseFloat(lastHistory.maxRateValue || lastHistory.rateValue);
+        return parseFloat(lastHistory.rv);
     },
 
     validatePeriod(period) {
@@ -150,13 +150,13 @@ const Helper = {
         const d = new Date(date);
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
-        
+
         if (period === 1) {
             const hours = String(d.getHours()).padStart(2, '0');
             const minutes = String(d.getMinutes()).padStart(2, '0');
             return `${hours}:${minutes}`;
         }
-        
+
         return `${month}.${day}`;
     }
 }; 
