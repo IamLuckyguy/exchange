@@ -112,6 +112,19 @@ const EventHandler = {
     },
 
     setupAmountInputs() {
+        let previousValue = '';
+
+        $(document).on('focus', '.currency-input', function() {
+            previousValue = $(this).val();
+            $(this).val('');
+        });
+
+        $(document).on('blur', '.currency-input', function() {
+            if ($(this).val() === '') {
+                $(this).val(previousValue);
+            }
+        });
+
         $(document).on('keypress', '.currency-input', function(e) {
             if (!/[\d.]/.test(e.key)) {
                 e.preventDefault();
