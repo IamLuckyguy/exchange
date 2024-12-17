@@ -1,6 +1,17 @@
 // model.js
 const Model = {
-    exchangeRates: [],
+    exchangeRates: [
+        {
+            countryFlag: '',
+            countryName: '',
+            currencyCode: '',
+            decimals: '',
+            exchangeRateHistories: [],
+            fetchedAt: '',
+            unitAmount: '',
+            updatedAt: '',
+        }
+    ],
     currentState: {
         selectedCurrency: 'USD',
         currentAmount: 1,
