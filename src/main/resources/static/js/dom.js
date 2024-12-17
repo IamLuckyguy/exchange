@@ -16,15 +16,15 @@ const Dom = {
         baseCurrencySelect.empty();
         targetCurrencySelect.empty();
 
-        Model.exchangeRates.forEach(rate => {
-            baseCurrencySelect.append(`<option value="${rate.currencyCode}" 
-            ${rate.currencyCode === Model.currentState.chartSettings.baseCurrency ? 'selected' : ''}>
-            ${rate.countryFlag} ${rate.currencyCode}
+        Model.exchangeRates.forEach(exchangeRate => {
+            baseCurrencySelect.append(`<option value="${exchangeRate.currencyCode}" 
+            ${exchangeRate.currencyCode === Model.currentState.chartSettings.baseCurrency ? 'selected' : ''}>
+            ${exchangeRate.countryFlag} ${exchangeRate.currencyCode}
         </option>`);
 
-            targetCurrencySelect.append(`<option value="${rate.currencyCode}"
-            ${rate.currencyCode === Model.currentState.chartSettings.targetCurrency ? 'selected' : ''}>
-            ${rate.countryFlag} ${rate.currencyCode}
+            targetCurrencySelect.append(`<option value="${exchangeRate.currencyCode}"
+            ${exchangeRate.currencyCode === Model.currentState.chartSettings.targetCurrency ? 'selected' : ''}>
+            ${exchangeRate.countryFlag} ${exchangeRate.currencyCode}
         </option>`);
         });
     },
@@ -38,9 +38,11 @@ const Dom = {
             container.append(`
             <div class="input-group" style="display: none;">
                 <input type="text"
-                       id="${exchangeRate.currencyCode}"
-                       class="currency-input"
-                       value="0" />
+                    inputmode="decimal"
+                    pattern="[0-9]*"
+                    id="${exchangeRate.currencyCode}"
+                    class="currency-input"
+                    value="0" />
                 <button class="currency-btn">
                     <span class="currency-flag">${exchangeRate.countryFlag}</span>
                     <span class="currency-code">${exchangeRate.currencyCode}</span>
