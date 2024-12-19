@@ -9,7 +9,7 @@ const DEFAULT_SETTINGS = {
             currencyCode: 'USD',
             amount: 1
         },
-        selectedCurrencies: ['USD', 'KRW', 'JPY', 'CNY']
+        selectedCurrencies: ['USD', 'KRW', 'JPY', 'CNY', 'EUR']
     },
     chart: {
         type: 'trend',
@@ -92,9 +92,11 @@ const StorageUtil = {
      * @param {Object} updates - 업데이트할 계산기 설정
      */
     updateCalculatorSettings(updates) {
+        const currentSettings = this.loadSettings().calculator;
         const updated = {
+            ...currentSettings,
             ...updates,
-            selectedCurrencies: Array.from(updates.selectedCurrencies || [])
+            selectedCurrencies: updates.selectedCurrencies || currentSettings.selectedCurrencies || DEFAULT_SETTINGS.calculator.selectedCurrencies
         };
         return this.updateSection('calculator', updated);
     },
