@@ -1,6 +1,5 @@
 package kr.co.kwt.exchange.adapter.in.api.service;
 
-import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateRequest;
 import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiClient;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiResponse;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -54,10 +54,10 @@ public class ExchangeRateApiService {
     /**
      * 환율 정보 패치
      */
-    public Flux<FetchExchangeRateResponse> fetchExchangeRates(final FetchExchangeRateRequest request) {
+    public Flux<FetchExchangeRateResponse> fetchExchangeRates(final LocalDate fetchDate) {
         return openApiClient
-                .call(new NaverOpenApiRequest(request.getFetchDateTime()))
-                .map(response -> mapToUpdateRateValueRequest(response, request.getFetchDateTime()))
+                .call(new NaverOpenApiRequest(fetchDate.atStartOfDay()))
+                .map(response -> mapToUpdateRateValueRequest(response, fetchDate.atStartOfDay()))
                 .collectList()
                 .filter(list -> !list.isEmpty())
                 .flatMapMany(updateExchangeRateUseCase::bulkUpdateRateValues)
