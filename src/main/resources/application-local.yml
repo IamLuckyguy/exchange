@@ -33,7 +33,7 @@ spring:
 
 kms:
   apiKey: 368c479be0c2bc61c14d46e73fcfb93bb0a6fdd707616edccaa068a9b166e1ee
-  url: https://kms-dev.kwt.co.kr/api/secrets
+  url: https://kms.kwt.co.kr/api/secrets
   secretKey: exchange_nodeport
 
 openapi:
