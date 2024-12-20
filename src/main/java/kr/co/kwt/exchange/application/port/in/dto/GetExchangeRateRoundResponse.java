@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetExchangeRateDegreeCountResponse {
+public class GetExchangeRateRoundResponse {
 
     private int degreeCount;
     private LocalDateTime fetchedAt;

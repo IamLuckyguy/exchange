@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class NaverOpenApiDegreeCountBody {
+public class NaverOpenApiRoundBody {
 
     @JsonProperty("result")
-    private NaverOpenApiDegreeCountResponse result;
+    private NaverOpenApiRoundResponse result;
 
 }

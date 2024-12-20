@@ -1,9 +1,9 @@
 package kr.co.kwt.exchange.adapter.in.openapi.naver;
 
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiClient;
-import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiDegreeCountResponse;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiRequest;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiResponse;
+import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiRoundResponse;
 import kr.co.kwt.exchange.config.webclient.WebClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +34,13 @@ public class NaverOpenApiClient implements OpenApiClient {
     }
 
     @Override
-    public Mono<OpenApiDegreeCountResponse> getDegreeCount() {
+    public Mono<OpenApiRoundResponse> getRound() {
         return webClientService
                 .getWebClient(apiUrlProvider.getDegreeApiUrl(), new NaverOpenApiWebClientCustomizer())
                 .get()
                 .retrieve()
-                .bodyToMono(NaverOpenApiDegreeCountBody.class)
-                .map(NaverOpenApiDegreeCountBody::getResult)
-                .cast(OpenApiDegreeCountResponse.class);
+                .bodyToMono(NaverOpenApiRoundBody.class)
+                .map(NaverOpenApiRoundBody::getResult)
+                .cast(OpenApiRoundResponse.class);
     }
 }

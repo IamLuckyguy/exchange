@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddExchangeRateDegreeCountResponse {
+public class AddExchangeRateRoundResponse {
 
     private int degreeCount;
 }

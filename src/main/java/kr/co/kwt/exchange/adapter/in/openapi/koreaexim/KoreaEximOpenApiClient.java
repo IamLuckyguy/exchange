@@ -29,7 +29,7 @@ public class KoreaEximOpenApiClient implements OpenApiClient {
     }
 
     @Override
-    public Mono<OpenApiDegreeCountResponse> getDegreeCount() {
+    public Mono<OpenApiRoundResponse> getRound() {
         return null;
     }
 }

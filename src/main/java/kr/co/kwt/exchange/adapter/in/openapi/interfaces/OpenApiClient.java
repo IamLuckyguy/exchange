@@ -7,6 +7,6 @@ public interface OpenApiClient {
 
     Flux<OpenApiResponse> call(OpenApiRequest openApiRequest);
 
-    Mono<OpenApiDegreeCountResponse> getDegreeCount();
+    Mono<OpenApiRoundResponse> getRound();
 
 }

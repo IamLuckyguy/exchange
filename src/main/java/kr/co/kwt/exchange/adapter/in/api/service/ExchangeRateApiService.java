@@ -2,8 +2,8 @@ package kr.co.kwt.exchange.adapter.in.api.service;
 
 import kr.co.kwt.exchange.adapter.in.api.dto.FetchExchangeRateResponse;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiClient;
-import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiDegreeCountResponse;
 import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiResponse;
+import kr.co.kwt.exchange.adapter.in.openapi.interfaces.OpenApiRoundResponse;
 import kr.co.kwt.exchange.adapter.in.openapi.naver.NaverOpenApiRequest;
 import kr.co.kwt.exchange.application.port.in.*;
 import kr.co.kwt.exchange.application.port.in.dto.*;
@@ -26,9 +26,9 @@ public class ExchangeRateApiService {
     private final UpdateRateValueUseCase updateExchangeRateUseCase;
     private final GetExchangeRateUseCase getExchangeRateUseCase;
     private final AddExchangeRateUseCase addExchangeRateUseCase;
-    private final GetExchangeRateDegreeCountUseCase getExchangeRateDegreeCountUseCase;
-    private final AddExchangeRateDegreeCountUseCase addExchangeRateDegreeCountUseCase;
-    private final UpdateDegreeCountUseCase updateDegreeCountUseCase;
+    private final GetExchangeRateRoundUseCase getExchangeRateRoundUseCase;
+    private final AddExchangeRateRoundUseCase addExchangeRateRoundUseCase;
+    private final UpdateExchangeRoundUseCase updateExchangeRoundUseCase;
     private final OpenApiClient openApiClient;
 
     /**
@@ -60,8 +60,8 @@ public class ExchangeRateApiService {
     @Transactional
     public Flux<FetchExchangeRateResponse> fetchExchangeRates(final LocalDate fetchDate) {
         return openApiClient
-                .getDegreeCount()
-                .flatMapMany(degreeCountResponse -> handleDegreeCount(degreeCountResponse, fetchDate))
+                .getRound()
+                .flatMapMany(degreeCountResponse -> handleExchangeRateRound(degreeCountResponse, fetchDate))
                 .flatMap(openApiClient -> openApiClient.call(new NaverOpenApiRequest()))
                 .map(response -> mapToUpdateRateValueRequest(response, fetchDate.atStartOfDay()))
                 .collectList()
@@ -70,33 +70,32 @@ public class ExchangeRateApiService {
                 .map(this::mapToFetchExchangeRateResponse);
     }
 
-    private Mono<OpenApiClient> handleDegreeCount(final OpenApiDegreeCountResponse response,
-                                                  final LocalDate fetchDate) {
+    private Mono<OpenApiClient> handleExchangeRateRound(final OpenApiRoundResponse response,
+                                                        final LocalDate fetchDate
+    ) {
         return validateDegreeCount(fetchDate)
-                .flatMap(queryResponse -> updateDegreeCount(queryResponse, response))
+                .flatMap(queryResponse -> doUpdateRound(queryResponse, response))
                 .then(Mono.just(openApiClient));
     }
 
-    private Mono<Integer> updateDegreeCount(final GetExchangeRateDegreeCountResponse queryResponse,
-                                            final OpenApiDegreeCountResponse response) {
-        return doUpdateDegreeCount(queryResponse, response);
+    private Mono<GetExchangeRateRoundResponse> validateDegreeCount(final LocalDate fetchDate) {
+        return getExchangeRateRoundUseCase
+                .getExchangeRateRound()
+                .switchIfEmpty(Mono.just(new GetExchangeRateRoundResponse(1, fetchDate.atStartOfDay())));
     }
 
-    private Mono<GetExchangeRateDegreeCountResponse> validateDegreeCount(final LocalDate fetchDate) {
-        return getExchangeRateDegreeCountUseCase
-                .getExchangeRateDegreeCount()
-                .switchIfEmpty(Mono.just(new GetExchangeRateDegreeCountResponse(1, fetchDate.atStartOfDay())));
-    }
-
-    private Mono<Integer> doUpdateDegreeCount(final GetExchangeRateDegreeCountResponse queryResponse,
-                                              final OpenApiDegreeCountResponse openApiDegreeCountResponse
+    private Mono<Integer> doUpdateRound(final GetExchangeRateRoundResponse queryResponse,
+                                        final OpenApiRoundResponse openApiRoundResponse
     ) {
-        if (openApiDegreeCountResponse.getDegreeCount() > queryResponse.getDegreeCount()) {
-            return updateDegreeCountUseCase.updateDegreeCount(openApiDegreeCountResponse.getDegreeCount());
-        }
-        else {
-            return Mono.empty();
-        }
+        return doUpdateDegreeCount(queryResponse, openApiRoundResponse);
+    }
+
+    private Mono<Integer> doUpdateDegreeCount(final GetExchangeRateRoundResponse queryResponse,
+                                              final OpenApiRoundResponse openApiRoundResponse
+    ) {
+        return openApiRoundResponse.getRound() > queryResponse.getDegreeCount()
+                ? updateExchangeRoundUseCase.updateDegreeCount(openApiRoundResponse.getRound())
+                : Mono.empty();
     }
 
     private UpdateRateValueRequest mapToUpdateRateValueRequest(final OpenApiResponse openApiResponse,
@@ -108,7 +107,9 @@ public class ExchangeRateApiService {
                 fetchedAt);
     }
 
-    private FetchExchangeRateResponse mapToFetchExchangeRateResponse(final UpdateRateValueResponse updateRateValueResponse) {
+    private FetchExchangeRateResponse mapToFetchExchangeRateResponse(
+            final UpdateRateValueResponse updateRateValueResponse
+    ) {
         return new FetchExchangeRateResponse(updateRateValueResponse.getCurrencyCode(),
                 updateRateValueResponse.getRateValue(),
                 updateRateValueResponse.getUpdateTime());
