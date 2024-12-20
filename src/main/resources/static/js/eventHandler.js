@@ -8,6 +8,7 @@ const EventHandler = {
         this.setupCurrencyOptions();
         this.setupCustomPeriodInput();
         this.setupCurrencyDialog();        
+        this.setupCurrencyDragAndDrop();
     },
 
     setupCurrencyDialog() {
@@ -222,7 +223,7 @@ const EventHandler = {
                     Model.addChartSelectedCurrency(currencyCode);
                     $(this).addClass('selected');
                 } else {
-                    CommonLibrary.showAlert('최대 8개까지 선택할 수 있습니다.');
+                    CommonLibrary.showAlert('최대 8개 까지 선택할 수 있습니다.');
                 }
             }
     
@@ -255,6 +256,31 @@ const EventHandler = {
             });
         });
     },
+
+    setupCurrencyDragAndDrop() {
+        const container = $('#currencyInputs');
+        
+        container.sortable({
+            handle: '.drag-handle',
+            axis: 'y',
+            cursor: 'move',
+            update: function(event, ui) {
+                const newOrder = [];
+                $('.input-group:visible').each(function() {
+                    const currencyCode = $(this).find('input').attr('id');
+                    newOrder.push(currencyCode);
+                });
+                
+                // 모델 업데이트
+                Model.currentState.calculator.selectedCurrencies = newOrder;
+                
+                // 로컬 스토리지 업데이트
+                StorageUtil.updateCalculatorSettings({
+                    selectedCurrencies: newOrder
+                });
+            }
+        });
+    }
 };
 
 $(document).ready(() => {
