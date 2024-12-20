@@ -33,22 +33,48 @@ const Dom = {
         const container = $('#currencyInputs');
         container.empty();
 
-        // 모든 통화에 대한 input-group 생성
-        Model.exchangeRates.forEach(exchangeRate => {
+        // 선택된 통화 순서대로 처리
+        const selectedCurrencies = Model.getCalculatorCurrencies();
+        selectedCurrencies.forEach(currencyCode => {
+            const exchangeRate = Model.exchangeRates.find(rate => rate.currencyCode === currencyCode);
+            if (!exchangeRate) return;
+
             container.append(`
-            <div class="input-group" style="display: none;">
-                <input type="text"
-                    inputmode="decimal"
-                    pattern="[0-9]*"
-                    id="${exchangeRate.currencyCode}"
-                    class="currency-input"
-                    value="0" />
-                <button class="currency-btn">
-                    <span class="currency-flag">${exchangeRate.countryFlag}</span>
-                    <span class="currency-code">${exchangeRate.currencyCode}</span>
-                </button>
-            </div>
-        `);
+                <div class="input-group">
+                    <div class="drag-handle" title="순서 변경"></div>
+                    <div class="currency-info">
+                        <span class="currency-flag">${exchangeRate.countryFlag}</span>
+                        <span class="currency-code">${exchangeRate.currencyCode}</span>
+                    </div>
+                    <input type="text"
+                        inputmode="decimal"
+                        pattern="[0-9]*"
+                        id="${exchangeRate.currencyCode}"
+                        class="currency-input"
+                        value="0" />
+                </div>
+            `);
+        });
+
+        // 나머지 통화들도 숨김 상태로 추가
+        Model.exchangeRates.forEach(exchangeRate => {
+            if (!selectedCurrencies.includes(exchangeRate.currencyCode)) {
+                container.append(`
+                    <div class="input-group" style="display: none;">
+                        <div class="drag-handle" title="순서 변경"></div>
+                        <div class="currency-info">
+                            <span class="currency-flag">${exchangeRate.countryFlag}</span>
+                            <span class="currency-code">${exchangeRate.currencyCode}</span>
+                        </div>
+                        <input type="text"
+                            inputmode="decimal"
+                            pattern="[0-9]*"
+                            id="${exchangeRate.currencyCode}"
+                            class="currency-input"
+                            value="0" />
+                    </div>
+                `);
+            }
         });
 
         // 초기 선택된 통화들만 보이게 처리
@@ -149,11 +175,28 @@ const Dom = {
         $('#baseFlag').text(exchangeRate.countryFlag);
     },
 
-    updateCurrencyInput(code, amount, exchangeRate) {
-        if (!code || !amount || !exchangeRate) return;
-
-        const formattedAmount = Helper.formatNumber(amount, exchangeRate.decimals, 'floor');
-        $(`#${code}`).val(formattedAmount);
+    updateCurrencyInput(currencyCode, amount, exchangeRate) {
+        const inputGroup = $(`#${currencyCode}`).closest('.input-group');
+        if (!inputGroup.length) {
+            const newInputGroup = `
+                <div class="input-group">
+                    <div class="drag-handle" title="순서 변경"></div>
+                    <div class="currency-info">
+                        <span class="currency-flag">${exchangeRate.countryFlag}</span>
+                        <span class="currency-code">${currencyCode}</span>
+                    </div>
+                    <input type="text" 
+                           id="${currencyCode}"
+                           class="currency-input" 
+                           value="${Helper.formatNumber(amount, exchangeRate.decimals)}"
+                           data-decimals="${exchangeRate.decimals}">
+                </div>
+            `;
+            $('#currencyInputs').append(newInputGroup);
+        } else {
+            const input = inputGroup.find('input');
+            input.val(Helper.formatNumber(amount, exchangeRate.decimals));
+        }
     },
 
     attachEventListeners() {

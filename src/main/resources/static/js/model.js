@@ -16,7 +16,7 @@ const Model = {
         selectedCurrency: 'USD',
         currentAmount: 1,
         calculator: {
-            selectedCurrencies: ['USD', 'KRW', 'JPY', 'CNY']
+            selectedCurrencies: ['USD', 'KRW', 'JPY', 'CNY', 'EUR']
         },
         chartSettings: {
             type: 'trend',
@@ -56,24 +56,44 @@ const Model = {
 
     // 계산기용 메서드
     getCalculatorCurrencies() {
-        return this.currentState.calculator.selectedCurrencies || ['USD', 'KRW', 'JPY'];
+        if (!this.currentState.calculator.selectedCurrencies) {
+            this.currentState.calculator.selectedCurrencies = ['USD', 'KRW', 'JPY', 'CNY', 'EUR'];
+        }
+        // 항상 배열로 반환되도록 보장
+        return Array.isArray(this.currentState.calculator.selectedCurrencies) 
+            ? this.currentState.calculator.selectedCurrencies 
+            : ['USD', 'KRW', 'JPY', 'CNY', 'EUR'];
     },
 
     addCalculatorCurrency(currencyCode) {
-        if (!this.currentState.calculator.selectedCurrencies) {
+        // selectedCurrencies가 없거나 배열이 아닌 경우 초기화
+        if (!this.currentState.calculator.selectedCurrencies || !Array.isArray(this.currentState.calculator.selectedCurrencies)) {
             this.currentState.calculator.selectedCurrencies = [];
         }
+        
         if (!this.currentState.calculator.selectedCurrencies.includes(currencyCode)) {
             this.currentState.calculator.selectedCurrencies.push(currencyCode);
+            // 변경사항을 즉시 저장
+            StorageUtil.updateCalculatorSettings({
+                selectedCurrencies: this.currentState.calculator.selectedCurrencies
+            });
         }
     },
 
     removeCalculatorCurrency(currencyCode) {
-        if (this.currentState.calculator.selectedCurrencies) {
-            const index = this.currentState.calculator.selectedCurrencies.indexOf(currencyCode);
-            if (index > -1) {
-                this.currentState.calculator.selectedCurrencies.splice(index, 1);
-            }
+        // selectedCurrencies가 없거나 배열이 아닌 경우 초기화
+        if (!this.currentState.calculator.selectedCurrencies || !Array.isArray(this.currentState.calculator.selectedCurrencies)) {
+            this.currentState.calculator.selectedCurrencies = [];
+            return;
+        }
+        
+        const index = this.currentState.calculator.selectedCurrencies.indexOf(currencyCode);
+        if (index > -1) {
+            this.currentState.calculator.selectedCurrencies.splice(index, 1);
+            // 변경사항을 즉시 저장
+            StorageUtil.updateCalculatorSettings({
+                selectedCurrencies: this.currentState.calculator.selectedCurrencies
+            });
         }
     },
 

@@ -89,6 +89,12 @@
     position: relative;
     width: 100%;
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 0.25rem;
+    flex-wrap: nowrap; /* 줄바꿈 방지 */
 }
 
 .input-group label {
@@ -97,26 +103,33 @@
     font-size: 0.875rem;
 }
 
-.input-group input {
-    width: 100%;
-    padding: 0.75rem 0 0.75rem 1rem;
-    background-color: #3a3a3a;
-    border: 1px solid #4a4a4a;
-    border-radius: 0.25rem;
-    color: #ffffff;
-    font-size: 1rem;
-    box-sizing: border-box;
-}
-
-.input-group .currency-btn {
-    position: absolute;
-    right: 0;
+.currency-btn {
+    width: 100px;
     background-color: transparent;
     border: none;
     color: #ffffff;
     padding: 0.75rem 1rem;
     font-size: 1rem;
-    cursor: pointer;
+    cursor: move;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-right: 1px solid #4a4a4a;
+}
+
+.currency-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    text-align: right;
+    min-width: 0; /* flex-basis 오버플로우 방지 */
+}
+
+.currency-input:focus {
+    outline: none;
 }
 
 .dialog {
@@ -506,4 +519,36 @@
     background-color: #00ff88;
     border-color: #00ff88;
     color: #1a1a1a;
+}
+
+.drag-handle {
+    padding: 0.75rem 0.5rem;
+    cursor: move;
+    display: flex;
+    align-items: center;
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.drag-handle::before {
+    content: "⋮⋮⋮"; /* 6개의 점으로 드래그 핸들 표시 */
+    letter-spacing: -10px;
+}
+
+.currency-info {
+    display: flex;
+    align-items: center;
+    width: 120px; /* 고정 너비 설정 */
+    padding: 0.75rem 1rem;
+    border-right: 1px solid #4a4a4a;
+}
+
+.currency-flag {
+    margin-right: 0.5rem;
+}
+
+@media (max-width: 576px) {
+    .currency-info {
+        width: 100px; /* 모바일에서는 좀 더 좁게 */
+    }
 }

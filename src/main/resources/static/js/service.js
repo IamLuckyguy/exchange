@@ -13,7 +13,15 @@ const Service = {
 
             // 저장된 설정 로드
             const settings = StorageUtil.loadSettings();
+            
+            // 차트 설정 업데이트
             Model.updateChartSettings(settings.chart);
+            
+            // 계산기 설정 업데이트 추가
+            Model.currentState.calculator = {
+                ...Model.currentState.calculator,
+                ...settings.calculator
+            };
 
             // UI 초기화
             Dom.initializeUI();
