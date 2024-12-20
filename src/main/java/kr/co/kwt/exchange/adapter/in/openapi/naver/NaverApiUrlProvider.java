@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 @ConditionalOnProperty(name = "openapi.naver.enable", havingValue = "true")
@@ -13,16 +14,30 @@ public class NaverApiUrlProvider implements ApiUrlProvider {
 
     @Value("${openapi.naver.base-url}")
     private String baseUrl;
+    @Value("${openapi.naver.path.exchange-rate}")
+    private String exchangeRatePath;
+    @Value("${openapi.naver.path.degree-count}")
+    private String degreeCountPath;
 
 
     @Override
-    public String getUrl(final LocalDate fetchDate) {
-        return getBaseUrl();
+    public String getApiUrl() {
+        return baseUrl + exchangeRatePath;
     }
 
     @Override
-    public String getPath(LocalDate fetchDate) {
-        return "";
+    public String getApiUrl(LocalDateTime localDateTime) {
+        return getApiUrl();
+    }
+
+    @Override
+    public String getDegreeApiUrl() {
+        return baseUrl + degreeCountPath;
+    }
+
+    @Override
+    public String getApiUrl(LocalDate fetchDate) {
+        return getApiUrl();
     }
 
     @Override

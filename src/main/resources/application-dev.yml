@@ -31,7 +31,10 @@ openapi:
   naver:
     enable: true
     key:
-    base-url: https://m.stock.naver.com/front-api/marketIndex/exchange/new
+    base-url: https://m.stock.naver.com
+    path:
+      exchange-rate: /front-api/marketIndex/exchange/new
+      degree-count: /front-api/marketIndex/productDetail?category=exchange&reutersCode=FX_USDKRW
 
 logging:
   level:

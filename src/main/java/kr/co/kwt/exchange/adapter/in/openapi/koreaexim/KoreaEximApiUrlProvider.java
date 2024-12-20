@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 @ConditionalOnProperty(name = "openapi.koreaexim.enable", havingValue = "true")
@@ -19,12 +20,22 @@ public class KoreaEximApiUrlProvider implements ApiUrlProvider {
 
 
     @Override
-    public String getUrl(final LocalDate fetchDate) {
-        return getBaseUrl();
+    public String getApiUrl() {
+        return "";
     }
 
     @Override
-    public String getPath(LocalDate fetchDate) {
+    public String getApiUrl(LocalDateTime localDateTime) {
+        return "";
+    }
+
+    @Override
+    public String getDegreeApiUrl() {
+        return "";
+    }
+
+    @Override
+    public String getApiUrl(LocalDate fetchDate) {
         return String.format("/site/program/financial/exchangeJSON?authkey=%s&searchdate=%s&data=AP01",
                 apiKey, fetchDate);
     }
