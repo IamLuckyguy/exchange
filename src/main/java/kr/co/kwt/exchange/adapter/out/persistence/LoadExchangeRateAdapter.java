@@ -44,7 +44,7 @@ class LoadExchangeRateAdapter implements LoadExchangeRatePort {
     @Override
     public Flux<GetExchangeRateResponse> getExchangeRates() {
         return exchangeRateRepository
-                .getExchangeRates()
+                .getMajorExchangeRates()
                 .flatMap(this::setHistories);
     }
 
