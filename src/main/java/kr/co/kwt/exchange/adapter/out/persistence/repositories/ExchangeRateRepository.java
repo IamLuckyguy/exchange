@@ -24,8 +24,22 @@ public interface ExchangeRateRepository extends ReactiveCrudRepository<ExchangeR
             " er.fetched_at as fetched_at," +
             " er.updated_at as updated_at " +
             " from exchange_rates as er" +
+            " join country as c on er.currency_code = c.currency_code" +
+            " where er.currency_code in ('KRW', 'JPY', 'USD', 'CNY', 'EUR')")
+    Flux<GetExchangeRateResponse> getMajorExchangeRates();
+
+    @Query("select c.country_name as country_name," +
+            " c.country_flag as country_flag," +
+            " er.currency_code as currency_code," +
+            " er.rate_value as rate_value," +
+            " er.unit_amount as unit_amount," +
+            " er.decimals as decimals," +
+            " er.fetched_at as fetched_at," +
+            " er.updated_at as updated_at " +
+            " from exchange_rates as er" +
             " join country as c on er.currency_code = c.currency_code")
     Flux<GetExchangeRateResponse> getExchangeRates();
+
 
     @Query("select c.country_name as country_name," +
             " c.country_flag as country_flag," +
