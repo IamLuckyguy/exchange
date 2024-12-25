@@ -40,7 +40,8 @@ public class WebClientLoggingFilter {
                     request.method(),
                     request.url(),
                     request.url().getQuery());
-        } else {
+        }
+        else {
             log.info("[{}] Request: {} {}",
                     requestId,
                     request.method(),

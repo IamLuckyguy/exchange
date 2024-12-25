@@ -13,4 +13,8 @@ public class KmsDbSecretValue {
     private String database;
     private String username;
     private String password;
+
+    public String getJdbcUrl() {
+        return "jdbc:mysql://" + host + ":" + port + "/" + database;
+    }
 }
