@@ -5,6 +5,7 @@ import kr.co.kwt.exchange.application.port.dto.GetExchangeResult;
 import kr.co.kwt.exchange.application.port.in.GetExchangeUseCase;
 import kr.co.kwt.exchange.application.port.out.LoadExchangePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class GetExchangeService implements GetExchangeUseCase {
     }
 
     @Override
-    public List<GetExchangeByRoundResult> getExchangesByRound(final int start, final int end) {
+    public List<GetExchangeByRoundResult> getExchangesByRound(@NonNull final Integer start, @NonNull final Integer end) {
         return loadExchangePort.getExchangesByRound(start, end);
     }
 }

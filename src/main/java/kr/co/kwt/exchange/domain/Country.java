@@ -31,4 +31,13 @@ public enum Country {
                 .findAny()
                 .orElseThrow(InvalidCurrencyCodeException::new);
     }
+
+    public static boolean isValidCurrencyCode(@NonNull final String currencyCode) {
+        try {
+            of(currencyCode);
+            return true;
+        } catch (InvalidCurrencyCodeException e) {
+            return false;
+        }
+    }
 }

@@ -4,7 +4,7 @@ import kr.co.kwt.exchange.domain.RoundRate;
 
 import java.util.List;
 
-public interface SaveRoundRatePort {
+public interface LoadRoundRatePort {
 
-    void bulkInsert(List<RoundRate> roundRates);
+    List<RoundRate> findLastRoundRates();
 }

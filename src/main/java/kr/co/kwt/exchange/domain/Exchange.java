@@ -10,7 +10,6 @@ import org.springframework.lang.NonNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -92,12 +91,12 @@ public class Exchange {
                 .build();
     }
 
-    public void updateDecimals(final int decimals) {
-        this.decimals = decimals;
+    public void updateDecimals(@NonNull final Integer newDecimals) {
+        decimals = newDecimals;
     }
 
-    public void updateUnit(final int unit) {
-        this.unit = unit;
+    public void updateUnit(@NonNull final Integer newUnit) {
+        unit = newUnit;
     }
 
     public void addAllYearlyClosingRates(@NonNull final List<ClosingRate> addedYearlyClosingRates) {
@@ -106,53 +105,5 @@ public class Exchange {
 
     public void addYearlyClosingRate(@NonNull final ClosingRate yearlyClosingRate) {
         yearlyClosingRates.add(yearlyClosingRate);
-    }
-
-    public void fetch(
-            @NonNull final Double fetchRate,
-            @NonNull final Integer fetchRound,
-            @NonNull final String trend,
-            @NonNull final Double trendRate,
-            @NonNull final String liveStatus,
-            @NonNull final String marketStatus,
-            @NonNull final LocalDateTime fetchedAt
-    ) {
-        if (fetchRound == FIRST_ROUND) {
-            getLastRoundRate().ifPresent(roundRate -> fetchClosingRate(roundRate.getRoundRate(), fetchedAt));
-        }
-
-        fetchRoundRate(fetchRate, fetchRound, trend, trendRate, liveStatus, marketStatus, fetchedAt);
-    }
-
-    private void fetchRoundRate(
-            @NonNull final Double fetchRate,
-            @NonNull final Integer fetchRound,
-            @NonNull final String trend,
-            @NonNull final Double trendRate,
-            @NonNull final String liveStatus,
-            @NonNull final String marketStatus,
-            @NonNull final LocalDateTime fetchedAt
-    ) {
-        dailyRoundRates.add(RoundRate.withoutId(
-                currencyCode,
-                fetchRound,
-                fetchRate,
-                trend,
-                trendRate,
-                liveStatus,
-                marketStatus,
-                fetchedAt));
-    }
-
-    private void fetchClosingRate(
-            @NonNull final Double lastRoundRate,
-            @NonNull final LocalDateTime fetchedAt
-    ) {
-        yearlyClosingRates.add(ClosingRate.withoutId(lastRoundRate, fetchedAt));
-    }
-
-    public Optional<RoundRate> getLastRoundRate() {
-        return Optional.ofNullable(dailyRoundRates
-                .get(dailyRoundRates.size() - 1));
     }
 }

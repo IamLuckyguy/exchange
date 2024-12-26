@@ -41,26 +41,35 @@ public class ExchangeApiController {
 
     @GetMapping("/exchange-rates/round")
     public List<GetExchangeByRoundResult> getExchangeRates(
-            @RequestParam(name = "start") final int start,
-            @RequestParam(name = "end", required = false) final int end
+            @RequestParam(name = "start") final Integer start,
+            @RequestParam(
+                    name = "end",
+                    required = false,
+                    defaultValue = "#{T(java.lang.Integer).MAX_VALUE}"
+            ) final Integer end
     ) {
         return getExchangeUseCase.getExchangesByRound(start, end);
     }
 
     @PostMapping("/exchange-rates/fetch")
-    public void fetchExchanges(
+    public String fetchExchanges(
             @RequestParam(
                     name = "fetchDate",
                     required = false,
                     defaultValue = "#{T(java.time.LocalDateTime).now().toString()}"
             ) final LocalDateTime fetchDateTime
     ) {
-        int remoteRound = openApiClient.getRound().getRound();
-        int localRound = getRoundUseCase.getRound().getRound();
+        int remoteRound = openApiClient
+                .getRound()
+                .getRound();
+
+        int localRound = getRoundUseCase
+                .getRound()
+                .getRound();
 
         // 회차 비교
         if (remoteRound == localRound) {
-            return;
+            return "이미 패치되었습니다.";
         }
 
         // 환율 정보 조회
@@ -76,6 +85,7 @@ public class ExchangeApiController {
                 fetchRates);
 
         fetchExchangeUseCase.fetchExchange(fetchExchangeCommand);
+        return "패치에 성공하였습니다.";
     }
 
     @GetMapping("/round")

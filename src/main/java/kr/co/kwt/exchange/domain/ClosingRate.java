@@ -27,8 +27,13 @@ public class ClosingRate {
     private double closingRate;
     private LocalDateTime fetchedAt;
 
-    public static ClosingRate withoutId(@NonNull Double closingRate, @NonNull LocalDateTime fetchedAt) {
+    public static ClosingRate withoutId(
+            @NonNull final String currencyCode,
+            @NonNull final Double closingRate,
+            @NonNull final LocalDateTime fetchedAt
+    ) {
         return ClosingRate.builder()
+                .currencyCode(currencyCode)
                 .closingRate(closingRate)
                 .fetchedAt(fetchedAt)
                 .build();

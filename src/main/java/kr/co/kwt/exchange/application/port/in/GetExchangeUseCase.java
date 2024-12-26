@@ -9,6 +9,6 @@ public interface GetExchangeUseCase {
 
     List<GetExchangeResult> getExchanges();
 
-    List<GetExchangeByRoundResult> getExchangesByRound(int start, int end);
+    List<GetExchangeByRoundResult> getExchangesByRound(Integer start, Integer end);
 
 }
