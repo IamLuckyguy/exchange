@@ -1,5 +1,6 @@
 package kr.co.kwt.exchange.application.port.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import kr.co.kwt.exchange.domain.ClosingRate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class GetClosingRateResult {
 
+    @JsonProperty("rv")
     private double closingRate;
+    @JsonProperty("at")
     private LocalDateTime fetchedAt;
 
     public static GetClosingRateResult of(final ClosingRate closingRate) {

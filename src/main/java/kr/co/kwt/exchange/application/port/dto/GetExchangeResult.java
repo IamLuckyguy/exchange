@@ -1,5 +1,6 @@
 package kr.co.kwt.exchange.application.port.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import kr.co.kwt.exchange.domain.Exchange;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,9 @@ public class GetExchangeResult {
     private String countryName;
     private String countryFlag;
     private String currencyCode;
+    @JsonProperty("exchangeRateRealTime")
     private List<GetRoundRateResult> dailyRoundRates;
+    @JsonProperty("exchangeRateHistories")
     private List<GetClosingRateResult> yearlyClosingRates;
     private Integer decimal;
     private Integer unit;
