@@ -13,6 +13,7 @@ spring:
         order_inserts: true
         order_updates: true
         dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
 
 kms:
   apiKey: bf3a6d5c2cdebbaf1585f23b2759e8897b6e4c83ffb8cd4ef0a7bd64a4ec97d6

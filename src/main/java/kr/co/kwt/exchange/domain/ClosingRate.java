@@ -22,6 +22,7 @@ public class ClosingRate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "closing_rate_id")
     private Long id;
+
     @Column(name = "currency_code")
     private String currencyCode;
     private double closingRate;

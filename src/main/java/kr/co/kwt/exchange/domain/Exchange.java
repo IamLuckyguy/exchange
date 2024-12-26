@@ -35,10 +35,12 @@ public class Exchange {
     @Enumerated(EnumType.STRING)
     private Country country;
 
+    @OrderBy("fetchedAt DESC")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "currency_code", referencedColumnName = "currencyCode")
     private List<RoundRate> dailyRoundRates;
 
+    @OrderBy("fetchedAt DESC")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "currency_code", referencedColumnName = "currencyCode")
     private List<ClosingRate> yearlyClosingRates;
