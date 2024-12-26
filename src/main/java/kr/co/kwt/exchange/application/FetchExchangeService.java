@@ -1,6 +1,7 @@
 package kr.co.kwt.exchange.application;
 
 import kr.co.kwt.exchange.application.port.dto.FetchExchangeCommand;
+import kr.co.kwt.exchange.application.port.dto.FetchExchangeResult;
 import kr.co.kwt.exchange.application.port.in.FetchExchangeUseCase;
 import kr.co.kwt.exchange.application.port.out.LoadRoundPort;
 import kr.co.kwt.exchange.application.port.out.LoadRoundRatePort;
@@ -33,7 +34,10 @@ public class FetchExchangeService implements FetchExchangeUseCase {
 
     @Override
     @Transactional
-    public void fetchExchange(@NonNull final FetchExchangeCommand command) {
+    public FetchExchangeResult fetchExchange(@NonNull final FetchExchangeCommand command) {
+        long fetchedRoundRateCount = 0;
+        long fetchedClosingRateCount = 0;
+
         Map<String, FetchRate> currrencyCodeFetchRateMap =
                 getCurrrencyCodeFetchRateMap(command);
 
@@ -43,14 +47,15 @@ public class FetchExchangeService implements FetchExchangeUseCase {
                 .orElseThrow(ServerException::new);
 
         if (command.getRound() == 1) { // 최초 회차시 종가 데이터 추가
-            ClosingRateBulkInsert();
+            fetchedClosingRateCount = ClosingRateBulkInsert();
         }
 
         round.updateRound(command.getRound());
-        RoundRateBulkInsert(command, currrencyCodeFetchRateMap);
+        fetchedRoundRateCount = RoundRateBulkInsert(command, currrencyCodeFetchRateMap);
+        return new FetchExchangeResult(fetchedRoundRateCount, fetchedClosingRateCount);
     }
 
-    private void RoundRateBulkInsert(
+    private long RoundRateBulkInsert(
             @NonNull final FetchExchangeCommand command,
             @NonNull final Map<String, FetchRate> currrencyCodeFetchRateMap
     ) {
@@ -60,10 +65,10 @@ public class FetchExchangeService implements FetchExchangeUseCase {
                 .map(fetchRate -> fetchRate.toRoundRate(command.getRound(), command.getFetchedAt()))
                 .toList();
 
-        saveRoundRatePort.bulkInsert(roundRates);
+        return saveRoundRatePort.bulkInsert(roundRates);
     }
 
-    private void ClosingRateBulkInsert() {
+    private long ClosingRateBulkInsert() {
         List<ClosingRate> closingRateList = loadRoundRatePort
                 .findLastRoundRates()
                 .stream()
@@ -73,7 +78,7 @@ public class FetchExchangeService implements FetchExchangeUseCase {
                         roundRate.getFetchedAt()))
                 .toList();
 
-        saveClosingRatePort.bulkInsert(closingRateList);
+        return saveClosingRatePort.bulkInsert(closingRateList);
     }
 
     private Map<String, FetchRate> getCurrrencyCodeFetchRateMap(

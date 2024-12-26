@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface SaveClosingRatePort {
 
-    void bulkInsert(List<ClosingRate> lastRoundRates);
+    long bulkInsert(List<ClosingRate> lastRoundRates);
 }

@@ -13,9 +13,9 @@ import java.util.List;
 public class SaveRoundRateAdapter implements SaveRoundRatePort {
 
     private final RoundRateRepository roundRateRepository;
-    
+
     @Override
-    public void bulkInsert(List<RoundRate> roundRates) {
-        roundRateRepository.bulkInsert(roundRates);
+    public long bulkInsert(List<RoundRate> roundRates) {
+        return roundRateRepository.bulkInsert(roundRates);
     }
 }

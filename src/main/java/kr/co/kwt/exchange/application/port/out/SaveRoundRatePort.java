@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface SaveRoundRatePort {
 
-    void bulkInsert(List<RoundRate> roundRates);
+    long bulkInsert(List<RoundRate> roundRates);
 }

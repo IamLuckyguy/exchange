@@ -15,8 +15,8 @@ public class SaveClosingRateAdapter implements SaveClosingRatePort {
     private final ClosingRateRepository closingRateRepository;
 
     @Override
-    public void bulkInsert(List<ClosingRate> lastRoundRates) {
-        closingRateRepository.bulkInsert(lastRoundRates);
+    public long bulkInsert(List<ClosingRate> lastRoundRates) {
+        return closingRateRepository.bulkInsert(lastRoundRates);
     }
 
 }

@@ -8,12 +8,15 @@ import kr.co.kwt.exchange.application.port.out.LoadExchangePort;
 import kr.co.kwt.exchange.openapi.interfaces.OpenApiClient;
 import kr.co.kwt.exchange.openapi.interfaces.OpenApiGetExchangeResult;
 import kr.co.kwt.exchange.openapi.naver.NaverOpenApiRequest;
+import kr.co.kwt.exchange.utils.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static kr.co.kwt.exchange.utils.Response.ok;
 
 @Slf4j
 @RestController
@@ -30,17 +33,17 @@ public class ExchangeApiController {
     private final OpenApiClient openApiClient;
 
     @GetMapping("/exchange-rates")
-    public List<GetExchangeResult> getExchanges() {
-        return loadExchangePort.getExchanges();
+    public Response<List<GetExchangeResult>> getExchanges() {
+        return ok(loadExchangePort.getExchanges());
     }
 
     @PostMapping("/exchange-rates")
-    public void addExchange(@RequestBody final AddExchangeCommand command) {
-        addExchangeUseCase.addExchange(command);
+    public Response<Long> addExchange(@RequestBody final AddExchangeCommand command) {
+        return ok(addExchangeUseCase.addExchange(command));
     }
 
     @GetMapping("/exchange-rates/round")
-    public List<GetExchangeByRoundResult> getExchangeRates(
+    public Response<List<GetExchangeByRoundResult>> getExchangeRates(
             @RequestParam(name = "start") final Integer start,
             @RequestParam(
                     name = "end",
@@ -48,11 +51,11 @@ public class ExchangeApiController {
                     defaultValue = "#{T(java.lang.Integer).MAX_VALUE}"
             ) final Integer end
     ) {
-        return getExchangeUseCase.getExchangesByRound(start, end);
+        return ok(getExchangeUseCase.getExchangesByRound(start, end));
     }
 
     @PostMapping("/exchange-rates/fetch")
-    public String fetchExchanges(
+    public Response<FetchExchangeResult> fetchExchanges(
             @RequestParam(
                     name = "fetchDate",
                     required = false,
@@ -69,7 +72,7 @@ public class ExchangeApiController {
 
         // 회차 비교
         if (remoteRound == localRound) {
-            return "이미 패치되었습니다.";
+            return Response.ok(new FetchExchangeResult(), "이미 패치가 되었습니다.");
         }
 
         // 환율 정보 조회
@@ -84,17 +87,16 @@ public class ExchangeApiController {
                 fetchDateTime,
                 fetchRates);
 
-        fetchExchangeUseCase.fetchExchange(fetchExchangeCommand);
-        return "패치에 성공하였습니다.";
+        return ok(fetchExchangeUseCase.fetchExchange(fetchExchangeCommand), "패치 성공!");
     }
 
     @GetMapping("/round")
-    public GetRoundResult getFinalRound() {
-        return getRoundUseCase.getRound();
+    public Response<GetRoundResult> getFinalRound() {
+        return ok(getRoundUseCase.getRound());
     }
 
     @PostMapping("/round")
-    public Integer addRound() {
-        return addRoundUseCase.addRound();
+    public Response<Integer> addRound() {
+        return ok(addRoundUseCase.addRound());
     }
 }
