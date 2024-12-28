@@ -1,5 +1,7 @@
 package kr.co.kwt.exchange.application.port.dto;
 
+import kr.co.kwt.exchange.domain.Exchange;
+import kr.co.kwt.exchange.domain.Round;
 import kr.co.kwt.exchange.domain.RoundRate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,9 +30,9 @@ public class FetchExchangeCommand {
         private String marketStatus;
         private String liveStatus;
 
-        public RoundRate toRoundRate(int round, LocalDateTime fetchedAt) {
+        public RoundRate toRoundRate(Exchange exchange, Round round, LocalDateTime fetchedAt) {
             return RoundRate.withoutId(
-                    currencyCode,
+                    exchange,
                     round,
                     roundRate,
                     trend,

@@ -18,7 +18,7 @@ public class LoadRoundAdapter implements LoadRoundPort {
     @Override
     public Optional<Round> findLastRound() {
         return roundRepository
-                .findAll()
+                .getLastRound()
                 .stream()
                 .findAny();
     }

@@ -25,7 +25,7 @@ public class RoundRateQueryDslRepositoryImpl implements RoundRateQueryDslReposit
                 "INSERT INTO round_rates(" +
                         "currency_code, " +
                         "round_rate, " +
-                        "round, " +
+                        "round_id, " +
                         "trend, " +
                         "trend_rate, " +
                         "live_status, " +
@@ -33,9 +33,9 @@ public class RoundRateQueryDslRepositoryImpl implements RoundRateQueryDslReposit
                         "fetched_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 
         int[][] updatedCounts = jdbcTemplate.batchUpdate(query, roundRates, 100, ((ps, argument) -> {
-            ps.setString(1, argument.getCurrencyCode());
+            ps.setString(1, argument.getExchange().getCurrencyCode());
             ps.setDouble(2, argument.getRoundRate());
-            ps.setInt(3, argument.getRound());
+            ps.setLong(3, argument.getRound().getId());
             ps.setString(4, argument.getTrend());
             ps.setDouble(5, argument.getTrendRate());
             ps.setString(6, argument.getLiveStatus());
@@ -53,11 +53,11 @@ public class RoundRateQueryDslRepositoryImpl implements RoundRateQueryDslReposit
     public List<RoundRate> findLastRoundRates() {
         return queryFactory
                 .selectFrom(roundRate1)
-                .where(roundRate1.id.eq(
+                .where(roundRate1.id.in(
                         queryFactory
                                 .select(roundRate1.id.max())
                                 .from(roundRate1)
-                                .groupBy(roundRate1.currencyCode)))
+                                .groupBy(roundRate1.exchange.currencyCode)))
                 .fetch();
     }
 }

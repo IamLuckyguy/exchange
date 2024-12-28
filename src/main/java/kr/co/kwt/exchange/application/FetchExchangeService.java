@@ -3,14 +3,8 @@ package kr.co.kwt.exchange.application;
 import kr.co.kwt.exchange.application.port.dto.FetchExchangeCommand;
 import kr.co.kwt.exchange.application.port.dto.FetchExchangeResult;
 import kr.co.kwt.exchange.application.port.in.FetchExchangeUseCase;
-import kr.co.kwt.exchange.application.port.out.LoadRoundPort;
-import kr.co.kwt.exchange.application.port.out.LoadRoundRatePort;
-import kr.co.kwt.exchange.application.port.out.SaveClosingRatePort;
-import kr.co.kwt.exchange.application.port.out.SaveRoundRatePort;
-import kr.co.kwt.exchange.domain.ClosingRate;
-import kr.co.kwt.exchange.domain.Country;
-import kr.co.kwt.exchange.domain.Round;
-import kr.co.kwt.exchange.domain.RoundRate;
+import kr.co.kwt.exchange.application.port.out.*;
+import kr.co.kwt.exchange.domain.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -21,73 +15,98 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static kr.co.kwt.exchange.application.port.dto.FetchExchangeCommand.FetchRate;
-
 @Service
 @RequiredArgsConstructor
 public class FetchExchangeService implements FetchExchangeUseCase {
 
     private final LoadRoundPort loadRoundPort;
+    private final SaveRoundPort saveRoundPort;
+    private final LoadExchangePort loadExchangePort;
+    private final LoadRoundRatePort loadRoundRatePort;
     private final SaveRoundRatePort saveRoundRatePort;
     private final SaveClosingRatePort saveClosingRatePort;
-    private final LoadRoundRatePort loadRoundRatePort;
 
+    /**
+     * 하나은행 기준 날짜마다 대한 환율가를 고시한다.
+     * 이때, 각각의 고시를 회차별로 나누어 구분한다.
+     * 그리고 마지막 회차에 대한 환율가격을 종가라고 한다.
+     */
     @Override
     @Transactional
     public FetchExchangeResult fetchExchange(@NonNull final FetchExchangeCommand command) {
-        long fetchedRoundRateCount = 0;
-        long fetchedClosingRateCount = 0;
+        long updatedRoundRatesCount = 0;
+        long updatedClosingRatesCount = 0;
 
-        Map<String, FetchRate> currrencyCodeFetchRateMap =
-                getCurrrencyCodeFetchRateMap(command);
+        Map<String, Exchange> currencyCodeToExchangeMap = getCurrencyCodeToExchangeMap();
+        Round round = getLastRound();
 
-        // 현재 회차 조회
-        Round round = loadRoundPort
-                .findLastRound()
-                .orElseThrow(ServerException::new);
-
-        if (command.getRound() == 1) { // 최초 회차시 종가 데이터 추가
-            fetchedClosingRateCount = ClosingRateBulkInsert();
+        if (command.getRound().equals(round.getRound())) {
+            throw new AlreadyFetchedExeption();
+        }
+        else if (command.getRound() > round.getRound()) { // 다음날 신규 회차
+            round = doUpdateRound(command, round);
+            updatedRoundRatesCount = saveRoundRatePort.bulkInsert(
+                    getRoundRateList(
+                            command,
+                            currencyCodeToExchangeMap,
+                            round));
+        }
+        else {
+            round = doUpdateRound(command, round);
+            updatedClosingRatesCount = saveClosingRatePort.bulkInsert(getClosingRateList());
+            updatedRoundRatesCount = saveRoundRatePort.bulkInsert(
+                    getRoundRateList(
+                            command,
+                            currencyCodeToExchangeMap,
+                            round));
         }
 
-        round.updateRound(command.getRound());
-        fetchedRoundRateCount = RoundRateBulkInsert(command, currrencyCodeFetchRateMap);
-        return new FetchExchangeResult(fetchedRoundRateCount, fetchedClosingRateCount);
+        return new FetchExchangeResult(updatedRoundRatesCount, updatedClosingRatesCount, round.getRound());
     }
 
-    private long RoundRateBulkInsert(
+    private Round getLastRound() {
+        return loadRoundPort
+                .findLastRound()
+                .orElseThrow(ServerException::new);
+    }
+
+    private Round doUpdateRound(
             @NonNull final FetchExchangeCommand command,
-            @NonNull final Map<String, FetchRate> currrencyCodeFetchRateMap
+            @NonNull final Round round
     ) {
-        List<RoundRate> roundRates = currrencyCodeFetchRateMap
-                .values()
-                .stream()
-                .map(fetchRate -> fetchRate.toRoundRate(command.getRound(), command.getFetchedAt()))
-                .toList();
-
-        return saveRoundRatePort.bulkInsert(roundRates);
+        return saveRoundPort.saveAndFlush(round.updateRound(command.getRound(), command.getFetchedAt()));
     }
 
-    private long ClosingRateBulkInsert() {
-        List<ClosingRate> closingRateList = loadRoundRatePort
-                .findLastRoundRates()
-                .stream()
-                .map(roundRate -> ClosingRate.withoutId(
-                        roundRate.getCurrencyCode(),
-                        roundRate.getRoundRate(),
-                        roundRate.getFetchedAt()))
-                .toList();
-
-        return saveClosingRatePort.bulkInsert(closingRateList);
-    }
-
-    private Map<String, FetchRate> getCurrrencyCodeFetchRateMap(
-            @NonNull final FetchExchangeCommand fetchExchangeCommand
+    private List<RoundRate> getRoundRateList(
+            @NonNull final FetchExchangeCommand fetchExchangeCommand,
+            @NonNull final Map<String, Exchange> currecyCodeToExchangeMap,
+            @NonNull final Round round
     ) {
         return fetchExchangeCommand
                 .getFetchRates()
                 .stream()
                 .filter(fetchRate -> Country.isValidCurrencyCode(fetchRate.getCurrencyCode()))
-                .collect(Collectors.toMap(FetchRate::getCurrencyCode, Function.identity()));
+                .map(fetchRate -> fetchRate.toRoundRate(
+                        currecyCodeToExchangeMap.get(fetchRate.getCurrencyCode()),
+                        round,
+                        fetchExchangeCommand.getFetchedAt()))
+                .toList();
+    }
+
+    private List<ClosingRate> getClosingRateList() {
+        return loadRoundRatePort
+                .findLastRoundRates()
+                .stream()
+                .map(roundRate -> ClosingRate.withoutId(
+                        roundRate.getExchange(),
+                        roundRate.getRoundRate(),
+                        roundRate.getFetchedAt()))
+                .toList();
+    }
+
+    private Map<String, Exchange> getCurrencyCodeToExchangeMap() {
+        return loadExchangePort.findAll()
+                .stream()
+                .collect(Collectors.toMap(Exchange::getCurrencyCode, Function.identity()));
     }
 }

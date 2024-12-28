@@ -10,6 +10,7 @@ import org.springframework.lang.NonNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -36,13 +37,11 @@ public class Exchange {
     private Country country;
 
     @OrderBy("fetchedAt DESC")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "currency_code", referencedColumnName = "currencyCode")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "exchange")
     private List<RoundRate> dailyRoundRates;
 
     @OrderBy("fetchedAt DESC")
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "currency_code", referencedColumnName = "currencyCode")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "exchange")
     private List<ClosingRate> yearlyClosingRates;
 
     private int unit;
@@ -101,11 +100,37 @@ public class Exchange {
         unit = newUnit;
     }
 
-    public void addAllYearlyClosingRates(@NonNull final List<ClosingRate> addedYearlyClosingRates) {
-        yearlyClosingRates.addAll(addedYearlyClosingRates);
+    public void addAllDailyRoundRates(@NonNull final List<RoundRate> newDailyRoundRates) {
+        dailyRoundRates = newDailyRoundRates;
+    }
+
+    public void addAllYearlyClosingRates(@NonNull final List<ClosingRate> newYearlyClosingRates) {
+        yearlyClosingRates = newYearlyClosingRates;
     }
 
     public void addYearlyClosingRate(@NonNull final ClosingRate yearlyClosingRate) {
         yearlyClosingRates.add(yearlyClosingRate);
+    }
+
+    public void fetch(@NonNull final RoundRate roundRate) {
+        getLastRoundRate()
+                .ifPresentOrElse(lastRoundRate -> {
+                    if (lastRoundRate.getRound().getRound() < roundRate.getRound().getRound()) {
+                        dailyRoundRates.add(roundRate);
+                    }
+                    else {
+                        yearlyClosingRates.add(ClosingRate.withoutId(this, lastRoundRate.getRoundRate(), lastRoundRate.getFetchedAt()));
+                        dailyRoundRates.clear();
+                        dailyRoundRates.add(roundRate);
+                    }
+                }, () -> dailyRoundRates.add(roundRate));
+    }
+
+    private Optional<RoundRate> getLastRoundRate() {
+        if (dailyRoundRates.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(dailyRoundRates.get(dailyRoundRates.size() - 1));
     }
 }

@@ -11,4 +11,5 @@ public class FetchExchangeResult {
 
     private Long roundRateFetchedCount;
     private Long closingRateFetchedCount;
+    private Integer round;
 }

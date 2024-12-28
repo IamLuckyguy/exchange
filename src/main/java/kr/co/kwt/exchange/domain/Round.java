@@ -1,7 +1,11 @@
 package kr.co.kwt.exchange.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 
@@ -22,16 +26,23 @@ public class Round {
     private Long id;
     private Integer round;
     private LocalDateTime fetchedAt;
+    private LocalDateTime createdAt;
 
-    public static Round init() {
+    public static Round withoutId(@NonNull final Integer round, @NonNull final LocalDateTime fetchedAt) {
         return Round.builder()
-                .round(0)
+                .round(round)
                 .fetchedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 
-    public void updateRound(@NonNull final Integer newRound) {
+    public Round updateRound(@NonNull final Integer newRound, @NonNull final LocalDateTime newFetchedAt) {
+        if (round >= newRound) {
+            return Round.withoutId(newRound, newFetchedAt);
+        }
+
         round = newRound;
-        fetchedAt = LocalDateTime.now();
+        fetchedAt = newFetchedAt;
+        return this;
     }
 }

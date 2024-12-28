@@ -23,18 +23,19 @@ public class ClosingRate {
     @Column(name = "closing_rate_id")
     private Long id;
 
-    @Column(name = "currency_code")
-    private String currencyCode;
+    @ManyToOne
+    @JoinColumn(name = "currency_code", referencedColumnName = "currencyCode")
+    private Exchange exchange;
     private double closingRate;
     private LocalDateTime fetchedAt;
 
     public static ClosingRate withoutId(
-            @NonNull final String currencyCode,
+            @NonNull final Exchange exchange,
             @NonNull final Double closingRate,
             @NonNull final LocalDateTime fetchedAt
     ) {
         return ClosingRate.builder()
-                .currencyCode(currencyCode)
+                .exchange(exchange)
                 .closingRate(closingRate)
                 .fetchedAt(fetchedAt)
                 .build();

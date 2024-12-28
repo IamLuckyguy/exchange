@@ -16,4 +16,9 @@ public class SaveRoundAdapter implements SaveRoundPort {
     public Round save(final Round round) {
         return roundRepository.save(round);
     }
+
+    @Override
+    public Round saveAndFlush(Round round) {
+        return roundRepository.saveAndFlush(round);
+    }
 }

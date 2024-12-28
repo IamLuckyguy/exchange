@@ -18,7 +18,8 @@ public enum ErrorCode {
     ALREADY_EXISTS_EXCHANGE(HttpStatus.BAD_REQUEST, "이미 존재하는 환율 도메인입니다."),
     ALREADY_EXISTS_ROUND(HttpStatus.BAD_REQUEST, "이미 라운드 설정이 되어 있습니다."),
     INVALID_CURRENCY_CODE(HttpStatus.BAD_REQUEST, "통화 코드가 유효하지 않습니다."),
-    INVALID_FETCH_REQUEST(HttpStatus.TOO_EARLY, "가장 최신 회차입니다.");
+    INVALID_FETCH_REQUEST(HttpStatus.TOO_EARLY, "가장 최신 회차입니다."),
+    ALREADY_FETCHED(HttpStatus.OK, "가장 최신 회차입니다.");
 
     private final HttpStatus status;
     private final String message;

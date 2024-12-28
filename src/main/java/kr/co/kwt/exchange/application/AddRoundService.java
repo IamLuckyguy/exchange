@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AddRoundService implements AddRoundUseCase {
@@ -19,7 +21,7 @@ public class AddRoundService implements AddRoundUseCase {
     @Transactional
     public Integer addRound() {
         validateExistsRound();
-        Round round = saveRoundPort.save(Round.init());
+        Round round = saveRoundPort.save(Round.withoutId(0, LocalDateTime.now()));
         return round.getRound();
     }
 

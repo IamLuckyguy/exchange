@@ -3,13 +3,16 @@ package kr.co.kwt.exchange.adapter.out.persistence.querydsl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.co.kwt.exchange.application.port.dto.GetExchangeByRoundResult;
 import kr.co.kwt.exchange.application.port.dto.GetExchangeResult;
+import kr.co.kwt.exchange.domain.ClosingRate;
 import kr.co.kwt.exchange.domain.Exchange;
 import kr.co.kwt.exchange.domain.RoundRate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static kr.co.kwt.exchange.domain.QClosingRate.closingRate1;
@@ -24,11 +27,42 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
 
     @Override
     public List<Exchange> findAllByQueryDsl() {
-        return queryFactory
+        List<Exchange> exchanges = queryFactory
                 .selectFrom(exchange)
-                .leftJoin(exchange.dailyRoundRates, roundRate1)
-                .leftJoin(exchange.yearlyClosingRates, closingRate1).fetchJoin()
                 .fetch();
+
+        Map<String, List<RoundRate>> roundRatesMap = getCurrencyCodeToRoundRatesMap();
+        Map<String, List<ClosingRate>> closingRatesMap = getCurrencyCodeToClosingRatesMap();
+
+        for (Exchange exchange : exchanges) {
+            exchange.addAllDailyRoundRates(roundRatesMap
+                    .getOrDefault(exchange.getCurrencyCode(), new ArrayList<>()));
+
+            exchange.addAllYearlyClosingRates(closingRatesMap
+                    .getOrDefault(exchange.getCurrencyCode(), new ArrayList<>()));
+        }
+
+        return exchanges;
+    }
+
+    private Map<String, List<RoundRate>> getCurrencyCodeToRoundRatesMap() {
+        return queryFactory
+                .selectFrom(roundRate1)
+                .join(roundRate1.exchange, exchange).fetchJoin()
+                .where(roundRate1.fetchedAt.after(LocalDate.now().atStartOfDay().minusDays(1)))
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(roundRate -> roundRate.getExchange().getCurrencyCode(), Collectors.toList()));
+    }
+
+    private Map<String, List<ClosingRate>> getCurrencyCodeToClosingRatesMap() {
+        return queryFactory
+                .selectFrom(closingRate1)
+                .join(closingRate1.exchange, exchange).fetchJoin()
+                .where(closingRate1.fetchedAt.after(LocalDate.now().atStartOfDay().minusYears(1)))
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(closingRate -> closingRate.getExchange().getCurrencyCode(), Collectors.toList()));
     }
 
     @Override
@@ -43,12 +77,12 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
     public List<GetExchangeByRoundResult> getExchangesByRound(int start, int end) {
         return queryFactory
                 .selectFrom(roundRate1)
-                .where(roundRate1.round.between(start, end)
-                        .and(roundRate1.fetchedAt.after(LocalDate.now().atStartOfDay())))
+                .where(roundRate1.round.round.between(start, end)
+                        .and(roundRate1.fetchedAt.after(LocalDate.now().atStartOfDay().minusDays(1))))
                 .orderBy(roundRate1.fetchedAt.desc())
                 .fetch()
                 .stream()
-                .collect(Collectors.groupingBy(RoundRate::getCurrencyCode))
+                .collect(Collectors.groupingBy(roundRate -> roundRate.getExchange().getCurrencyCode()))
                 .entrySet()
                 .stream()
                 .map(entry -> GetExchangeByRoundResult.of(entry.getKey(), entry.getValue()))

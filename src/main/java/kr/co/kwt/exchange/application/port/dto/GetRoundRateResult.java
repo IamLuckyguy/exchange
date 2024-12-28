@@ -31,7 +31,7 @@ public class GetRoundRateResult {
     public static GetRoundRateResult of(final RoundRate roundRate) {
         return new GetRoundRateResult(
                 roundRate.getRoundRate(),
-                roundRate.getRound(),
+                roundRate.getRound().getRound(),
                 roundRate.getTrend(),
                 roundRate.getTrendRate(),
                 roundRate.getLiveStatus(),

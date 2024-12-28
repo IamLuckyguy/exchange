@@ -20,7 +20,7 @@ public class ClosingRateQueryDslRepositoryImpl implements ClosingRateQueryDslRep
         String query = "INSERT INTO closing_rates(currency_code, closing_rate, fetched_at) VALUES (?, ?, ?)";
 
         int[][] updatedCounts = jdbcTemplate.batchUpdate(query, lastRoundRates, 100, ((ps, argument) -> {
-            ps.setString(1, argument.getCurrencyCode());
+            ps.setString(1, argument.getExchange().getCurrencyCode());
             ps.setDouble(2, argument.getClosingRate());
             ps.setTimestamp(3, Timestamp.valueOf(argument.getFetchedAt()));
         }));

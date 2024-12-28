@@ -23,10 +23,15 @@ public class RoundRate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "round_rate_id")
     private Long id;
-    @Column(name = "currency_code")
-    private String currencyCode;
+
+    @ManyToOne
+    @JoinColumn(name = "currency_code", referencedColumnName = "currencyCode")
+    private Exchange exchange;
     private double roundRate;
-    private Integer round;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "round_id")
+    private Round round;
     private String trend;
     private Double trendRate;
     private String liveStatus;
@@ -34,8 +39,8 @@ public class RoundRate {
     private LocalDateTime fetchedAt;
 
     public static RoundRate withoutId(
-            @NonNull final String currencyCode,
-            @NonNull final Integer round,
+            @NonNull final Exchange exchange,
+            @NonNull final Round round,
             @NonNull final Double roundRate,
             @NonNull final String trend,
             @NonNull final Double trendRate,
@@ -44,7 +49,7 @@ public class RoundRate {
             @NonNull final LocalDateTime fetchedAt
     ) {
         return RoundRate.builder()
-                .currencyCode(currencyCode)
+                .exchange(exchange)
                 .roundRate(roundRate)
                 .round(round)
                 .trend(trend)
