@@ -25,6 +25,7 @@ class RoundQueryDslRepositoryImpl implements RoundQueryDslRepository {
                         round1.round,
                         round1.fetchedAt))
                 .from(round1)
+                .orderBy(round1.id.desc())
                 .limit(1L)
                 .fetchOne());
     }
