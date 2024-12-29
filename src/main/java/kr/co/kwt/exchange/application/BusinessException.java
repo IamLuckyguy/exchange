@@ -1,5 +1,6 @@
-package kr.co.kwt.exchange.config.error;
+package kr.co.kwt.exchange.application;
 
+import kr.co.kwt.exchange.config.error.ErrorCode;
 import lombok.Getter;
 
 @Getter

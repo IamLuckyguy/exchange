@@ -10,7 +10,6 @@ import org.springframework.lang.NonNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -106,31 +105,5 @@ public class Exchange {
 
     public void addAllYearlyClosingRates(@NonNull final List<ClosingRate> newYearlyClosingRates) {
         yearlyClosingRates = newYearlyClosingRates;
-    }
-
-    public void addYearlyClosingRate(@NonNull final ClosingRate yearlyClosingRate) {
-        yearlyClosingRates.add(yearlyClosingRate);
-    }
-
-    public void fetch(@NonNull final RoundRate roundRate) {
-        getLastRoundRate()
-                .ifPresentOrElse(lastRoundRate -> {
-                    if (lastRoundRate.getRound().getRound() < roundRate.getRound().getRound()) {
-                        dailyRoundRates.add(roundRate);
-                    }
-                    else {
-                        yearlyClosingRates.add(ClosingRate.withoutId(this, lastRoundRate.getRoundRate(), lastRoundRate.getFetchedAt()));
-                        dailyRoundRates.clear();
-                        dailyRoundRates.add(roundRate);
-                    }
-                }, () -> dailyRoundRates.add(roundRate));
-    }
-
-    private Optional<RoundRate> getLastRoundRate() {
-        if (dailyRoundRates.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(dailyRoundRates.get(dailyRoundRates.size() - 1));
     }
 }

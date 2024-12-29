@@ -37,13 +37,11 @@ public class FetchExchangeService implements FetchExchangeUseCase {
         long updatedRoundRatesCount = 0;
         long updatedClosingRatesCount = 0;
 
-        Map<String, Exchange> currencyCodeToExchangeMap = getCurrencyCodeToExchangeMap();
         Round round = getLastRound();
+        Map<String, Exchange> currencyCodeToExchangeMap =
+                getCurrencyCodeToExchangeMap();
 
-        if (command.getRound().equals(round.getRound())) {
-            throw new AlreadyFetchedExeption();
-        }
-        else if (command.getRound() > round.getRound()) { // 다음날 신규 회차
+        if (command.getRound() > round.getRound()) { // 동일 일자 신규 회차인 경우
             round = doUpdateRound(command, round);
             updatedRoundRatesCount = saveRoundRatePort.bulkInsert(
                     getRoundRateList(
@@ -51,7 +49,7 @@ public class FetchExchangeService implements FetchExchangeUseCase {
                             currencyCodeToExchangeMap,
                             round));
         }
-        else {
+        else if (command.getRound() < round.getRound()) { // 신규 일자 신규 회차인 경우
             round = doUpdateRound(command, round);
             updatedClosingRatesCount = saveClosingRatePort.bulkInsert(getClosingRateList());
             updatedRoundRatesCount = saveRoundRatePort.bulkInsert(
@@ -59,6 +57,9 @@ public class FetchExchangeService implements FetchExchangeUseCase {
                             command,
                             currencyCodeToExchangeMap,
                             round));
+        }
+        else { // 동일 일자 동일 회차인 경우
+            throw new AlreadyFetchedExeption();
         }
 
         return new FetchExchangeResult(updatedRoundRatesCount, updatedClosingRatesCount, round.getRound());

@@ -1,6 +1,5 @@
 package kr.co.kwt.exchange.application;
 
-import kr.co.kwt.exchange.config.error.BusinessException;
 import kr.co.kwt.exchange.config.error.ErrorCode;
 
 public class AlreadyExistsExchangeException extends BusinessException {

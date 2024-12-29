@@ -1,6 +1,6 @@
 package kr.co.kwt.exchange.adapter.in;
 
-import kr.co.kwt.exchange.config.error.BusinessException;
+import kr.co.kwt.exchange.application.BusinessException;
 import kr.co.kwt.exchange.config.error.ErrorCode;
 
 public class InvalidFetchRequest extends BusinessException {

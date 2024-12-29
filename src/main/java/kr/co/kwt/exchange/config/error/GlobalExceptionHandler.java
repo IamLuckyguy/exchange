@@ -1,5 +1,6 @@
 package kr.co.kwt.exchange.config.error;
 
+import kr.co.kwt.exchange.application.BusinessException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
