@@ -11,4 +11,8 @@ public class ServerException extends BusinessException {
     public ServerException(ErrorCode errorCode) {
         super(errorCode);
     }
+
+    public ServerException(Exception e) {
+        super(ErrorCode.INTERNAL_SERVER_ERROR, e);
+    }
 }

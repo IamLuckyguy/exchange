@@ -78,7 +78,7 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
         return queryFactory
                 .selectFrom(roundRate1)
                 .where(roundRate1.round.round.between(start, end)
-                        .and(roundRate1.fetchedAt.after(LocalDate.now().atStartOfDay().minusDays(1))))
+                        .and(roundRate1.fetchedAt.after(LocalDate.now().atStartOfDay())))
                 .orderBy(roundRate1.fetchedAt.desc())
                 .fetch()
                 .stream()
