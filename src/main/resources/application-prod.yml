@@ -2,20 +2,18 @@ spring:
   config:
     activate:
       on-profile: prod
-  r2dbc:
-    pool:
-      initial-size: 10
-      max-size: 20
-      max-idle-time: 30m
-      validation-query: SELECT 1
-      validation-depth: REMOTE  # 실제 DB 연결 확인
-      max-create-connection-time: 2s
-      max-acquire-time: 4s
-      max-life-time: 2h        # 커넥션 최대 수명
-      enable-metrics: true     # 모니터링을 위한 메트릭 활성화
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
     properties:
-      connect-timeout: 3s
-      ssl: false               # SSL 설정이 불필요한 경우
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
 
 kms:
   apiKey: bf3a6d5c2cdebbaf1585f23b2759e8897b6e4c83ffb8cd4ef0a7bd64a4ec97d6
@@ -31,10 +29,14 @@ openapi:
   naver:
     enable: true
     key:
-    base-url: https://m.stock.naver.com/front-api/marketIndex/exchange/new
+    base-url: https://m.stock.naver.com
+    path:
+      exchange: /front-api/marketIndex/exchange/new
+      round: /front-api/marketIndex/productDetail?category=exchange&reutersCode=FX_USDKRW
 
 logging:
   level:
     org.springframework.r2dbc: INFO
     kr.co.kwt.exchange: INFO
     io.r2dbc.pool: INFO
+    org.hibernate.sql: INFO

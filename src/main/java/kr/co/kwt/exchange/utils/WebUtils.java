@@ -1,10 +1,8 @@
 package kr.co.kwt.exchange.utils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.env.Environment;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
-
-import java.net.URI;
 
 @Component
 public class WebUtils {
@@ -14,13 +12,22 @@ public class WebUtils {
         this.environment = environment;
     }
 
-    public String getBaseUrl(ServerHttpRequest request) {
-        URI uri = request.getURI();
+//    public String getBaseUrl(ServerHttpRequest request) {
+//        URI uri = request.getURI();
+//        return String.format("%s://%s%s%s",
+//                uri.getScheme(),
+//                uri.getHost(),
+//                getPortString(uri.getPort()),
+//                uri.getPath()
+//        );
+//    }
+
+    public String getBaseUrl(HttpServletRequest request) {
         return String.format("%s://%s%s%s",
-                uri.getScheme(),
-                uri.getHost(),
-                getPortString(uri.getPort()),
-                uri.getPath()
+                request.getScheme(),
+                request.getRemoteHost(),
+                getPortString(request.getServerPort()),
+                request.getRequestURI()
         );
     }
 

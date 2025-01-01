@@ -21,7 +21,8 @@
 <main class="container-fluid">
     <div class="title-container">
         <h1 class="visually-hidden">실시간 환율 계산기</h1>
-        <div class="calculator-title" id="animatedTitle"></div><span class="cursor"></span>
+        <div class="calculator-title" id="animatedTitle"></div>
+        <span class="cursor"></span>
     </div>
 
     <div class="calculator-wrapper">
@@ -59,7 +60,7 @@
                                     <button class="chart-type-btn" data-type="change">변동률 차트</button>
                                 </div>
                             </div>
-                            
+
                             <!-- 환율 추이 차트 설정 -->
                             <div id="trendChartSettings" class="settings-group">
                                 <h5 class="settings-title">통화 선택</h5>
@@ -78,7 +79,7 @@
                                     </div>
                                 </div>
                             </div>
-                    
+
                             <!-- 변동률 차트 설정 -->
                             <div id="changeChartSettings" class="settings-group" style="display: none;">
                                 <h5 class="settings-title">표시 통화</h5>
@@ -121,7 +122,7 @@
             </div>
             <div class="select-all-wrapper">
                 <label class="currency-item">
-                    <input type="checkbox" id="selectAllCurrencies" />
+                    <input type="checkbox" id="selectAllCurrencies"/>
                     <div class="currency-info">
                         <span>전체 선택</span>
                     </div>
@@ -154,7 +155,7 @@
 
     <!-- 초기화 -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             Service.initialize().catch(error => {
                 console.error('Failed to initialize application:', error);
                 CommonLibrary.showAlert('애플리케이션 초기화에 실패했습니다.');
