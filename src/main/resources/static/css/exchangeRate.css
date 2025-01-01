@@ -37,6 +37,17 @@
     }
 }
 
+.main-content {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.main-content.loading {
+    opacity: 0;
+    visibility: hidden;
+}
+
 .container-fluid {
     min-height: 100vh;
     padding: 2rem;
@@ -117,19 +128,59 @@
     border-right: 1px solid #4a4a4a;
 }
 
-.currency-input {
+.currency-input-wrapper {
+    position: relative;
     flex: 1;
     padding: 0.75rem 1rem;
-    background-color: transparent;
-    border: none;
-    color: #ffffff;
-    font-size: 1rem;
     text-align: right;
-    min-width: 0; /* flex-basis 오버플로우 방지 */
+    font-size: 1rem;
+    font-family: Arial, sans-serif;
+}
+
+.currency-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: transparent;
+    caret-color: #ffffff; /* 커서 색상을 흰색으로 설정 */
+    text-align: right;
+    padding: 0.75rem 1rem;
 }
 
 .currency-input:focus {
     outline: none;
+}
+
+.currency-input::selection {
+    background-color: rgba(0, 255, 136, 0.3); /* 선택 영역 배경색 */
+    color: transparent; /* 선택된 텍스트는 여전히 투명하게 */
+}
+
+.display-text {
+    position: absolute;
+    top: 0;
+    right: 1rem;
+    bottom: 0;
+    left: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    pointer-events: none; /* 텍스트가 input 이벤트를 방해하지 않도록 */
+}
+
+.integer-part {
+    color: #ffffff;
+}
+
+.decimal-separator {
+    color: #666;
+    margin: 0 1px;
+}
+
+.decimal-part {
+    color: #00ff88;
+    min-width: 2ch;
+    display: inline-block;
 }
 
 .dialog {
@@ -532,13 +583,13 @@
 
 .drag-handle::before {
     content: "⋮⋮⋮"; /* 6개의 점으로 드래그 핸들 표시 */
-    letter-spacing: -10px;
+    letter-spacing: -12px;
 }
 
 .currency-info {
     display: flex;
     align-items: center;
-    width: 120px; /* 고정 너비 설정 */
+    width: 95px; /* 고정 너비 설정 */
     padding: 0.75rem 1rem;
     border-right: 1px solid #4a4a4a;
 }

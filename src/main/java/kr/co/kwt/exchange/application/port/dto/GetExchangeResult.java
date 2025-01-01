@@ -20,7 +20,7 @@ public class GetExchangeResult {
     private List<GetRoundRateResult> dailyRoundRates;
     @JsonProperty("exchangeRateHistories")
     private List<GetClosingRateResult> yearlyClosingRates;
-    private Integer decimal;
+    private Integer decimals;
     private Integer unit;
 
     public static GetExchangeResult of(final Exchange exchange) {
