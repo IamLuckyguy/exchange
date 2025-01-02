@@ -51,45 +51,17 @@
                 <div class="card-content">
                     <div class="chart-section">
                         <div class="mb-3">
-                            <!-- 차트 설정 영역 전체를 감싸는 컨테이너 추가 -->
+                            <!-- 차트 설정 영역 -->
                             <div class="chart-settings-container">
-                                <!-- 차트 유형 선택 -->
+                                <!-- 통화 선택 -->
                                 <div class="settings-group">
-                                    <h5 class="settings-title">차트 유형</h5>
-                                    <div class="btn-group">
-                                        <button class="chart-type-btn" data-type="trend">환율 추이 차트</button>
-                                        <button class="chart-type-btn" data-type="change">변동률 차트</button>
-                                    </div>
-                                </div>
-
-                                <!-- 환율 추이 차트 설정 -->
-                                <div id="trendChartSettings" class="settings-group">
-                                    <h5 class="settings-title">통화 선택</h5>
-                                    <div class="currency-pair-selector">
-                                        <div class="base-currency-select mb-2">
-                                            <label>기준 통화</label>
-                                            <select id="baseCurrency" class="form-select">
-                                                <!-- 동적으로 통화 옵션 추가 -->
-                                            </select>
-                                        </div>
-                                        <div class="target-currency-select">
-                                            <label>비교 통화</label>
-                                            <select id="targetCurrency" class="form-select">
-                                                <!-- 동적으로 통화 옵션 추가 -->
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 변동률 차트 설정 -->
-                                <div id="changeChartSettings" class="settings-group" style="display: none;">
                                     <h5 class="settings-title">표시 통화</h5>
                                     <div id="currencySelector" class="currency-selector">
                                         <!-- 동적으로 추가될 통화 옵션들 -->
                                     </div>
                                 </div>
 
-                                <!-- 기간 선택 (공통) -->
+                                <!-- 기간 선택 -->
                                 <div class="period-selector settings-group">
                                     <h5 class="settings-title">조회 기간</h5>
                                     <div class="period-buttons">
@@ -100,19 +72,22 @@
                                         <button class="period-btn" data-period="365">1년</button>
                                     </div>
                                     <div class="mt-2">
-                                        <input type="number" id="customDays" placeholder="직접 입력 (일)" min="1" max="365">
+                                        <input type="number" id="customDays"
+                                               placeholder="직접 입력 (일)"
+                                               min="1"
+                                               max="365">
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="chart-container">
-                            <canvas id="exchangeRateChart"></canvas>
+                        <!-- 차트 컨테이너 -->
+                        <div class="charts-container">
+                            <!-- 차트들이 동적으로 추가될 영역 -->
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
         <!-- 다이얼로그 -->
         <div id="currencyDialog" class="dialog">

@@ -3,9 +3,14 @@
 /**
  * 실시간 환율 데이터
  * @typedef {Object} ExchangeRateRealTime
- * @property {number} r - 순번
- * @property {string} rv - 환율 값
- * @property {string} ts - 타임스탬프
+ * @property {number} rv - 환율 값
+ * @property {number} r - 환율 고시 회차
+ * @property {string} t - 상승/하락
+ * @property {number} tv - 변동금액 (직전 회차 대비 변동 금액)
+ * @property {number} tr - 변동률
+ * @property {string} live - 실시간/종료
+ * @property {string} market - 시장 상태
+ * @property {string} at - 날짜 (YYYY-MM-DDTHH:mm:ss 형식)
  */
 
 /**
@@ -50,9 +55,13 @@ const exampleResponse = [
         ],
         exchangeRateRealTime: [
             {
-                r: 1,
-                rv: "1321.90",
-                ts: "2024-01-01T00:00:00"
+                "rv": 1521.28,
+                "r": 403,
+                "t": "하락",
+                "tr": -9.83,
+                "live": "실시간",
+                "market": "OPEN",
+                "at": "2025-01-02T11:00:20"
             }
         ],
         unit: 1

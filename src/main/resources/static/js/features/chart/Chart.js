@@ -1,59 +1,104 @@
-// resources/static/js/features/chart/Chart.js
-import { STORAGE_KEYS } from '../../constants/storage-keys.js';
-import { CURRENCY_DEFAULTS } from '../../constants/currency-defaults.js';
-import { CHART_OPTIONS, CHART_COLORS, CHART_PERIODS } from '../../constants/chart-options.js';
-import { UIUtils } from '../../utils/ui-utils.js';
+import {CHART_COLORS, CHART_OPTIONS, CHART_PERIODS} from "../../constants/chart-options.js";
+import {STORAGE_KEYS} from "../../constants/storage-keys.js";
+import {UIUtils} from "../../utils/ui-utils.js";
 
 export class ExchangeRateChart {
     constructor(containerSelector = '#chartContainer') {
-        // DOM 엘리먼트 참조
         this.container = document.querySelector(containerSelector);
-        this.canvas = this.container.querySelector('#exchangeRateChart');
-        this.chartInstance = null;
+        this.chartInstances = new Map();
 
         // 상태 초기화
         this.state = {
-            type: 'trend',
             period: CHART_PERIODS.WEEK,
-            baseCurrency: CURRENCY_DEFAULTS.DEFAULT_BASE_CURRENCY,
-            targetCurrency: CURRENCY_DEFAULTS.DEFAULT_TARGET_CURRENCY,
-            selectedCurrencies: [CURRENCY_DEFAULTS.DEFAULT_BASE_CURRENCY],
+            selectedCurrencies: [],
             exchangeRates: []
         };
 
         this.loadSettings();
         this.bindEvents();
+        this.resizeHandler = this.handleResize.bind(this);
+        window.addEventListener('resize', this.debounce(this.resizeHandler, 250));
+    }
+
+    // 리사이즈 이벤트 디바운싱을 위한 유틸리티 함수
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // 리사이즈 핸들러
+    handleResize() {
+        this.renderCharts();
+    }
+
+    // 컴포넌트 정리
+    destroy() {
+        window.removeEventListener('resize', this.resizeHandler);
+        this.chartInstances.forEach(chart => chart.destroy());
+        this.chartInstances.clear();
     }
 
     loadSettings() {
         try {
             const savedSettings = localStorage.getItem(STORAGE_KEYS.CHART.SETTINGS);
-            const savedCurrencies = localStorage.getItem(STORAGE_KEYS.CHART.SELECTED_CURRENCIES);
-
             if (savedSettings) {
                 const settings = JSON.parse(savedSettings);
-                this.state = { ...this.state, ...settings };
+                this.state.period = settings.period || CHART_PERIODS.WEEK;
             }
 
+            // 저장된 선택 통화 목록 불러오기
+            const savedCurrencies = localStorage.getItem(STORAGE_KEYS.CHART.SELECTED_CURRENCIES);
             if (savedCurrencies) {
                 this.state.selectedCurrencies = JSON.parse(savedCurrencies);
             }
+
+            // 기간 선택 버튼 상태 복원
+            const periodButtons = this.container.querySelectorAll('.period-btn');
+            periodButtons.forEach(btn => {
+                if (parseInt(btn.dataset.period) === this.state.period) {
+                    btn.classList.add('selected');
+                }
+            });
+
+            // 커스텀 기간 입력 상태 복원
+            const customDaysInput = this.container.querySelector('#customDays');
+            if (customDaysInput && !periodButtons.length) {
+                customDaysInput.value = this.state.period;
+            }
         } catch (error) {
             console.error('Failed to load chart settings:', error);
-            UIUtils.showAlert('차트 설정을 불러오는데 실패했습니다.');
+            this.initializeDefaultSettings();
         }
+    }
+
+    initializeDefaultSettings() {
+        // 초기 상태 설정
+        this.state.period = CHART_PERIODS.WEEK;
+        // KRW를 제외한 모든 통화 선택
+        this.state.selectedCurrencies = this.state.exchangeRates
+            .filter(rate => rate.currencyCode !== 'KRW')
+            .map(rate => rate.currencyCode);
+
+        // 설정 저장
+        this.saveSettings();
     }
 
     saveSettings() {
         try {
+            // 차트 설정 저장
             const settings = {
-                type: this.state.type,
-                period: this.state.period,
-                baseCurrency: this.state.baseCurrency,
-                targetCurrency: this.state.targetCurrency
+                period: this.state.period
             };
-
             localStorage.setItem(STORAGE_KEYS.CHART.SETTINGS, JSON.stringify(settings));
+
+            // 선택된 통화 목록 저장
             localStorage.setItem(
                 STORAGE_KEYS.CHART.SELECTED_CURRENCIES,
                 JSON.stringify(this.state.selectedCurrencies)
@@ -65,11 +110,6 @@ export class ExchangeRateChart {
     }
 
     bindEvents() {
-        // 차트 타입 변경
-        this.container.querySelectorAll('.chart-type-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.handleChartTypeChange(e));
-        });
-
         // 기간 선택
         this.container.querySelectorAll('.period-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.handlePeriodChange(e));
@@ -82,19 +122,7 @@ export class ExchangeRateChart {
         }
 
         // 통화 선택
-        this.bindCurrencySelectors();
-    }
-
-    bindCurrencySelectors() {
-        const baseCurrencySelect = this.container.querySelector('#baseCurrency');
-        const targetCurrencySelect = this.container.querySelector('#targetCurrency');
         const currencySelector = this.container.querySelector('#currencySelector');
-
-        if (baseCurrencySelect && targetCurrencySelect) {
-            baseCurrencySelect.addEventListener('change', () => this.handleCurrencyChange());
-            targetCurrencySelect.addEventListener('change', () => this.handleCurrencyChange());
-        }
-
         if (currencySelector) {
             currencySelector.addEventListener('click', (e) => {
                 if (e.target.closest('.currency-option')) {
@@ -104,23 +132,7 @@ export class ExchangeRateChart {
         }
     }
 
-    async handleChartTypeChange(event) {
-        const button = event.target;
-        const type = button.dataset.type;
-
-        // UI 업데이트
-        this.container.querySelectorAll('.chart-type-btn')
-            .forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-
-        // 상태 업데이트
-        this.state.type = type;
-        this.saveSettings();
-        this.updateChartSettingsVisibility();
-        await this.renderChart();
-    }
-
-    async handlePeriodChange(event) {
+    handlePeriodChange(event) {
         const button = event.target;
         const period = parseInt(button.dataset.period);
 
@@ -132,7 +144,9 @@ export class ExchangeRateChart {
         // 상태 업데이트
         this.state.period = period;
         this.saveSettings();
-        await this.renderChart();
+
+        // 차트 업데이트
+        this.renderCharts();
     }
 
     handleCustomPeriodInput(event) {
@@ -145,23 +159,17 @@ export class ExchangeRateChart {
             days = CHART_PERIODS.YEAR;
         }
 
+        // 기간 버튼 선택 해제
         this.container.querySelectorAll('.period-btn')
             .forEach(btn => btn.classList.remove('selected'));
 
+        // 상태 업데이트
         this.state.period = days;
         input.value = days;
         this.saveSettings();
-        this.renderChart();
-    }
 
-    async handleCurrencyChange() {
-        const baseCurrency = this.container.querySelector('#baseCurrency').value;
-        const targetCurrency = this.container.querySelector('#targetCurrency').value;
-
-        this.state.baseCurrency = baseCurrency;
-        this.state.targetCurrency = targetCurrency;
-        this.saveSettings();
-        await this.renderChart();
+        // 차트 업데이트
+        this.renderCharts();
     }
 
     async handleCurrencySelection(event) {
@@ -169,11 +177,9 @@ export class ExchangeRateChart {
         const currencyCode = option.dataset.currency;
 
         if (option.classList.contains('selected')) {
-            if (this.state.selectedCurrencies.length > 1) {
-                this.state.selectedCurrencies = this.state.selectedCurrencies
-                    .filter(code => code !== currencyCode);
-                option.classList.remove('selected');
-            }
+            this.state.selectedCurrencies = this.state.selectedCurrencies
+                .filter(code => code !== currencyCode);
+            option.classList.remove('selected');
         } else {
             if (this.state.selectedCurrencies.length < 8) {
                 this.state.selectedCurrencies.push(currencyCode);
@@ -184,96 +190,29 @@ export class ExchangeRateChart {
             }
         }
 
+        // 설정 저장 및 차트 업데이트
         this.saveSettings();
-        await this.renderChart();
+        await this.renderCharts();
     }
 
-    updateChartSettingsVisibility() {
-        const trendSettings = this.container.querySelector('#trendChartSettings');
-        const changeSettings = this.container.querySelector('#changeChartSettings');
+    prepareChartData(currencyCode, colorIndex) {
+        const rate = this.getExchangeRate(currencyCode);
+        if (!rate?.exchangeRateHistories) return null;
 
-        if (this.state.type === 'trend') {
-            trendSettings.style.display = 'block';
-            changeSettings.style.display = 'none';
-        } else {
-            trendSettings.style.display = 'none';
-            changeSettings.style.display = 'block';
-        }
-    }
-
-    // 차트 데이터 준비 및 렌더링
-    prepareChartData() {
-        if (this.state.type === 'trend') {
-            return this.prepareTrendChartData();
-        } else {
-            return this.prepareChangeRateData();
-        }
-    }
-
-    prepareTrendChartData() {
-        const baseRate = this.getExchangeRate(this.state.baseCurrency);
-        const targetRate = this.getExchangeRate(this.state.targetCurrency);
-
-        if (!baseRate?.exchangeRateHistories || !targetRate?.exchangeRateHistories) {
-            return {
-                labels: [],
-                datasets: [{
-                    label: `${baseRate?.currencyCode || ''}/${targetRate?.currencyCode || ''}`,
-                    data: [],
-                    borderColor: CHART_COLORS[0],
-                    backgroundColor: `${CHART_COLORS[0]}22`,
-                    borderWidth: 2,
-                    tension: 0.4
-                }]
-            };
-        }
-
-        const baseData = this.prepareHistoricalData(baseRate);
-        const targetData = this.prepareHistoricalData(targetRate);
+        const histories = this.prepareHistoricalData(rate);
+        const color = CHART_COLORS[colorIndex % CHART_COLORS.length];
 
         return {
-            labels: baseData.map(history => this.formatDate(history.at)),
+            labels: histories.map(history => this.formatDate(history.at)),
             datasets: [{
-                label: `${baseRate.currencyCode}/${targetRate.currencyCode}`,
-                data: baseData.map((history, index) => {
-                    const baseValue = parseFloat(history.rv);
-                    const targetValue = parseFloat(targetData[index]?.rv || 0);
-                    return baseValue / targetValue;
-                }),
-                borderColor: CHART_COLORS[0],
-                backgroundColor: `${CHART_COLORS[0]}22`,
+                label: `${rate.countryFlag} ${currencyCode}/KRW`,
+                data: histories.map(history => parseFloat(history.rv)),
+                borderColor: color,
+                backgroundColor: `${color}22`,
                 borderWidth: 2,
                 tension: 0.4
             }]
         };
-    }
-
-    prepareChangeRateData() {
-        const datasets = this.state.selectedCurrencies.map((currencyCode, index) => {
-            const rate = this.getExchangeRate(currencyCode);
-            if (!rate?.exchangeRateHistories) return null;
-
-            const histories = this.prepareHistoricalData(rate);
-            const baseValue = parseFloat(histories[0]?.rv || 0);
-
-            return {
-                label: `${currencyCode} 변화율 (%)`,
-                data: histories.map(history => {
-                    const currentValue = parseFloat(history.rv);
-                    return ((currentValue - baseValue) / baseValue * 100).toFixed(2);
-                }),
-                borderColor: CHART_COLORS[index % CHART_COLORS.length],
-                backgroundColor: `${CHART_COLORS[index % CHART_COLORS.length]}22`,
-                borderWidth: 2,
-                tension: 0.4
-            };
-        }).filter(dataset => dataset !== null);
-
-        const firstRate = this.getExchangeRate(this.state.selectedCurrencies[0]);
-        const labels = this.prepareHistoricalData(firstRate)
-            .map(history => this.formatDate(history.at));
-
-        return { labels, datasets };
     }
 
     prepareHistoricalData(exchangeRate) {
@@ -287,64 +226,86 @@ export class ExchangeRateChart {
             .sort((a, b) => new Date(a.at) - new Date(b.at)) || [];
     }
 
-    async renderChart() {
-        if (!this.canvas) return;
+    async renderCharts() {
+        const chartsContainer = this.container.querySelector('.charts-container');
+        if (!chartsContainer) return;
 
-        // 기존 차트 제거
-        if (this.chartInstance) {
-            this.chartInstance.destroy();
+        // 기존 차트 인스턴스들 제거
+        this.chartInstances.forEach(chart => chart.destroy());
+        this.chartInstances.clear();
+        chartsContainer.innerHTML = '';
+
+        // 차트 그리드 컨테이너 생성
+        const chartGrid = document.createElement('div');
+        chartGrid.className = 'chart-grid';
+        if (this.state.selectedCurrencies.length === 1) {
+            chartGrid.classList.add('single-chart');
         }
+        chartsContainer.appendChild(chartGrid);
 
-        const data = this.prepareChartData();
-        const options = CHART_OPTIONS[this.state.type];
+        // 각 통화별 차트 생성
+        this.state.selectedCurrencies.forEach((currencyCode, index) => {
+            const chartWrapper = document.createElement('div');
+            chartWrapper.className = 'chart-wrapper';
 
-        try {
-            this.chartInstance = new Chart(this.canvas, {
+            const canvas = document.createElement('canvas');
+            canvas.id = `chart-${currencyCode}`;
+            chartWrapper.appendChild(canvas);
+            chartGrid.appendChild(chartWrapper);
+
+            const data = this.prepareChartData(currencyCode, index);
+            if (!data) return;
+
+            const ctx = canvas.getContext('2d');
+            const chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: data,
-                options: options
+                options: {
+                    ...CHART_OPTIONS.change,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            align: 'start',
+                            labels: {
+                                color: '#ffffff',
+                                boxWidth: 15,
+                                padding: 15
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: `${this.getExchangeRate(currencyCode)?.countryFlag || ''} ${currencyCode} 원화 환율`,
+                            color: '#ffffff',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#4a4a4a' },
+                            ticks: { color: '#ffffff' }
+                        },
+                        y: {
+                            grid: { color: '#4a4a4a' },
+                            ticks: {
+                                color: '#ffffff',
+                                callback: value => value.toLocaleString('ko-KR')
+                            }
+                        }
+                    }
+                }
             });
-        } catch (error) {
-            console.error('Failed to render chart:', error);
-            UIUtils.showAlert('차트 렌더링에 실패했습니다.');
-        }
-    }
 
-    updateRates(rates) {
-        this.state.exchangeRates = rates;
-        this.render();
-    }
-
-    render() {
-        this.renderCurrencySelectors();
-        this.renderChart();
-        this.updateChartSettingsVisibility();
-    }
-
-    renderCurrencySelectors() {
-        this.renderBaseCurrencySelectors();
-        this.renderCurrencyOptions();
-    }
-
-    renderBaseCurrencySelectors() {
-        const baseCurrencySelect = this.container.querySelector('#baseCurrency');
-        const targetCurrencySelect = this.container.querySelector('#targetCurrency');
-
-        if (!baseCurrencySelect || !targetCurrencySelect) return;
-
-        const createOptions = (select, selectedValue) => {
-            select.innerHTML = this.state.exchangeRates
-                .map(rate => `
-                    <option value="${rate.currencyCode}" 
-                            ${rate.currencyCode === selectedValue ? 'selected' : ''}>
-                        ${rate.countryFlag} ${rate.currencyCode}
-                    </option>
-                `)
-                .join('');
-        };
-
-        createOptions(baseCurrencySelect, this.state.baseCurrency);
-        createOptions(targetCurrencySelect, this.state.targetCurrency);
+            this.chartInstances.set(currencyCode, chartInstance);
+        });
     }
 
     renderCurrencyOptions() {
@@ -363,7 +324,25 @@ export class ExchangeRateChart {
             .join('');
     }
 
-    // 유틸리티 메서드
+    updateRates(rates) {
+        this.state.exchangeRates = rates;
+
+        // 최초 실행 시 선택된 통화가 없다면 모든 통화 선택
+        if (this.state.selectedCurrencies.length === 0) {
+            this.state.selectedCurrencies = rates
+                .filter(rate => rate.currencyCode !== 'KRW')
+                .map(rate => rate.currencyCode);
+            this.saveSettings();
+        }
+
+        this.render();
+    }
+
+    render() {
+        this.renderCurrencyOptions();
+        this.renderCharts();
+    }
+
     getExchangeRate(currencyCode) {
         return this.state.exchangeRates.find(rate => rate.currencyCode === currencyCode);
     }
