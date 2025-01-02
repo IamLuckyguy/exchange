@@ -263,12 +263,56 @@ export class Calculator {
 
     // 환율 데이터 업데이트
     updateRates(rates) {
+        // 기존 실시간 데이터 보존을 위한 처리
+        if (this.state.exchangeRates.length > 0) {
+            rates = rates.map(newRate => {
+                const existingRate = this.state.exchangeRates.find(
+                    rate => rate.currencyCode === newRate.currencyCode
+                );
+
+                // 기존 실시간 데이터가 있으면 그대로 유지
+                if (existingRate && existingRate.exchangeRateRealTime) {
+                    return {
+                        ...newRate,
+                        exchangeRateRealTime: existingRate.exchangeRateRealTime
+                    };
+                }
+
+                return newRate;
+            });
+        }
+
         this.state.exchangeRates = rates;
         this.render(); // 새로운 환율로 UI 업데이트
 
+        // 마지막 입력값으로 계산기 업데이트
         const { currencyCode, amount } = this.state.lastInput;
         this.updateCalculatorTitle(currencyCode, amount);
         this.updateAllCurrencyInputs(currencyCode, amount);
+    }
+
+    // SSE로 받은 실시간 데이터 업데이트
+    updateRealTimeData(newData) {
+        let hasUpdates = false;
+
+        this.state.exchangeRates = this.state.exchangeRates.map(rate => {
+            const newRateData = newData.find(data => data.currencyCode === rate.currencyCode);
+            if (newRateData?.latestRate) {
+                hasUpdates = true;
+                return {
+                    ...rate,
+                    exchangeRateRealTime: [...(rate.exchangeRateRealTime || []), newRateData.latestRate]
+                };
+            }
+            return rate;
+        });
+
+        if (hasUpdates) {
+            // 마지막 입력값으로 계산기 업데이트
+            const { currencyCode, amount } = this.state.lastInput;
+            this.updateCalculatorTitle(currencyCode, amount);
+            this.updateAllCurrencyInputs(currencyCode, amount);
+        }
     }
 
     // UI 렌더링
@@ -334,15 +378,26 @@ export class Calculator {
 
     // 유틸리티 메서드들
     getExchangeRate(currencyCode) {
-        return this.state.exchangeRates.find(rate => rate.currencyCode === currencyCode);
+        const rate = this.state.exchangeRates.find(rate => rate.currencyCode === currencyCode);
+        if (!rate) return null;
+
+        // 실시간 데이터가 있는지 확인
+        if (!rate.exchangeRateRealTime || rate.exchangeRateRealTime.length === 0) {
+            return null;
+        }
+
+        // 마지막 실시간 데이터 반환
+        return {
+            ...rate,
+            currentRate: rate.exchangeRateRealTime[rate.exchangeRateRealTime.length - 1]
+        };
     }
 
     getRateValue(exchangeRate) {
-        if (!exchangeRate?.exchangeRateRealTime?.length) return 0;
+        if (!exchangeRate?.currentRate) return 0;
         if (exchangeRate.currencyCode === 'KRW') return 1;
 
-        const lastExchangeRate = exchangeRate.exchangeRateRealTime[exchangeRate.exchangeRateRealTime.length - 1];
-        return parseFloat(lastExchangeRate.rv);
+        return parseFloat(exchangeRate.currentRate.rv);
     }
 
     formatNumber(number, decimals = 2) {
