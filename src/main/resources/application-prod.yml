@@ -2,6 +2,16 @@ spring:
   config:
     activate:
       on-profile: prod
+
+  data:
+    redis:
+      sentinel:
+        password: fpeltmWkd!@#123
+        master: mymaster
+        nodes:
+          - redis.redis:26379
+      password: fpeltmWkd!@#123
+
   jpa:
     hibernate:
       ddl-auto: validate
