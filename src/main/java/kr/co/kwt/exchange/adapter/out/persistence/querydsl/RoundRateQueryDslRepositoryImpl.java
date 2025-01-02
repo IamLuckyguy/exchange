@@ -26,23 +26,25 @@ public class RoundRateQueryDslRepositoryImpl implements RoundRateQueryDslReposit
                         "currency_code, " +
                         "round_rate, " +
                         "round_id, " +
+                        "fetch_round, " +
                         "trend, " +
                         "trend_rate, " +
                         "trend_diff, " +
                         "live_status, " +
                         "market_status, " +
-                        "fetched_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        "fetched_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         int[][] updatedCounts = jdbcTemplate.batchUpdate(query, roundRates, 100, ((ps, argument) -> {
             ps.setString(1, argument.getExchange().getCurrencyCode());
             ps.setDouble(2, argument.getRoundRate());
             ps.setLong(3, argument.getRound().getId());
-            ps.setString(4, argument.getTrend());
-            ps.setDouble(5, argument.getTrendRate());
-            ps.setDouble(6, argument.getTrendDiff());
-            ps.setString(7, argument.getLiveStatus());
-            ps.setString(8, argument.getMarketStatus());
-            ps.setTimestamp(9, Timestamp.valueOf(argument.getFetchedAt()));
+            ps.setLong(4, argument.getFetchRound());
+            ps.setString(5, argument.getTrend());
+            ps.setDouble(6, argument.getTrendRate());
+            ps.setDouble(7, argument.getTrendDiff());
+            ps.setString(8, argument.getLiveStatus());
+            ps.setString(9, argument.getMarketStatus());
+            ps.setTimestamp(10, Timestamp.valueOf(argument.getFetchedAt()));
         }));
 
         return Arrays

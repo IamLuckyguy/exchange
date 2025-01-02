@@ -35,6 +35,7 @@ public class FetchExchangeCommand {
             return RoundRate.withoutId(
                     exchange,
                     round,
+                    round.getRound(),
                     roundRate,
                     trend,
                     trendRate,

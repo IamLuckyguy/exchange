@@ -32,6 +32,7 @@ public class RoundRate {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "round_id")
     private Round round;
+    private Integer fetchRound;
     private String trend;
     private Double trendRate;
     private Double trendDiff;
@@ -44,6 +45,7 @@ public class RoundRate {
     public static RoundRate withoutId(
             @NonNull final Exchange exchange,
             @NonNull final Round round,
+            @NonNull final Integer fetchRound,
             @NonNull final Double roundRate,
             @NonNull final String trend,
             @NonNull final Double trendRate,
@@ -56,6 +58,7 @@ public class RoundRate {
                 .exchange(exchange)
                 .roundRate(roundRate)
                 .round(round)
+                .fetchRound(fetchRound)
                 .trend(trend)
                 .trendRate(trendRate)
                 .trendDiff(trendDiff)
