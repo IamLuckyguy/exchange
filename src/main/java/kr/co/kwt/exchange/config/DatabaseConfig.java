@@ -1,47 +1,46 @@
 package kr.co.kwt.exchange.config;
 
-import io.r2dbc.spi.ConnectionFactories;
-import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.ConnectionFactoryOptions;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import jakarta.persistence.EntityManagerFactory;
 import kr.co.kwt.exchange.config.kms.KmsDbSecretValue;
 import kr.co.kwt.exchange.config.kms.KmsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
-import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
-import org.springframework.r2dbc.connection.R2dbcTransactionManager;
-import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
-import org.springframework.transaction.ReactiveTransactionManager;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.sql.DataSource;
+
 @Configuration
-@EnableR2dbcAuditing
 @EnableTransactionManagement
-@EnableR2dbcRepositories(basePackages = "kr.co.kwt.exchange.adapter.out.persistence")
 public class DatabaseConfig {
 
     @Bean
-    public ConnectionFactory connectionFactory(final KmsService kmsService) {
-        KmsDbSecretValue kmsDbSecretValue = kmsService.getDbSecretValue();
-        return ConnectionFactories.get(ConnectionFactoryOptions.builder()
-                .option(ConnectionFactoryOptions.DRIVER, "mysql")
-                .option(ConnectionFactoryOptions.HOST, kmsDbSecretValue.getHost())
-                .option(ConnectionFactoryOptions.PORT, kmsDbSecretValue.getPort())
-                .option(ConnectionFactoryOptions.DATABASE, kmsDbSecretValue.getDatabase())
-                .option(ConnectionFactoryOptions.USER, kmsDbSecretValue.getUsername())
-                .option(ConnectionFactoryOptions.PASSWORD, kmsDbSecretValue.getPassword())
-                .build());
+    public DataSource dataSource(KmsService kmsService) {
+        KmsDbSecretValue dbSecretValue = kmsService.getDbSecretValue();
+
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        hikariConfig.setJdbcUrl(dbSecretValue.getJdbcUrl() + "?rewriteBatchedStatements=true&profileSQL=true&logger=Slf4JLogger&maxQuerySizeToLog=999999");
+        hikariConfig.setUsername(dbSecretValue.getUsername());
+        hikariConfig.setPassword(dbSecretValue.getPassword());
+
+        // 풀 크기 설정
+        hikariConfig.setMinimumIdle(10);
+        hikariConfig.setMaximumPoolSize(20);
+        hikariConfig.setIdleTimeout(1800000);
+        hikariConfig.setConnectionTimeout(3000);
+        hikariConfig.setMaxLifetime(7200000);
+
+        // 커넥션 유효성 검사
+        hikariConfig.setConnectionTestQuery("SELECT 1");
+        hikariConfig.setValidationTimeout(2000);
+        return new HikariDataSource(hikariConfig);
     }
 
     @Bean
-    public ConnectionFactoryInitializer initializer(final ConnectionFactory connectionFactory) {
-        ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
-        initializer.setConnectionFactory(connectionFactory);
-        return initializer;
-    }
-
-    @Bean
-    public ReactiveTransactionManager transactionManager(final ConnectionFactory connectionFactory) {
-        return new R2dbcTransactionManager(connectionFactory);
+    public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
     }
 }
