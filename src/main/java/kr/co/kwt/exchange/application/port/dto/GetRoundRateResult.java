@@ -21,6 +21,8 @@ public class GetRoundRateResult {
     private String trend;
     @JsonProperty("tr")
     private double trendRate;
+    @JsonProperty("td")
+    private double trendDiff;
     @JsonProperty("live")
     private String liveStatus;
     @JsonProperty("market")
@@ -34,6 +36,7 @@ public class GetRoundRateResult {
                 roundRate.getRound().getRound(),
                 roundRate.getTrend(),
                 roundRate.getTrendRate(),
+                roundRate.getTrendDiff(),
                 roundRate.getLiveStatus(),
                 roundRate.getMarketStatus(),
                 roundRate.getFetchedAt()

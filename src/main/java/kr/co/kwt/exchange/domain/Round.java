@@ -25,7 +25,11 @@ public class Round {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Integer round;
+
+    @Column(columnDefinition = "DATETIME")
     private LocalDateTime fetchedAt;
+
+    @Column(columnDefinition = "DATETIME")
     private LocalDateTime createdAt;
 
     public static Round withoutId(@NonNull final Integer round, @NonNull final LocalDateTime fetchedAt) {

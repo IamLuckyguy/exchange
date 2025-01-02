@@ -15,4 +15,6 @@ public interface ExchangeQueryDslRepository {
     List<GetExchangeByRoundResult> getExchangesByRound(int start, int end);
 
     List<String> findAllCurrencyCodes(List<String> currencyCodes);
+
+    List<GetExchangeByRoundResult> getExchangesWithLastRoundRate();
 }

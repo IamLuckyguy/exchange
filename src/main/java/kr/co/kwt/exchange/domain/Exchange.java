@@ -45,7 +45,10 @@ public class Exchange {
 
     private int unit;
     private int decimals;
+
+    @Column(columnDefinition = "DATETIME")
     private LocalDateTime createdAt;
+    @Column(columnDefinition = "DATETIME")
     private LocalDateTime updatedAt;
 
     public static Exchange withoutId(

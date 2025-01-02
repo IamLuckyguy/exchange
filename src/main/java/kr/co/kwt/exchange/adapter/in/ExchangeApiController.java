@@ -121,14 +121,14 @@ public class ExchangeApiController {
                 fetchRates);
 
         FetchExchangeResult fetchExchangeResult = fetchExchangeUseCase.fetchExchange(fetchExchangeCommand);
-        publishFetchedEvent(fetchExchangeResult.getRound());
+        publishFetchedEvent();
 
         return ResponseEntity.ok(fetchExchangeResult);
     }
 
-    private void publishFetchedEvent(Integer fetchedRound) {
+    private void publishFetchedEvent() {
         List<GetExchangeByRoundResult> exchangeByRoundResults = loadExchangePort
-                .getExchangesByRound(fetchedRound, fetchedRound);
+                .getExchangesWithLastRoundRate();
 
         sseEmitterProvider
                 .getSseEmitters()

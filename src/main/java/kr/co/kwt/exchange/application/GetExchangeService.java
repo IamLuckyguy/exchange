@@ -25,4 +25,9 @@ public class GetExchangeService implements GetExchangeUseCase {
     public List<GetExchangeByRoundResult> getExchangesByRound(@NonNull final Integer start, @NonNull final Integer end) {
         return loadExchangePort.getExchangesByRound(start, end);
     }
+
+    @Override
+    public List<GetExchangeByRoundResult> getExchangesWithLastRoundRate() {
+        return loadExchangePort.getExchangesWithLastRoundRate();
+    }
 }

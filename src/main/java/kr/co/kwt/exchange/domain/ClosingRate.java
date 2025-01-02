@@ -27,6 +27,8 @@ public class ClosingRate {
     @JoinColumn(name = "currency_code", referencedColumnName = "currencyCode")
     private Exchange exchange;
     private double closingRate;
+
+    @Column(columnDefinition = "DATETIME")
     private LocalDateTime fetchedAt;
 
     public static ClosingRate withoutId(

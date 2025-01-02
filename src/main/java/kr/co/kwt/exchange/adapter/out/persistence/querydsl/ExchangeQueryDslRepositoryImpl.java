@@ -97,4 +97,19 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
                 .where(exchange.currencyCode.in(currencyCodes))
                 .fetch();
     }
+
+    @Override
+    public List<GetExchangeByRoundResult> getExchangesWithLastRoundRate() {
+        return queryFactory
+                .selectFrom(roundRate1)
+                .orderBy(roundRate1.fetchedAt.desc())
+                .limit(1)
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(roundRate -> roundRate.getExchange().getCurrencyCode()))
+                .entrySet()
+                .stream()
+                .map(entry -> GetExchangeByRoundResult.of(entry.getKey(), entry.getValue()))
+                .toList();
+    }
 }
