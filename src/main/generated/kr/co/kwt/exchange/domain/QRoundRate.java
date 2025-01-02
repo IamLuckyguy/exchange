@@ -38,6 +38,8 @@ public class QRoundRate extends EntityPathBase<RoundRate> {
 
     public final StringPath trend = createString("trend");
 
+    public final NumberPath<Double> trendDiff = createNumber("trendDiff", Double.class);
+
     public final NumberPath<Double> trendRate = createNumber("trendRate", Double.class);
 
     public QRoundRate(String variable) {

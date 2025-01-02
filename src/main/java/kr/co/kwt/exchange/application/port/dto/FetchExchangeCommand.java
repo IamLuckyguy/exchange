@@ -27,6 +27,7 @@ public class FetchExchangeCommand {
         private Double roundRate;
         private String trend;
         private Double trendRate;
+        private Double trendDiff;
         private String marketStatus;
         private String liveStatus;
 
@@ -37,6 +38,7 @@ public class FetchExchangeCommand {
                     roundRate,
                     trend,
                     trendRate,
+                    trendDiff,
                     liveStatus,
                     marketStatus,
                     fetchedAt

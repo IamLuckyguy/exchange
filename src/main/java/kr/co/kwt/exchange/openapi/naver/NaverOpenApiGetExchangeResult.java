@@ -22,6 +22,9 @@ public class NaverOpenApiGetExchangeResult implements OpenApiGetExchangeResult {
     private Map<String, String> trend;
 
     @JsonProperty("fluctuations")
+    private String trendDiff;
+
+    @JsonProperty("fluctuationsRatio")
     private String trendRate;
 
     @JsonProperty("delayTimename")
@@ -41,6 +44,11 @@ public class NaverOpenApiGetExchangeResult implements OpenApiGetExchangeResult {
     }
 
     @Override
+    public double getTrendDiff() {
+        return Double.parseDouble(trendDiff.replace(",", ""));
+    }
+
+    @Override
     public String getTrend() {
         return trend.get("text");
     }
@@ -52,6 +60,7 @@ public class NaverOpenApiGetExchangeResult implements OpenApiGetExchangeResult {
                 getRate(),
                 getTrend(),
                 getTrendRate(),
+                getTrendDiff(),
                 getMarketStatus(),
                 getLiveStatus());
     }

@@ -29,13 +29,16 @@ public class RoundRate {
     private Exchange exchange;
     private double roundRate;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "round_id")
     private Round round;
     private String trend;
     private Double trendRate;
+    private Double trendDiff;
     private String liveStatus;
     private String marketStatus;
+
+    @Column(columnDefinition = "DATETIME")
     private LocalDateTime fetchedAt;
 
     public static RoundRate withoutId(
@@ -44,6 +47,7 @@ public class RoundRate {
             @NonNull final Double roundRate,
             @NonNull final String trend,
             @NonNull final Double trendRate,
+            @NonNull final Double trendDiff,
             @NonNull final String liveStatus,
             @NonNull final String marketStatus,
             @NonNull final LocalDateTime fetchedAt
@@ -54,6 +58,7 @@ public class RoundRate {
                 .round(round)
                 .trend(trend)
                 .trendRate(trendRate)
+                .trendDiff(trendDiff)
                 .liveStatus((liveStatus == null || liveStatus.isBlank()) ? "실시간" : liveStatus)
                 .marketStatus(marketStatus)
                 .fetchedAt(fetchedAt)

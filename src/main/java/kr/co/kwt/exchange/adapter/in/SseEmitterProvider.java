@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @RequiredArgsConstructor
 public class SseEmitterProvider {
 
-    private static final Long DEFAULT_TIME_OUT = 60L * 1000 * 10; // 10분
+    private static final Long DEFAULT_TIME_OUT = 60L * 1000 * 60; // 60분
     private final List<SseEmitter> sseEmitters;
 
     public SseEmitterProvider() {

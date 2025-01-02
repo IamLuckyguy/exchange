@@ -18,4 +18,6 @@ public interface LoadExchangePort {
     List<GetExchangeByRoundResult> getExchangesByRound(int start, int end);
 
     List<String> findAllCurrencyCodes(List<String> list);
+
+    List<GetExchangeByRoundResult> getExchangesWithLastRoundRate();
 }

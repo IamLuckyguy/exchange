@@ -41,4 +41,9 @@ public class LoadExchangeAdapter implements LoadExchangePort {
     public List<String> findAllCurrencyCodes(List<String> currencyCodes) {
         return exchangeRepository.findAllCurrencyCodes(currencyCodes);
     }
+
+    @Override
+    public List<GetExchangeByRoundResult> getExchangesWithLastRoundRate() {
+        return exchangeRepository.getExchangesWithLastRoundRate();
+    }
 }

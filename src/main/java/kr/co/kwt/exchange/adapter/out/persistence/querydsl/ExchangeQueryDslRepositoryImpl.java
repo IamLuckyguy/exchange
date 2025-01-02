@@ -50,6 +50,7 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
                 .selectFrom(roundRate1)
                 .join(roundRate1.exchange, exchange).fetchJoin()
                 .where(roundRate1.fetchedAt.after(LocalDate.now().atStartOfDay().minusDays(1)))
+                .orderBy(roundRate1.fetchedAt.desc())
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(roundRate -> roundRate.getExchange().getCurrencyCode(), Collectors.toList()));
@@ -60,6 +61,7 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
                 .selectFrom(closingRate1)
                 .join(closingRate1.exchange, exchange).fetchJoin()
                 .where(closingRate1.fetchedAt.after(LocalDate.now().atStartOfDay().minusYears(1)))
+                .orderBy(closingRate1.fetchedAt.desc())
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(closingRate -> closingRate.getExchange().getCurrencyCode(), Collectors.toList()));
@@ -96,5 +98,20 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
                 .from(exchange)
                 .where(exchange.currencyCode.in(currencyCodes))
                 .fetch();
+    }
+
+    @Override
+    public List<GetExchangeByRoundResult> getExchangesWithLastRoundRate() {
+        return queryFactory
+                .selectFrom(roundRate1)
+                .orderBy(roundRate1.fetchedAt.desc())
+                .limit(1)
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(roundRate -> roundRate.getExchange().getCurrencyCode()))
+                .entrySet()
+                .stream()
+                .map(entry -> GetExchangeByRoundResult.of(entry.getKey(), entry.getValue()))
+                .toList();
     }
 }

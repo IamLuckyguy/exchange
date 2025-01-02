@@ -11,4 +11,6 @@ public interface GetExchangeUseCase {
 
     List<GetExchangeByRoundResult> getExchangesByRound(Integer start, Integer end);
 
+    List<GetExchangeByRoundResult> getExchangesWithLastRoundRate();
+
 }

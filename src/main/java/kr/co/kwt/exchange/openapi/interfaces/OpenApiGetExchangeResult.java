@@ -18,5 +18,7 @@ public interface OpenApiGetExchangeResult {
 
     double getTrendRate();
 
+    double getTrendDiff();
+
     FetchExchangeCommand.FetchRate toFetchRate();
 }
