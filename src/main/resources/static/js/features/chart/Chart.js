@@ -203,6 +203,12 @@ export class ExchangeRateChart {
         if (!histories || histories.length === 0) return null;
 
         const color = CHART_COLORS[colorIndex % CHART_COLORS.length];
+        const isRealTime = this.state.period === CHART_PERIODS.DAY;
+
+        // 포인트 크기 배열 생성
+        const pointRadiuses = histories.map((_, index) =>
+            index === histories.length - 1 && isRealTime ? 6 : 3
+        );
 
         return {
             labels: histories.map(history => this.formatDate(history.at)),
@@ -212,7 +218,13 @@ export class ExchangeRateChart {
                 borderColor: color,
                 backgroundColor: `${color}22`,
                 borderWidth: 2,
-                tension: 0.4
+                tension: 0.4,
+                pointStyle: 'circle',
+                pointRadius: pointRadiuses,
+                pointHoverRadius: 8,
+                pointBackgroundColor: color,
+                pointBorderColor: color,
+                lastPointColor: color // 애니메이션을 위한 커스텀 속성
             }]
         };
     }
@@ -228,6 +240,106 @@ export class ExchangeRateChart {
         return exchangeRate.exchangeRateHistories
             ?.slice(0, this.state.period)
             .sort((a, b) => new Date(a.at) - new Date(b.at)) || [];
+    }
+
+    bindChartEvents(currencyCode, chartInstance) {
+        // 마우스 이동 이벤트
+        chartInstance.canvas.addEventListener('mousemove', (e) => {
+            const points = chartInstance.getElementsAtEventForMode(
+                e,
+                'nearest',
+                { intersect: false, axis: 'x' },
+                true
+            );
+
+            if (points.length > 0) {
+                const dataIndex = points[0].index;
+                const chartArea = chartInstance.chartArea;
+
+                // 다른 모든 차트의 툴팁 동기화
+                this.chartInstances.forEach((chart, code) => {
+                    if (code !== currencyCode) {  // 현재 차트 제외
+                        const tooltip = chart.tooltip;
+                        const targetChartArea = chart.chartArea;
+
+                        // 마우스 X 위치의 상대적 비율 계산
+                        const relativeX = (e.x - chartArea.left) / (chartArea.right - chartArea.left);
+                        const targetX = targetChartArea.left + (targetChartArea.right - targetChartArea.left) * relativeX;
+
+                        // Y 위치는 해당 차트의 데이터 포인트 위치 사용
+                        const dataset = chart.data.datasets[0];
+                        const yValue = dataset.data[dataIndex];
+                        const yPixel = chart.scales.y.getPixelForValue(yValue);
+
+                        // 툴팁 활성화
+                        tooltip.setActiveElements([
+                            {
+                                datasetIndex: 0,
+                                index: dataIndex,
+                            }
+                        ], {
+                            x: targetX,
+                            y: yPixel
+                        });
+
+                        // 부드러운 업데이트를 위해 'none' 모드 사용
+                        chart.update('none');
+                    }
+                });
+            }
+        });
+
+        // 마우스가 차트를 벗어날 때의 이벤트
+        chartInstance.canvas.addEventListener('mouseleave', () => {
+            // 모든 차트의 툴팁 숨기기
+            this.chartInstances.forEach(chart => {
+                chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                chart.update('none');
+            });
+        });
+
+        // 터치 이벤트 처리 (모바일 지원)
+        chartInstance.canvas.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            const points = chartInstance.getElementsAtEventForMode(
+                touch,
+                'nearest',
+                { intersect: false, axis: 'x' },
+                true
+            );
+
+            if (points.length > 0) {
+                const dataIndex = points[0].index;
+                this.chartInstances.forEach((chart, code) => {
+                    if (code !== currencyCode) {
+                        const tooltip = chart.tooltip;
+                        const dataset = chart.data.datasets[0];
+                        const yValue = dataset.data[dataIndex];
+                        const yPixel = chart.scales.y.getPixelForValue(yValue);
+
+                        tooltip.setActiveElements([
+                            {
+                                datasetIndex: 0,
+                                index: dataIndex,
+                            }
+                        ], {
+                            x: touch.clientX,
+                            y: yPixel
+                        });
+
+                        chart.update('none');
+                    }
+                });
+            }
+        });
+
+        // 터치 종료 시 툴팁 숨기기
+        chartInstance.canvas.addEventListener('touchend', () => {
+            this.chartInstances.forEach(chart => {
+                chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                chart.update('none');
+            });
+        });
     }
 
     async renderCharts() {
@@ -247,7 +359,6 @@ export class ExchangeRateChart {
         }
         chartsContainer.appendChild(chartGrid);
 
-        // 각 통화별 차트 생성
         this.state.selectedCurrencies.forEach((currencyCode, index) => {
             const chartWrapper = document.createElement('div');
             chartWrapper.className = 'chart-wrapper';
@@ -268,7 +379,27 @@ export class ExchangeRateChart {
                     ...CHART_OPTIONS.change,
                     maintainAspectRatio: false,
                     responsive: true,
+                    animation: {
+                        duration: 0
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    onHover: (event, elements, chart) => {
+                        if (elements.length > 0) {
+                            const dataIndex = elements[0].index;
+                            this.syncTooltips(dataIndex);
+                        }
+                    },
                     plugins: {
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false,
+                            position: 'nearest',
+                        },
                         legend: {
                             position: 'bottom',
                             align: 'start',
@@ -302,7 +433,6 @@ export class ExchangeRateChart {
                             ticks: {
                                 color: '#ffffff',
                                 callback: function(value) {
-                                    // Y축 값을 정수로 표시
                                     return Math.round(value).toLocaleString('ko-KR');
                                 }
                             }
@@ -311,7 +441,109 @@ export class ExchangeRateChart {
                 }
             });
 
+            // 실시간 모드일 때 마지막 포인트 깜빡임 애니메이션 적용
+            if (this.state.period === CHART_PERIODS.DAY) {
+                this.applyLastPointAnimation(chartInstance);
+            }
+
             this.chartInstances.set(currencyCode, chartInstance);
+            this.bindChartEvents(currencyCode, chartInstance);
+        });
+    }
+
+    applyLastPointAnimation(chartInstance) {
+        let alpha = 1;
+        let decreasing = true;
+        const minAlpha = 0.4;
+        const maxAlpha = 1;
+        const stepSize = 0.02; // 더 작은 단계로 변화
+        let frameCount = 0;
+        const frameSkip = 2; // 프레임 건너뛰기
+
+        const animate = () => {
+            if (!chartInstance.data.datasets[0]) return;
+
+            const dataset = chartInstance.data.datasets[0];
+            const lastIndex = dataset.data.length - 1;
+
+            frameCount++;
+
+            // 일정 프레임마다 업데이트
+            if (frameCount % frameSkip !== 0) {
+                requestAnimationFrame(animate);
+                return;
+            }
+
+            // 투명도 업데이트
+            if (decreasing) {
+                alpha -= stepSize;
+                if (alpha <= minAlpha) {
+                    alpha = minAlpha;
+                    decreasing = false;
+                }
+            } else {
+                alpha += stepSize;
+                if (alpha >= maxAlpha) {
+                    alpha = maxAlpha;
+                    decreasing = true;
+                }
+            }
+
+            if (lastIndex >= 0) {
+                const baseColor = dataset.lastPointColor;
+                const rgbaColor = this.getRGBAColor(baseColor, alpha);
+
+                // 마지막 포인트의 색상만 업데이트
+                dataset.pointBackgroundColor = dataset.data.map((_, i) =>
+                    i === lastIndex ? rgbaColor : dataset.lastPointColor
+                );
+
+                chartInstance.update('none');
+            }
+
+            if (this.state.period === CHART_PERIODS.DAY) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }
+
+    getRGBAColor(color, alpha) {
+        if (color.startsWith('rgb')) {
+            return color.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
+        }
+        return `rgba(0, 255, 136, ${alpha})`; // 기본 색상
+    }
+
+    syncTooltips(dataIndex) {
+        this.chartInstances.forEach(chart => {
+            const tooltip = chart.tooltip;
+
+            if (tooltip.getActiveElements().length > 0) {
+                const chartArea = chart.chartArea;
+                const centerX = (chartArea.left + chartArea.right) / 2;
+                const yAxis = chart.scales.y;
+
+                // 데이터 포인트의 y값 가져오기
+                const dataset = chart.data.datasets[0];
+                const yValue = dataset.data[dataIndex];
+
+                // y축 위치 계산
+                const yPixel = yAxis.getPixelForValue(yValue);
+
+                tooltip.setActiveElements([
+                    {
+                        datasetIndex: 0,
+                        index: dataIndex,
+                    }
+                ], {
+                    x: centerX,
+                    y: yPixel,
+                });
+            }
+
+            chart.update('none');
         });
     }
 
