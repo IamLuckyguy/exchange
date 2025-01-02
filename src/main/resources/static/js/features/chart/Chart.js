@@ -411,8 +411,26 @@ export class ExchangeRateChart {
                         },
                         title: {
                             display: true,
-                            text: `${this.getExchangeRate(currencyCode)?.countryFlag || ''} ${currencyCode} 원화 환율`,
-                            color: '#ffffff',
+                            text: (() => {
+                                const rate = this.getExchangeRate(currencyCode);
+                                if (!rate?.exchangeRateRealTime?.length) {
+                                    return `${rate?.countryFlag || ''} ${currencyCode} 원화 환율`;
+                                }
+
+                                const latestRate = rate.exchangeRateRealTime[rate.exchangeRateRealTime.length - 1];
+                                const isUp = latestRate.t === '상승';
+                                const arrow = isUp ? '▲' : '▼';
+
+                                return `${rate.countryFlag} ${currencyCode} 원화 환율    ${arrow} ${Math.abs(latestRate.td).toFixed(2)} (${Math.abs(latestRate.tr).toFixed(2)}%)`;
+                            })(),
+                            color: (context) => {
+                                const rate = this.getExchangeRate(currencyCode);
+                                if (!rate?.exchangeRateRealTime?.length) return '#ffffff';
+
+                                const latestRate = rate.exchangeRateRealTime[rate.exchangeRateRealTime.length - 1];
+                                const isUp = latestRate.t === '상승';
+                                return isUp ? '#ff6b6b' : '#4dabf7';
+                            },
                             font: {
                                 size: 16,
                                 weight: 'bold'
