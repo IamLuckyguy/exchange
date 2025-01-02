@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.adapter.in;
+package kr.co.kwt.exchange.adapter.in.web;
 
 import kr.co.kwt.exchange.application.BusinessException;
 import kr.co.kwt.exchange.config.error.ErrorCode;

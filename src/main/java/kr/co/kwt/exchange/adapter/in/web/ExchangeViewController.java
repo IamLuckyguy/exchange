@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.adapter.in;
+package kr.co.kwt.exchange.adapter.in.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kr.co.kwt.exchange.utils.WebUtils;

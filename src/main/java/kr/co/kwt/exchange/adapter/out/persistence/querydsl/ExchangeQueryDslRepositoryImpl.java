@@ -79,7 +79,7 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
     public List<GetExchangeByRoundResult> getExchangesByRound(int start, int end) {
         return queryFactory
                 .selectFrom(roundRate1)
-                .where(roundRate1.round.round.between(start, end)
+                .where(roundRate1.fetchRound.between(start, end)
                         .and(roundRate1.fetchedAt.after(LocalDate.now().atStartOfDay())))
                 .orderBy(roundRate1.fetchedAt.desc())
                 .fetch()

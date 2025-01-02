@@ -26,6 +26,8 @@ public class QRoundRate extends EntityPathBase<RoundRate> {
 
     public final DateTimePath<java.time.LocalDateTime> fetchedAt = createDateTime("fetchedAt", java.time.LocalDateTime.class);
 
+    public final NumberPath<Integer> fetchRound = createNumber("fetchRound", Integer.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath liveStatus = createString("liveStatus");
