@@ -90,28 +90,19 @@ export class App {
 
     updateRealTimeData(newRealTimeData) {
         try {
+            // 기존 저장된 데이터 가져오기
             const savedRates = JSON.parse(localStorage.getItem('exchange.rates'));
+
             if (!savedRates) return;
 
+            // 새로운 실시간 데이터 추가
             savedRates.forEach(rate => {
                 const newData = newRealTimeData.find(data => data.currencyCode === rate.currencyCode);
-                if (newData && newData.latestRate) {
-                    const rateData = newData.latestRate;
+                if (newData) {
+                    // 기존 실시간 데이터 배열에 새 데이터 추가
+                    rate.exchangeRateRealTime.push(newData.latestRate);
 
-                    // 이미 존재하는 고시 회차인지 확인
-                    const existingIndex = rate.exchangeRateRealTime.findIndex(
-                        item => item.r === rateData.r
-                    );
-
-                    if (existingIndex === -1) {
-                        // 새로운 고시 회차 데이터 추가
-                        rate.exchangeRateRealTime.push(rateData);
-                    } else {
-                        // 기존 고시 회차 데이터 업데이트
-                        rate.exchangeRateRealTime[existingIndex] = rateData;
-                    }
-
-                    // 24시간 이전 데이터 필터링
+                    // 24시간이 지난 데이터 제거
                     const twentyFourHoursAgo = new Date();
                     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
 
@@ -122,10 +113,11 @@ export class App {
                 }
             });
 
+            // 업데이트된 데이터 저장
             this.saveExchangeRatesToLocalStorage(savedRates);
 
-            // 컴포넌트 업데이트
-            if (this.calculator) this.calculator.updateRates(savedRates);
+            // 각 컴포넌트의 실시간 데이터 업데이트
+            if (this.calculator) this.calculator.updateRealTimeData(newRealTimeData);
             if (this.chart) this.chart.updateRates(savedRates);
 
         } catch (error) {
