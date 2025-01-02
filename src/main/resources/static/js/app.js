@@ -159,7 +159,23 @@ export class App {
                 throw new Error('Failed to fetch exchange rates');
             }
 
-            return await response.json();
+            const rates = await response.json();
+
+            // 각 통화별로 실시간 데이터를 시간순으로 정렬
+            return rates.map(rate => {
+                if (rate.exchangeRateRealTime) {
+                    const sortedRealTime = [...rate.exchangeRateRealTime].sort(
+                        (a, b) => new Date(b.at) - new Date(a.at)
+                    );
+                    return {
+                        ...rate,
+                        exchangeRateRealTime: sortedRealTime,
+                        currentRate: sortedRealTime[0]  // 가장 최근 데이터
+                    };
+                }
+                return rate;
+            });
+
         } catch (error) {
             console.error('Error fetching exchange rates:', error);
             UIUtils.showAlert('환율 정보를 가져오는데 실패했습니다.');

@@ -408,7 +408,6 @@
 .currency-option {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.75rem 1rem;
     background: #3a3a3a;
     border-radius: 0.25rem;
@@ -669,7 +668,6 @@
 .currency-option {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     padding: 0.75rem;
     background-color: #3a3a3a;
     border-radius: 0.25rem;
