@@ -22,7 +22,7 @@ public class DatabaseConfig {
 
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        hikariConfig.setJdbcUrl(dbSecretValue.getJdbcUrl() + "?rewriteBatchedStatements=true&profileSQL=true&logger=Slf4JLogger&maxQuerySizeToLog=999999");
+        hikariConfig.setJdbcUrl(dbSecretValue.getJdbcUrl() + "?rewriteBatchedStatements=true&maxQuerySizeToLog=999999");
         hikariConfig.setUsername(dbSecretValue.getUsername());
         hikariConfig.setPassword(dbSecretValue.getPassword());
 
