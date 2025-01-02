@@ -197,9 +197,11 @@ export class ExchangeRateChart {
 
     prepareChartData(currencyCode, colorIndex) {
         const rate = this.getExchangeRate(currencyCode);
-        if (!rate?.exchangeRateHistories) return null;
+        if (!rate) return null;
 
         const histories = this.prepareHistoricalData(rate);
+        if (!histories || histories.length === 0) return null;
+
         const color = CHART_COLORS[colorIndex % CHART_COLORS.length];
 
         return {
@@ -217,10 +219,12 @@ export class ExchangeRateChart {
 
     prepareHistoricalData(exchangeRate) {
         if (this.state.period === CHART_PERIODS.DAY) {
+            // 실시간 데이터 처리 - 24시간 데이터
             return exchangeRate.exchangeRateRealTime
-                ?.sort((a, b) => a.r - b.r) || [];
+                ?.sort((a, b) => new Date(a.at) - new Date(b.at)) || [];
         }
 
+        // 일별 데이터 처리
         return exchangeRate.exchangeRateHistories
             ?.slice(0, this.state.period)
             .sort((a, b) => new Date(a.at) - new Date(b.at)) || [];
@@ -297,7 +301,10 @@ export class ExchangeRateChart {
                             grid: { color: '#4a4a4a' },
                             ticks: {
                                 color: '#ffffff',
-                                callback: value => value.toLocaleString('ko-KR')
+                                callback: function(value) {
+                                    // Y축 값을 정수로 표시
+                                    return Math.round(value).toLocaleString('ko-KR');
+                                }
                             }
                         }
                     }
@@ -351,7 +358,7 @@ export class ExchangeRateChart {
         const d = new Date(date);
 
         if (this.state.period === CHART_PERIODS.DAY) {
-            return `${String(d.getDate()).padStart(2, '0')}일 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
         }
 
         const year = String(d.getFullYear()).slice(2);

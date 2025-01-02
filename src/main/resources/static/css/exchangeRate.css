@@ -173,14 +173,16 @@
 }
 
 .decimal-separator {
-    color: #666;
+    color: #00ff88;
     margin: 0 1px;
+    font-weight: bold;
 }
 
 .decimal-part {
     color: #00ff88;
     min-width: 2ch;
     display: inline-block;
+    font-size: 0.8rem;
 }
 
 .dialog {
