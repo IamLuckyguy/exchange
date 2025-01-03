@@ -1,6 +1,8 @@
 package kr.co.kwt.exchange.adapter.in.web;
 
 
+import kr.co.kwt.exchange.adapter.in.event.FetchEventPublisher;
+import kr.co.kwt.exchange.adapter.in.event.SseEmitterProvider;
 import kr.co.kwt.exchange.application.ServerException;
 import kr.co.kwt.exchange.application.port.dto.*;
 import kr.co.kwt.exchange.application.port.dto.FetchExchangeCommand.FetchRate;
@@ -34,6 +36,7 @@ public class ExchangeApiController {
     private final AddExchangeUseCase addExchangeUseCase;
     private final OpenApiClient openApiClient;
     private final SseEmitterProvider sseEmitterProvider;
+    private final FetchEventPublisher fetchEventPublisher;
 
     @GetMapping("/exchange-rates")
     public ResponseEntity<List<GetExchangeResult>> getExchanges() {
@@ -121,28 +124,8 @@ public class ExchangeApiController {
                 fetchRates);
 
         FetchExchangeResult fetchExchangeResult = fetchExchangeUseCase.fetchExchange(fetchExchangeCommand);
-        publishFetchedEvent();
+        fetchEventPublisher.publishEvent();
 
         return ResponseEntity.ok(fetchExchangeResult);
-    }
-
-    private void publishFetchedEvent() {
-        List<GetExchangeByRoundResult> exchangeByRoundResults = loadExchangePort
-                .getExchangesWithLastRoundRate();
-
-        sseEmitterProvider
-                .getSseEmitters()
-                .forEach(sseEmitter -> doPublish(sseEmitter, exchangeByRoundResults));
-    }
-
-    private void doPublish(SseEmitter sseEmitter, List<GetExchangeByRoundResult> exchangeByRoundResults) {
-        try {
-            sseEmitter.send(SseEmitter.event()
-                    .name("Publish Fetch Event")
-                    .data(exchangeByRoundResults));
-        }
-        catch (IOException e) {
-            throw new ServerException(e);
-        }
     }
 }
