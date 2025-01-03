@@ -6,6 +6,7 @@ export class ExchangeRateChart {
     constructor(containerSelector = '#chartContainer') {
         this.container = document.querySelector(containerSelector);
         this.chartInstances = new Map();
+        this.resizeTimeouts = new Map();
 
         // 상태 초기화
         this.state = {
@@ -16,33 +17,60 @@ export class ExchangeRateChart {
 
         this.loadSettings();
         this.bindEvents();
-        this.resizeHandler = this.handleResize.bind(this);
-        window.addEventListener('resize', this.debounce(this.resizeHandler, 250));
+
+        // 전역 ResizeObserver 초기화
+        this.initializeResizeObserver();
     }
 
-    // 리사이즈 이벤트 디바운싱을 위한 유틸리티 함수
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    initializeResizeObserver() {
+        // ResizeObserver가 이미 존재하면 정리
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
+
+        // 새로운 ResizeObserver 설정
+        this.resizeObserver = new ResizeObserver(entries => {
+            entries.forEach(entry => {
+                const chartId = entry.target.querySelector('canvas')?.id;
+                if (chartId) {
+                    // 기존 타임아웃 취소
+                    if (this.resizeTimeouts.has(chartId)) {
+                        clearTimeout(this.resizeTimeouts.get(chartId));
+                    }
+
+                    // 새로운 타임아웃 설정
+                    this.resizeTimeouts.set(chartId, setTimeout(() => {
+                        const chart = this.chartInstances.get(chartId.replace('chart-', ''));
+                        if (chart) {
+                            requestAnimationFrame(() => {
+                                chart.resize();
+                                chart.update('none');
+                            });
+                        }
+                        this.resizeTimeouts.delete(chartId);
+                    }, 100));
+                }
+            });
+        });
     }
 
-    // 리사이즈 핸들러
     handleResize() {
-        this.renderCharts();
+        requestAnimationFrame(() => {
+            this.chartInstances.forEach(chart => {
+                if (chart.canvas) {
+                    chart.resize();
+                }
+            });
+        });
     }
 
     // 컴포넌트 정리
     destroy() {
-        window.removeEventListener('resize', this.resizeHandler);
-        this.chartInstances.forEach(chart => chart.destroy());
-        this.chartInstances.clear();
+        this.cleanupCharts();
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+            this.resizeObserver = null;
+        }
     }
 
     loadSettings() {
@@ -254,83 +282,104 @@ export class ExchangeRateChart {
     }
 
     bindChartEvents(currencyCode, chartInstance) {
-        // 이벤트 핸들러 함수들 정의
+        // 마우스 이벤트 핸들러
         const mouseMoveHandler = (e) => {
+            console.log('mouseMoveHandler');
             const points = chartInstance.getElementsAtEventForMode(
                 e,
                 'nearest',
                 { intersect: false, axis: 'x' },
                 true
             );
-
-            if (points.length > 0) {
-                const dataIndex = points[0].index;
-                const chartArea = chartInstance.chartArea;
-
-                this.chartInstances.forEach((chart, code) => {
-                    if (code !== currencyCode) {
-                        const tooltip = chart.tooltip;
-                        const targetChartArea = chart.chartArea;
-
-                        const relativeX = (e.x - chartArea.left) / (chartArea.right - chartArea.left);
-                        const targetX = targetChartArea.left + (targetChartArea.right - targetChartArea.left) * relativeX;
-
-                        const dataset = chart.data.datasets[0];
-                        const yValue = dataset.data[dataIndex];
-                        const yPixel = chart.scales.y.getPixelForValue(yValue);
-
-                        tooltip.setActiveElements([
-                            {
-                                datasetIndex: 0,
-                                index: dataIndex,
-                            }
-                        ], {
-                            x: targetX,
-                            y: yPixel
-                        });
-
-                        chart.update('none');
-                    }
-                });
-            }
+            this.syncTooltips(chartInstance, points);
         };
 
         const mouseLeaveHandler = () => {
+            console.log('mouseLeaveHandler');
             this.chartInstances.forEach(chart => {
                 chart.tooltip.setActiveElements([], { x: 0, y: 0 });
                 chart.update('none');
             });
         };
 
+        let lastKnownDataIndex = null;  // 마지막으로 알려진 데이터 인덱스 저장
+
         const touchStartHandler = (e) => {
             const touch = e.touches[0];
+            const rect = chartInstance.canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
             const points = chartInstance.getElementsAtEventForMode(
-                touch,
+                { x, y },
                 'nearest',
                 { intersect: false, axis: 'x' },
                 true
             );
 
             if (points.length > 0) {
-                const dataIndex = points[0].index;
-                this.syncTooltips(dataIndex);
+                lastKnownDataIndex = points[0].index;  // 인덱스 저장
+                this.syncTooltips(chartInstance, points);
             }
         };
 
-        const touchEndHandler = mouseLeaveHandler;
+        const touchMoveHandler = (e) => {
+            const touch = e.touches[0];
+            const rect = chartInstance.canvas.getBoundingClientRect();
+
+            // 차트 영역 내에서의 상대적 x 위치 계산 (0~1 사이 값)
+            const chartArea = chartInstance.chartArea;
+            const x = touch.clientX - rect.left;
+
+            // x 좌표가 차트 영역 내에 있는지 확인
+            if (x >= chartArea.left && x <= chartArea.right) {
+                const relativeX = (x - chartArea.left) / (chartArea.right - chartArea.left);
+
+                // 데이터 포인트의 총 개수
+                const totalPoints = chartInstance.data.datasets[0].data.length;
+
+                // 상대적 위치를 기반으로 가장 가까운 데이터 포인트 인덱스 계산
+                const newIndex = Math.min(
+                    Math.floor(relativeX * (totalPoints - 1)),
+                    totalPoints - 1
+                );
+
+                lastKnownDataIndex = newIndex;
+
+                // 가상의 points 배열 생성
+                const simulatedPoints = [{
+                    datasetIndex: 0,
+                    index: newIndex
+                }];
+
+                this.syncTooltips(chartInstance, simulatedPoints);
+            }
+        };
+
+        const touchEndHandler = () => {
+            lastKnownDataIndex = null;  // 인덱스 초기화
+            this.chartInstances.forEach(chart => {
+                chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+                chart.update('none');
+            });
+        };
 
         // 이벤트 리스너 등록
         chartInstance.canvas.addEventListener('mousemove', mouseMoveHandler);
         chartInstance.canvas.addEventListener('mouseleave', mouseLeaveHandler);
         chartInstance.canvas.addEventListener('touchstart', touchStartHandler);
+        chartInstance.canvas.addEventListener('touchmove', touchMoveHandler);
         chartInstance.canvas.addEventListener('touchend', touchEndHandler);
+        chartInstance.canvas.addEventListener('touchcancel', touchEndHandler);
 
         // 이벤트 핸들러 참조 저장
         chartInstance._eventHandlers = {
             mousemove: mouseMoveHandler,
             mouseleave: mouseLeaveHandler,
             touchstart: touchStartHandler,
-            touchend: touchEndHandler
+            touchmove: touchMoveHandler,
+            touchend: touchEndHandler,
+            touchcancel: touchEndHandler
         };
     }
 
@@ -338,11 +387,9 @@ export class ExchangeRateChart {
         const chartsContainer = this.container.querySelector('.charts-container');
         if (!chartsContainer) return;
 
-        // 기존 차트 인스턴스들과 이벤트 리스너 제거
         this.cleanupCharts();
         chartsContainer.innerHTML = '';
 
-        // 차트 그리드 컨테이너 생성
         const chartGrid = document.createElement('div');
         chartGrid.className = 'chart-grid';
         if (this.state.selectedCurrencies.length === 1) {
@@ -350,7 +397,6 @@ export class ExchangeRateChart {
         }
         chartsContainer.appendChild(chartGrid);
 
-        // 각 통화별 차트 생성
         this.state.selectedCurrencies.forEach((currencyCode, index) => {
             const chartWrapper = document.createElement('div');
             chartWrapper.className = 'chart-wrapper';
@@ -370,14 +416,19 @@ export class ExchangeRateChart {
                 options: this.getChartOptions(currencyCode)
             });
 
-            // 실시간 모드일 때 마지막 포인트 깜빡임 애니메이션 적용
             if (this.state.period === CHART_PERIODS.DAY) {
                 this.applyLastPointAnimation(chartInstance);
             }
 
-            // 이벤트 바인딩
-            this.bindChartEvents(currencyCode, chartInstance);
             this.chartInstances.set(currencyCode, chartInstance);
+
+            // 차트 이벤트 바인딩 추가
+            this.bindChartEvents(currencyCode, chartInstance);
+
+            // ResizeObserver가 존재하면 차트 래퍼 관찰 시작
+            if (this.resizeObserver) {
+                this.resizeObserver.observe(chartWrapper);
+            }
         });
     }
 
@@ -386,6 +437,14 @@ export class ExchangeRateChart {
             ...CHART_OPTIONS.change,
             maintainAspectRatio: false,
             responsive: true,
+            layout: {
+                padding: {
+                    top: 10,
+                    right: 10,
+                    bottom: 10,
+                    left: 10
+                }
+            },
             animation: {
                 duration: 0
             },
@@ -494,42 +553,31 @@ export class ExchangeRateChart {
     }
 
     cleanupCharts() {
-        this.chartInstances.forEach(chart => {
-            // 애니메이션 프레임 정리
-            if (chart._animationFrame) {
-                cancelAnimationFrame(chart._animationFrame);
-                delete chart._animationFrame;
-            }
+        // ResizeObserver가 존재하면 연결 해제
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
 
-            // 이벤트 리스너 정리
-            if (chart._eventHandlers) {
-                Object.entries(chart._eventHandlers).forEach(([event, handler]) => {
-                    if (chart.canvas) {
-                        chart.canvas.removeEventListener(event, handler);
-                    }
-                });
-                delete chart._eventHandlers;
-            }
+        // 타임아웃 정리
+        if (this.resizeTimeouts) {
+            this.resizeTimeouts.forEach(timeout => clearTimeout(timeout));
+            this.resizeTimeouts.clear();
+        }
 
-            // Chart.js 내부 이벤트 리스너 정리
-            if (chart.canvas) {
-                const canvas = chart.canvas;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // 차트 인스턴스 정리
+        if (this.chartInstances) {
+            this.chartInstances.forEach(chart => {
+                if (chart._eventHandlers) {
+                    Object.entries(chart._eventHandlers).forEach(([event, handler]) => {
+                        if (chart.canvas) {
+                            chart.canvas.removeEventListener(event, handler);
+                        }
+                    });
                 }
-
-                // 모든 이벤트 리스너 제거
-                const clone = canvas.cloneNode(true);
-                canvas.parentNode.replaceChild(clone, canvas);
-            }
-
-            // 차트 인스턴스 destroy
-            chart.destroy();
-        });
-
-        // 차트 인스턴스 맵 초기화
-        this.chartInstances.clear();
+                chart.destroy();
+            });
+            this.chartInstances.clear();
+        }
     }
 
     applyLastPointAnimation(chartInstance) {
@@ -594,34 +642,35 @@ export class ExchangeRateChart {
         return `rgba(0, 255, 136, ${alpha})`; // 기본 색상
     }
 
-    syncTooltips(dataIndex) {
-        this.chartInstances.forEach(chart => {
-            const tooltip = chart.tooltip;
+    syncTooltips(sourceChart, points) {
+        if (!points.length) return;
 
-            if (tooltip.getActiveElements().length > 0) {
-                const chartArea = chart.chartArea;
-                const centerX = (chartArea.left + chartArea.right) / 2;
-                const yAxis = chart.scales.y;
+        const dataIndex = points[0].index;
+        const sourceChartArea = sourceChart.chartArea;
 
-                // 데이터 포인트의 y값 가져오기
-                const dataset = chart.data.datasets[0];
-                const yValue = dataset.data[dataIndex];
+        // 모든 차트에 대해 동일한 데이터 포인트의 툴팁 표시
+        this.chartInstances.forEach(targetChart => {
+            if (!targetChart.data?.datasets?.[0]?.data[dataIndex]) return;
 
-                // y축 위치 계산
-                const yPixel = yAxis.getPixelForValue(yValue);
+            const dataset = targetChart.data.datasets[0];
+            const yValue = dataset.data[dataIndex];
+            const yPixel = targetChart.scales.y.getPixelForValue(yValue);
 
-                tooltip.setActiveElements([
-                    {
-                        datasetIndex: 0,
-                        index: dataIndex,
-                    }
-                ], {
-                    x: centerX,
-                    y: yPixel,
-                });
-            }
+            // 차트 영역의 중앙에 툴팁 표시
+            const targetChartArea = targetChart.chartArea;
+            const targetX = (targetChartArea.left + targetChartArea.right) / 2;
 
-            chart.update('none');
+            targetChart.tooltip.setActiveElements([
+                {
+                    datasetIndex: 0,
+                    index: dataIndex
+                }
+            ], {
+                x: targetX,
+                y: yPixel
+            });
+
+            targetChart.update('none');
         });
     }
 
