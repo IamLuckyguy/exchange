@@ -284,7 +284,6 @@ export class ExchangeRateChart {
     bindChartEvents(currencyCode, chartInstance) {
         // 마우스 이벤트 핸들러
         const mouseMoveHandler = (e) => {
-            console.log('mouseMoveHandler');
             const points = chartInstance.getElementsAtEventForMode(
                 e,
                 'nearest',
@@ -295,7 +294,6 @@ export class ExchangeRateChart {
         };
 
         const mouseLeaveHandler = () => {
-            console.log('mouseLeaveHandler');
             this.chartInstances.forEach(chart => {
                 chart.tooltip.setActiveElements([], { x: 0, y: 0 });
                 chart.update('none');
@@ -387,6 +385,7 @@ export class ExchangeRateChart {
         const chartsContainer = this.container.querySelector('.charts-container');
         if (!chartsContainer) return;
 
+        // 기존 차트들 정리
         this.cleanupCharts();
         chartsContainer.innerHTML = '';
 
@@ -416,16 +415,16 @@ export class ExchangeRateChart {
                 options: this.getChartOptions(currencyCode)
             });
 
+            // 차트 이벤트 바인딩
+            this.bindChartEvents(currencyCode, chartInstance);
+
+            // 실시간 모드일 때만 마지막 포인트 애니메이션 적용
             if (this.state.period === CHART_PERIODS.DAY) {
                 this.applyLastPointAnimation(chartInstance);
             }
 
             this.chartInstances.set(currencyCode, chartInstance);
 
-            // 차트 이벤트 바인딩 추가
-            this.bindChartEvents(currencyCode, chartInstance);
-
-            // ResizeObserver가 존재하면 차트 래퍼 관찰 시작
             if (this.resizeObserver) {
                 this.resizeObserver.observe(chartWrapper);
             }
@@ -439,7 +438,7 @@ export class ExchangeRateChart {
             responsive: true,
             layout: {
                 padding: {
-                    top: 10,
+                    top: 5,
                     right: 10,
                     bottom: 10,
                     left: 10
@@ -459,29 +458,91 @@ export class ExchangeRateChart {
                     mode: 'index',
                     intersect: false,
                     position: 'nearest',
+                    callbacks: {
+                        title: (tooltipItems) => {
+                            const data = tooltipItems[0];
+                            const chart = data.chart;
+                            const datasetIndex = data.datasetIndex;
+                            const index = data.dataIndex;
+
+                            // 실시간 데이터인 경우
+                            if (this.state.period === CHART_PERIODS.DAY) {
+                                try {
+                                    let currencyCode = chart.data.datasets[datasetIndex].label.split(' ')[1].split('/')[0];
+                                    // JPY(100)인 경우 JPY로 변환
+                                    if (currencyCode.includes('(')) {
+                                        currencyCode = 'JPY';
+                                    }
+                                    const rate = this.getExchangeRate(currencyCode);
+
+                                    if (!rate?.exchangeRateRealTime?.[index]) {
+                                        return data.label;
+                                    }
+
+                                    const timeData = rate.exchangeRateRealTime[index];
+                                    if (!timeData?.at || !timeData?.r) {
+                                        return data.label;
+                                    }
+
+                                    // 시간 포맷팅
+                                    const date = new Date(timeData.at);
+                                    const hours = String(date.getHours()).padStart(2, '0');
+                                    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                                    // 고시회차(r) 정보 추가
+                                    return `${hours}:${minutes} (${timeData.r}회차)`;
+                                } catch (error) {
+                                    console.error('Error in tooltip title callback:', error);
+                                    return data.label;
+                                }
+                            }
+
+                            return data.label;
+                        }
+                    }
                 },
                 legend: {
+                    display: false,
                     position: 'bottom',
                     align: 'start',
                     labels: {
                         color: '#ffffff',
                         boxWidth: 15,
-                        padding: 15
+                        padding: 10
                     }
                 },
                 title: {
                     display: true,
-                    text: this.generateChartTitle(currencyCode),
-                    color: this.getChartTitleColor(currencyCode),
+                    text: () => {
+                        const titles = this.generateChartTitle(currencyCode);
+                        return titles[0];  // 첫 번째 줄
+                    },
+                    color: '#ffffff',
                     font: {
                         size: 16,
                         weight: 'bold'
                     },
                     padding: {
                         top: 10,
-                        bottom: 20
+                        bottom: 5  // subtitle과의 간격 조절
                     }
-                }
+                },
+                subtitle: {
+                    display: true,
+                    text: () => {
+                        const titles = this.generateChartTitle(currencyCode);
+                        return titles[1];  // 두 번째 줄
+                    },
+                    color: () => this.getChartTitleColor(currencyCode),  // 상승/하락 색상
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    padding: {
+                        top: 0,
+                        bottom: 10
+                    }
+                },
             },
             scales: {
                 x: {
@@ -503,20 +564,31 @@ export class ExchangeRateChart {
     generateChartTitle(currencyCode) {
         const rate = this.getExchangeRate(currencyCode);
         if (!rate?.exchangeRateRealTime?.length) {
-            return `${rate?.countryFlag || ''} ${currencyCode === 'JPY' ? 'JPY(100)' : currencyCode} 원화 환율`;
+            return [
+                `${rate?.countryFlag || ''} ${currencyCode === 'JPY' ? 'JPY(100)' : currencyCode}`,
+                '원화 환율'
+            ];
         }
 
         const latestRate = rate.exchangeRateRealTime[rate.exchangeRateRealTime.length - 1];
+        const currentPrice = latestRate.rv;
 
+        // 첫 번째 줄: 국가 국기와 통화 코드
+        const firstLine = `${rate.countryFlag} ${currencyCode === 'JPY' ? 'JPY(100)' : currencyCode}`;
+
+        // 두 번째 줄: 현재 가격과 변동 정보를 함께 표시
+        let secondLine = '';
         if (this.state.period === CHART_PERIODS.DAY) {
             // 실시간 모드
             const isUp = latestRate.t === '상승';
             const arrow = isUp ? '▲' : '▼';
-            return `${rate.countryFlag} ${currencyCode === 'JPY' ? 'JPY(100)' : currencyCode} 원화 환율    ${arrow} ${Math.abs(latestRate.td).toFixed(2)} (${Math.abs(latestRate.tr).toFixed(2)}%)`;
+            secondLine = `${currentPrice.toFixed(2)}  ${arrow} ${latestRate.td.toFixed(2)} (${latestRate.tr.toFixed(2)}%)`;
         } else {
             // 기간별 모드
             const historicalRates = this.prepareHistoricalData(rate);
-            if (!historicalRates?.length) return `${rate.countryFlag} ${currencyCode === 'JPY' ? 'JPY(100)' : currencyCode} 원화 환율`;
+            if (!historicalRates?.length) {
+                return [firstLine, currentPrice];
+            }
 
             const firstRate = parseFloat(historicalRates[0].rv);
             const lastRate = parseFloat(historicalRates[historicalRates.length - 1].rv);
@@ -525,12 +597,13 @@ export class ExchangeRateChart {
 
             const isUp = change >= 0;
             const arrow = isUp ? '▲' : '▼';
-
-            return `${rate.countryFlag} ${currencyCode === 'JPY' ? 'JPY(100)' : currencyCode} 원화 환율    ${arrow} ${Math.abs(change).toFixed(2)} (${Math.abs(changePercent).toFixed(2)}%)`;
+            secondLine = `${currentPrice.toFixed(2)}  ${arrow} ${change.toFixed(2)} (${changePercent.toFixed(2)}%)`;
         }
+
+        return [firstLine, secondLine];
     }
 
-    getChartTitleColor(currencyCode) {
+    getChartTitleColor(currencyCode, context) {
         const rate = this.getExchangeRate(currencyCode);
         if (!rate?.exchangeRateRealTime?.length) return '#ffffff';
 
@@ -546,6 +619,9 @@ export class ExchangeRateChart {
 
             const firstRate = parseFloat(historicalRates[0].rv);
             const lastRate = parseFloat(historicalRates[historicalRates.length - 1].rv);
+
+            if (lastRate === firstRate) return '#ffffff';
+
             isUp = lastRate >= firstRate;
         }
 
@@ -553,41 +629,65 @@ export class ExchangeRateChart {
     }
 
     cleanupCharts() {
-        // ResizeObserver가 존재하면 연결 해제
+        // 1. 먼저 모든 차트 인스턴스의 이벤트 리스너를 제거
+        this.chartInstances.forEach(chart => {
+            // 이벤트 핸들러 제거
+            if (chart._eventHandlers) {
+                Object.entries(chart._eventHandlers).forEach(([event, handler]) => {
+                    if (chart.canvas) {
+                        chart.canvas.removeEventListener(event, handler);
+                    }
+                });
+            }
+
+            // 애니메이션 프레임 정리
+            if (chart._animationFrame) {
+                cancelAnimationFrame(chart._animationFrame);
+                chart._animationFrame = null;
+            }
+
+            if (chart.canvas) {
+                const canvas = chart.canvas;
+                // 새로운 캔버스로 교체하여 모든 이벤트 리스너 제거
+                const newCanvas = canvas.cloneNode(true);
+                if (canvas.parentNode) {
+                    canvas.parentNode.replaceChild(newCanvas, canvas);
+                }
+            }
+            // 차트 인스턴스 destroy
+            chart.destroy();
+        });
+
+        // 2. Map 초기화
+        this.chartInstances.clear();
+
+        // 3. ResizeObserver 정리
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
         }
 
-        // 타임아웃 정리
+        // 4. 타임아웃 정리
         if (this.resizeTimeouts) {
             this.resizeTimeouts.forEach(timeout => clearTimeout(timeout));
             this.resizeTimeouts.clear();
         }
 
-        // 차트 인스턴스 정리
-        if (this.chartInstances) {
-            this.chartInstances.forEach(chart => {
-                if (chart._eventHandlers) {
-                    Object.entries(chart._eventHandlers).forEach(([event, handler]) => {
-                        if (chart.canvas) {
-                            chart.canvas.removeEventListener(event, handler);
-                        }
-                    });
-                }
-                chart.destroy();
-            });
-            this.chartInstances.clear();
-        }
+        // 5. 이전 애니메이션 프레임 정리
+        this.chartInstances.forEach(chart => {
+            if (chart._animationFrame) {
+                cancelAnimationFrame(chart._animationFrame);
+            }
+        });
     }
 
     applyLastPointAnimation(chartInstance) {
         let alpha = 1;
         let decreasing = true;
-        const minAlpha = 0.4;
+        const minAlpha = 0.2;
         const maxAlpha = 1;
         const stepSize = 0.02;
         let frameCount = 0;
-        const frameSkip = 2;
+        const frameSkip = 1;
 
         const animate = () => {
             if (!chartInstance.data?.datasets?.[0]) return;
