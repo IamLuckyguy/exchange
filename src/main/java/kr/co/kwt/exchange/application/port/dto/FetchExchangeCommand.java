@@ -30,8 +30,9 @@ public class FetchExchangeCommand {
         private Double trendDiff;
         private String marketStatus;
         private String liveStatus;
+        private LocalDateTime fetchedAt;
 
-        public RoundRate toRoundRate(Exchange exchange, Round round, LocalDateTime fetchedAt) {
+        public RoundRate toRoundRate(Exchange exchange, Round round) {
             return RoundRate.withoutId(
                     exchange,
                     round,
