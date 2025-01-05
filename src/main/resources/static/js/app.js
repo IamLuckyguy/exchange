@@ -35,7 +35,7 @@ export class App {
             this.chart.updateRates(rates);
 
             // 24시간이 지난 데이터 정리를 위한 인터벌 설정
-            setInterval(() => this.cleanupOldData(), 5 * 60 * 1000); // 5분마다 실행
+            setInterval(() => this.cleanupOldData(), 1 * 60 * 1000); // 5분마다 실행
 
             // 타이틀 애니메이션
             UIUtils.typeWriter(
@@ -65,15 +65,18 @@ export class App {
             const savedRates = JSON.parse(localStorage.getItem('exchange.rates'));
             if (!savedRates) return;
 
-            const twentyFourHoursAgo = new Date();
-            twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-
-            // 각 통화별로 24시간 이내의 데이터만 유지
+            // 각 통화별로 처리
             savedRates.forEach(rate => {
-                if (rate.exchangeRateRealTime) {
+                if (rate.exchangeRateRealTime && rate.exchangeRateRealTime.length > 0) {
+                    // 마지막 데이터의 시간을 기준으로 설정
+                    const lastDataTime = new Date(rate.exchangeRateRealTime[rate.exchangeRateRealTime.length - 1].at);
+                    const twentyFourHoursBeforeLastData = new Date(lastDataTime);
+                    twentyFourHoursBeforeLastData.setHours(twentyFourHoursBeforeLastData.getHours() - 24);
+
+                    // 마지막 데이터 시간 기준 24시간 이내의 데이터만 필터링
                     rate.exchangeRateRealTime = rate.exchangeRateRealTime.filter(data => {
                         const dataTime = new Date(data.at);
-                        return dataTime >= twentyFourHoursAgo;
+                        return dataTime >= twentyFourHoursBeforeLastData;
                     });
                 }
             });
