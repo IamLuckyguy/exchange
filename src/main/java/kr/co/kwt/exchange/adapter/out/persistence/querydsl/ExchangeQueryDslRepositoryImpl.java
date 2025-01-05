@@ -10,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static kr.co.kwt.exchange.domain.QClosingRate.closingRate1;
@@ -49,11 +51,24 @@ public class ExchangeQueryDslRepositoryImpl implements ExchangeQueryDslRepositor
         return queryFactory
                 .selectFrom(roundRate1)
                 .join(roundRate1.exchange, exchange).fetchJoin()
-                .where(roundRate1.fetchedAt.after(LocalDate.now().atStartOfDay().minusDays(1)))
+                .where(roundRate1.fetchedAt.after(getLatestFetchedAt()))
                 .orderBy(roundRate1.fetchedAt.desc())
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(roundRate -> roundRate.getExchange().getCurrencyCode(), Collectors.toList()));
+    }
+
+    private LocalDateTime getLatestFetchedAt() {
+        LocalDateTime latestFetchedAt = queryFactory
+                .select(roundRate1.fetchedAt)
+                .from(roundRate1)
+                .orderBy(roundRate1.fetchedAt.desc())
+                .limit(1)
+                .fetchFirst();
+
+        return Objects
+                .requireNonNullElseGet(latestFetchedAt, LocalDateTime::now)
+                .minusDays(2);
     }
 
     private Map<String, List<ClosingRate>> getCurrencyCodeToClosingRatesMap() {
