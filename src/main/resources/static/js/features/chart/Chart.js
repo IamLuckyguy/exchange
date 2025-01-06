@@ -407,6 +407,7 @@ export class ExchangeRateChart {
             chartGrid.appendChild(chartWrapper);
 
             const data = this.prepareChartData(currencyCode, index);
+            this.state.labelDate = '';  // 날짜 레이블 초기화
             if (!data) return;
 
             const ctx = canvas.getContext('2d');
