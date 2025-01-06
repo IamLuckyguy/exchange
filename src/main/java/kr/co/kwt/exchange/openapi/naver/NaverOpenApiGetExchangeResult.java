@@ -5,6 +5,8 @@ import kr.co.kwt.exchange.application.port.dto.FetchExchangeCommand;
 import kr.co.kwt.exchange.openapi.interfaces.OpenApiGetExchangeResult;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 @Data
@@ -32,6 +34,9 @@ public class NaverOpenApiGetExchangeResult implements OpenApiGetExchangeResult {
 
     @JsonProperty("marketStatus")
     private String marketStatus;
+
+    @JsonProperty("localTradedAt")
+    private String fetchedAt;
 
     @Override
     public double getRate() {
@@ -62,6 +67,13 @@ public class NaverOpenApiGetExchangeResult implements OpenApiGetExchangeResult {
                 getTrendRate(),
                 getTrendDiff(),
                 getMarketStatus(),
-                getLiveStatus());
+                getLiveStatus(),
+                getFetchedAt());
+    }
+
+    @Override
+    public LocalDateTime getFetchedAt() {
+        OffsetDateTime parse = OffsetDateTime.parse(fetchedAt);
+        return parse.toLocalDateTime();
     }
 }
