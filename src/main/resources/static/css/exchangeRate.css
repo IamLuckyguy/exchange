@@ -336,9 +336,8 @@
     }
 
     .calculator-card {
-        flex: 1;
         min-width: 300px;
-        max-width: 500px;
+        max-width: 400px;
     }
 
     .chart-card {
@@ -526,7 +525,6 @@
 
 .settings-group {
     margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -582,8 +580,8 @@
 }
 
 .drag-handle::before {
-    content: "⋮⋮⋮"; /* 6개의 점으로 드래그 핸들 표시 */
-    letter-spacing: -12px;
+    font-size: 1.5rem;
+    content: "✥";
 }
 
 .currency-info {
