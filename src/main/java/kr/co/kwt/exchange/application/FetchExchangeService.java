@@ -89,8 +89,7 @@ public class FetchExchangeService implements FetchExchangeUseCase {
                 .filter(fetchRate -> Country.isValidCurrencyCode(fetchRate.getCurrencyCode()))
                 .map(fetchRate -> fetchRate.toRoundRate(
                         currecyCodeToExchangeMap.get(fetchRate.getCurrencyCode()),
-                        round,
-                        fetchExchangeCommand.getFetchedAt()))
+                        round))
                 .toList();
     }
 

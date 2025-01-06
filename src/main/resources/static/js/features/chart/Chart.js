@@ -12,7 +12,8 @@ export class ExchangeRateChart {
         this.state = {
             period: CHART_PERIODS.WEEK,
             selectedCurrencies: [],
-            exchangeRates: []
+            exchangeRates: [],
+            labelDate: '',
         };
 
         this.loadSettings();
@@ -547,7 +548,30 @@ export class ExchangeRateChart {
             scales: {
                 x: {
                     grid: { color: '#4a4a4a' },
-                    ticks: { color: '#ffffff' }
+                    ticks: {
+                        color: '#ffffff',
+                        autoSkip: false,
+                        maxRotation: 45,    // 최대 45도 회전
+                        minRotation: 45,    // 최소 45도 회전 (고정 45도로 설정)
+                        callback: function(value, index, values) {
+                            const label = this.chart.data.labels[index];
+                            if (!label) return '';
+
+                            // 일자가 포함된 라벨인 경우 굵은 글씨로 표시
+                            if (label.includes('일')) {
+                                this.font = { weight: 'bold' };
+                                return label;
+                            }
+
+                            // 시간 라벨은 더 큰 간격으로 표시 (약 6개만 표시되도록)
+                            const totalPoints = values.length;
+                            const skipInterval = Math.ceil(totalPoints / 6);
+                            return index % skipInterval === 0 ? label : '';
+                        },
+                        font: {
+                            size: 11
+                        }
+                    }
                 },
                 y: {
                     grid: { color: '#4a4a4a' },
@@ -853,6 +877,10 @@ export class ExchangeRateChart {
         const d = new Date(date);
 
         if (this.state.period === CHART_PERIODS.DAY) {
+            if (this.state.labelDate !== d.getDate()) {
+                this.state.labelDate = d.getDate();
+                return `${String(d.getDate()).padStart(2, '0')}일 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            }
             return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
         }
 

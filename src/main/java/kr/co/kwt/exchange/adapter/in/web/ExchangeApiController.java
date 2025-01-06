@@ -112,7 +112,8 @@ public class ExchangeApiController {
         }
 
         // 환율 정보 조회
-        List<FetchRate> fetchRates = openApiClient.getExchange(new NaverOpenApiRequest())
+        List<FetchRate> fetchRates = openApiClient
+                .getExchange(new NaverOpenApiRequest())
                 .stream()
                 .map(OpenApiGetExchangeResult::toFetchRate)
                 .toList();
