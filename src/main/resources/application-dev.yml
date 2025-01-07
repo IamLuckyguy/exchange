@@ -23,9 +23,9 @@ spring:
         default_batch_fetch_size: 100
 
 kms:
-  apiKey: 55b033ce7cfdb5e43a8b4c6daa52c2f5f4409c6266180150618687758718cdb7
-  url: http://kms.kms/api/secrets
-  secretKey: exchange
+  apiKey: ${KMS_API_KEY}
+  url: ${KMS_URL}
+  secretKey: ${KMS_SECRET_KEY}
 
 openapi:
   koreaexim:
