@@ -3,12 +3,6 @@ spring:
     activate:
       on-profile: dev
 
-  data:
-    redis:
-      host: redis-dev-master.redis
-      port: 6379
-      password: fpeltmWkd!@#123 # KMS 등록 필요!
-
   jpa:
     hibernate:
       ddl-auto: validate
