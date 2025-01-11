@@ -25,6 +25,7 @@ repositories {
 
 // 테스트 태스크 시 참조할 Spring 설정 파일 경로 명시적 지정
 test {
+    systemProperty 'spring.profiles.active', 'test'
     systemProperty 'spring.config.location', 'src/test/resources/application.yml'
 }
 

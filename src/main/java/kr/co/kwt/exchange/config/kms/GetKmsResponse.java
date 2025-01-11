@@ -5,9 +5,9 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class GetKmsResponse<T> {
+public class GetKmsResponse {
 
     private String serviceId;
     private String environment;
-    private List<KmsSecret<T>> secrets;
+    private List<KmsSecret> secrets;
 }
