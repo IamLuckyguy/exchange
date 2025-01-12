@@ -1,8 +1,10 @@
 package kr.co.kwt.exchange.adapter.in.web;
 
 
-import kr.co.kwt.exchange.adapter.in.event.FetchEventPublisher;
-import kr.co.kwt.exchange.adapter.in.event.SseEmitterProvider;
+import kr.co.kwt.exchange.adapter.in.web.event.FetchEvent;
+import kr.co.kwt.exchange.adapter.in.web.event.FetchEventPublisher;
+import kr.co.kwt.exchange.adapter.in.web.event.FetchEventResponse;
+import kr.co.kwt.exchange.adapter.in.web.sse.SseEmitterProvider;
 import kr.co.kwt.exchange.application.ServerException;
 import kr.co.kwt.exchange.application.port.dto.*;
 import kr.co.kwt.exchange.application.port.dto.FetchExchangeCommand.FetchRate;
@@ -20,6 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -108,6 +111,9 @@ public class ExchangeApiController {
 
         // 회차 비교
         if (remoteRound == localRound) {
+            fetchEventPublisher.publishEvent(new FetchEvent(
+                    "NON_FETCHED",
+                    new FetchEventResponse(new ArrayList<>(), fetchDateTime)));
             throw new InvalidFetchRequest();
         }
 
@@ -125,7 +131,9 @@ public class ExchangeApiController {
                 fetchRates);
 
         FetchExchangeResult fetchExchangeResult = fetchExchangeUseCase.fetchExchange(fetchExchangeCommand);
-        fetchEventPublisher.publishEvent();
+        fetchEventPublisher.publishEvent(new FetchEvent(
+                "FETCHED",
+                new FetchEventResponse(getExchangeUseCase.getExchangesWithLastRoundRate())));
 
         return ResponseEntity.ok(fetchExchangeResult);
     }

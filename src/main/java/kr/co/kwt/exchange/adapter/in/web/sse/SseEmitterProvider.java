@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.adapter.in.event;
+package kr.co.kwt.exchange.adapter.in.web.sse;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
