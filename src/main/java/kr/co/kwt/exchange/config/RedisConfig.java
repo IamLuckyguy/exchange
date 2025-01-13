@@ -1,5 +1,6 @@
 package kr.co.kwt.exchange.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.kwt.exchange.config.kms.KmsRedisSecretValue;
 import kr.co.kwt.exchange.config.kms.KmsService;
 import lombok.RequiredArgsConstructor;
