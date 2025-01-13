@@ -1,4 +1,4 @@
-package kr.co.kwt.exchange.adapter.in.event;
+package kr.co.kwt.exchange.adapter.in.web.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.MessageListener;
