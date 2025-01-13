@@ -93,22 +93,25 @@ export class App {
 
     updateRealTimeData(sseData) {
         try {
+            console.log('Processing real-time data:', sseData);
             const { exchangeRateRealTime, updatedAt } = sseData;
 
             // 기존 저장된 데이터 가져오기
             const savedRates = JSON.parse(localStorage.getItem('exchange.rates'));
-            if (!savedRates) return;
+            if (!savedRates) {
+                console.warn('No saved rates found');
+                return;
+            }
 
             let hasUpdates = false;
 
-            if (exchangeRateRealTime.length > 0) {
-                // 새로운 실시간 데이터가 있는 경우
+            // 새로운 실시간 데이터 처리
+            if (exchangeRateRealTime && exchangeRateRealTime.length > 0) {
                 savedRates.forEach(rate => {
                     const newData = exchangeRateRealTime.find(data => data.currencyCode === rate.currencyCode);
                     if (newData?.dailyRoundRates?.[0]) {
                         hasUpdates = true;
 
-                        // 새로운 데이터 포맷을 기존 형식으로 변환
                         const latestRate = {
                             rv: newData.dailyRoundRates[0].rv,
                             r: newData.dailyRoundRates[0].r,
@@ -120,35 +123,55 @@ export class App {
                             at: newData.dailyRoundRates[0].at
                         };
 
-                        // exchangeRateRealTime이 없으면 생성
                         if (!rate.exchangeRateRealTime) {
                             rate.exchangeRateRealTime = [];
                         }
 
-                        // 새로운 데이터 추가
-                        rate.exchangeRateRealTime.push(latestRate);
-
-                        // 시간순 정렬
-                        rate.exchangeRateRealTime.sort((a, b) => new Date(a.at) - new Date(b.at));
-
-                        // 24시간 이전 데이터 필터링
-                        const twentyFourHoursAgo = new Date(new Date(updatedAt).getTime() - (24 * 60 * 60 * 1000));
-                        rate.exchangeRateRealTime = rate.exchangeRateRealTime.filter(data =>
-                            new Date(data.at) >= twentyFourHoursAgo
+                        // 중복 데이터 체크 후 추가
+                        const isDuplicate = rate.exchangeRateRealTime.some(
+                            existingRate => existingRate.at === latestRate.at
                         );
+
+                        if (!isDuplicate) {
+                            rate.exchangeRateRealTime.push(latestRate);
+
+                            // 시간순 정렬
+                            rate.exchangeRateRealTime.sort((a, b) =>
+                                new Date(a.at).getTime() - new Date(b.at).getTime()
+                            );
+
+                            // 24시간 이전 데이터 필터링
+                            const twentyFourHoursAgo = new Date(new Date(updatedAt).getTime() - (24 * 60 * 60 * 1000));
+                            rate.exchangeRateRealTime = rate.exchangeRateRealTime.filter(data =>
+                                new Date(data.at) >= twentyFourHoursAgo
+                            );
+                        }
                     }
                 });
             }
 
+            if (hasUpdates) {
+                console.log('Updating components with new data');
+                // 업데이트된 데이터 저장
+                this.saveExchangeRatesToLocalStorage(savedRates);
+
+                // 컴포넌트 업데이트
+                if (this.calculator) {
+                    this.calculator.updateRates(savedRates);
+                    const { currencyCode, amount } = this.calculator.state.lastInput;
+                    this.calculator.updateCalculatorTitle(currencyCode, amount);
+                    this.calculator.updateAllCurrencyInputs(currencyCode, amount);
+                }
+
+                if (this.chart) {
+                    this.chart.updateRates(savedRates, updatedAt);
+                }
+            } else {
+                console.log('No updates needed');
+            }
+
             // 마지막 업데이트 시간 저장
             localStorage.setItem('exchange.lastUpdate', updatedAt);
-
-            // 업데이트된 데이터 저장
-            this.saveExchangeRatesToLocalStorage(savedRates);
-
-            // 컴포넌트 업데이트
-            if (this.calculator) this.calculator.updateRealTimeData(exchangeRateRealTime);
-            if (this.chart) this.chart.updateRates(savedRates, updatedAt);
 
         } catch (error) {
             console.error('Failed to update real-time data:', error);
@@ -160,14 +183,25 @@ export class App {
             const eventSource = new EventSource('/api/exchange-rates/event/subscribe');
 
             eventSource.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                this.updateRealTimeData(data);
+                try {
+                    console.log('SSE message received:', event.data);
+                    const data = JSON.parse(event.data);
+
+                    // 데이터 구조 검증
+                    if (!data || !data.updatedAt) {
+                        console.warn('Invalid SSE data format:', data);
+                        return;
+                    }
+
+                    this.updateRealTimeData(data);
+                } catch (error) {
+                    console.error('Error processing SSE message:', error);
+                }
             };
 
             eventSource.onerror = (error) => {
                 console.error('SSE connection error:', error);
                 eventSource.close();
-                // 연결 재시도 로직
                 setTimeout(() => this.setupSSEConnection(), 5000);
             };
 
