@@ -21,6 +21,12 @@ export class ExchangeRateChart {
 
         // 전역 ResizeObserver 초기화
         this.initializeResizeObserver();
+
+        // 마지막 업데이트 시간 상태 추가
+        this.state = {
+            ...this.state,
+            lastUpdateTime: null
+        };
     }
 
     initializeResizeObserver() {
@@ -551,22 +557,42 @@ export class ExchangeRateChart {
                     grid: { color: '#4a4a4a' },
                     ticks: {
                         color: '#ffffff',
-                        autoSkip: false,
+                        autoSkip: true,
                         maxRotation: 45,    // 최대 45도 회전
                         minRotation: 45,    // 최소 45도 회전 (고정 45도로 설정)
+                        maxTicksLimit: 8,    // 최대 표시할 틱 개수
                         callback: function(value, index, values) {
                             const label = this.chart.data.labels[index];
                             if (!label) return '';
 
-                            // 일자가 포함된 라벨인 경우 굵은 글씨로 표시
-                            if (label.includes('일')) {
-                                this.font = { weight: 'bold' };
+                            const totalPoints = values.length;
+                            const firstLabel = this.chart.data.labels[0];
+                            const lastLabel = this.chart.data.labels[totalPoints - 1];
+
+                            // 첫 번째와 마지막 레이블은 항상 표시
+                            if (label === firstLabel || label === lastLabel) {
+                                if (label.includes('일')) {
+                                    this.font = { weight: 'bold' };
+                                }
                                 return label;
                             }
 
-                            // 시간 라벨은 더 큰 간격으로 표시 (약 6개만 표시되도록)
-                            const totalPoints = values.length;
-                            const skipInterval = Math.ceil(totalPoints / 6);
+                            // 날짜 변경점에서만 일자 표시
+                            if (label.includes('일')) {
+                                // 이전 레이블과 비교하여 날짜가 변경된 경우에만 표시
+                                const prevLabel = this.chart.data.labels[index - 1];
+                                const nextLabel = this.chart.data.labels[index + 1];
+
+                                if ((!prevLabel?.includes('일') || !nextLabel?.includes('일'))) {
+                                    this.font = { weight: 'bold' };
+                                    return label;
+                                }
+                                return '';
+                            }
+
+                            // 시간 레이블의 경우 일정 간격으로 표시
+                            const visibleCount = Math.min(8, totalPoints);
+                            const skipInterval = Math.ceil(totalPoints / visibleCount);
                             return index % skipInterval === 0 ? label : '';
                         },
                         font: {
@@ -815,8 +841,11 @@ export class ExchangeRateChart {
             .join('');
     }
 
-    updateRates(rates) {
+    updateRates(rates, updatedAt = null) {
         this.state.exchangeRates = rates;
+        if (updatedAt) {
+            this.state.lastUpdateTime = updatedAt;
+        }
 
         // 최초 실행 시 선택된 통화가 없다면 모든 통화 선택
         if (this.state.selectedCurrencies.length === 0) {
@@ -827,6 +856,32 @@ export class ExchangeRateChart {
         }
 
         this.render();
+        this.updateLastUpdateTime();
+    }
+
+    updateLastUpdateTime() {
+        const lastUpdateElement = document.createElement('div');
+        lastUpdateElement.className = 'last-update-time';
+
+        if (this.state.lastUpdateTime) {
+            const updateTime = new Date(this.state.lastUpdateTime);
+            const formattedTime = `${updateTime.getHours().toString().padStart(2, '0')}:${
+                updateTime.getMinutes().toString().padStart(2, '0')}:${
+                updateTime.getSeconds().toString().padStart(2, '0')}`;
+            lastUpdateElement.textContent = `마지막 업데이트: ${formattedTime}`;
+        }
+
+        // 기존 업데이트 시간 요소 제거
+        const existingElement = this.container.querySelector('.last-update-time');
+        if (existingElement) {
+            existingElement.remove();
+        }
+
+        // 새로운 업데이트 시간 요소 추가
+        const chartSettings = this.container.querySelector('.chart-settings-container');
+        if (chartSettings) {
+            chartSettings.appendChild(lastUpdateElement);
+        }
     }
 
     render() {

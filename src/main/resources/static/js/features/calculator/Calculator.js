@@ -391,16 +391,32 @@ export class Calculator {
     }
 
     // SSE로 받은 실시간 데이터 업데이트
-    updateRealTimeData(newData) {
+    updateRealTimeData(newRealTimeData) {
+        if (!newRealTimeData || newRealTimeData.length === 0) return;
+
         let hasUpdates = false;
 
+        // 현재 상태의 환율 데이터 업데이트
         this.state.exchangeRates = this.state.exchangeRates.map(rate => {
-            const newRateData = newData.find(data => data.currencyCode === rate.currencyCode);
-            if (newRateData?.latestRate) {
+            const newData = newRealTimeData.find(data => data.currencyCode === rate.currencyCode);
+            if (newData?.dailyRoundRates?.[0]) {
                 hasUpdates = true;
+
+                // 새로운 실시간 데이터를 추가
+                const latestRate = newData.dailyRoundRates[0];
+
                 return {
                     ...rate,
-                    exchangeRateRealTime: [...(rate.exchangeRateRealTime || []), newRateData.latestRate]
+                    exchangeRateRealTime: [...(rate.exchangeRateRealTime || []), {
+                        rv: latestRate.rv,
+                        r: latestRate.r,
+                        t: latestRate.t,
+                        tr: latestRate.tr,
+                        td: latestRate.td,
+                        live: latestRate.live,
+                        market: latestRate.market,
+                        at: latestRate.at
+                    }]
                 };
             }
             return rate;

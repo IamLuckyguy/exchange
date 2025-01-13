@@ -1,5 +1,6 @@
 package kr.co.kwt.exchange.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.kwt.exchange.config.kms.KmsRedisSecretValue;
 import kr.co.kwt.exchange.config.kms.KmsService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @RequiredArgsConstructor
 public class RedisConfig {
 
+    private final ObjectMapper objectMapper;
     private final KmsService kmsService;
 
     @Bean
@@ -61,11 +63,15 @@ public class RedisConfig {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
+        // Value Serializer 설정
+        GenericJackson2JsonRedisSerializer serializer =
+                new GenericJackson2JsonRedisSerializer(objectMapper);
+
         // Key와 Value의 직렬화 방식 설정
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setValueSerializer(serializer);
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setHashValueSerializer(serializer);
 
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
