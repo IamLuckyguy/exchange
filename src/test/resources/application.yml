@@ -1,14 +1,8 @@
 spring:
 
-  data:
-    redis:
-      host: redis-dev-master.redis
-      port: 6379
-      password: fpeltmWkd!@#123 # KMS 등록 필요!
-
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
