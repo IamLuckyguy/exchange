@@ -185,14 +185,28 @@ export class App {
 
     setupSSEConnection() {
         try {
-            const eventSource = new EventSource('/api/exchange-rates/event/subscribe');
+            // 기존 연결이 있다면 정리
+            if (this.sseConnection) {
+                this.sseConnection.close();
+            }
 
+            console.log('Setting up SSE connection...');
+            const eventSource = new EventSource('/api/exchange-rates/event/subscribe', {
+                withCredentials: true
+            });
+
+            // 연결 성공 시
+            eventSource.onopen = (event) => {
+                console.log('SSE Connection established:', event);
+            };
+
+            // 메시지 수신 시
             eventSource.onmessage = (event) => {
                 try {
-                    console.log('SSE message received:', event.data);
-                    const data = JSON.parse(event.data);
+                    console.log('Raw SSE message received:', event);
+                    console.log('SSE message data:', event.data);
 
-                    // 데이터 구조 검증
+                    const data = JSON.parse(event.data);
                     if (!data || !data.updatedAt) {
                         console.warn('Invalid SSE data format:', data);
                         return;
@@ -204,15 +218,27 @@ export class App {
                 }
             };
 
+            // 에러 발생 시
             eventSource.onerror = (error) => {
                 console.error('SSE connection error:', error);
                 eventSource.close();
-                setTimeout(() => this.setupSSEConnection(), 5000);
+
+                // 재연결 시도
+                console.log('Attempting to reconnect in 5 seconds...');
+                setTimeout(() => {
+                    this.setupSSEConnection();
+                }, 5000);
             };
 
             this.sseConnection = eventSource;
+            console.log('SSE connection object created:', this.sseConnection);
         } catch (error) {
             console.error('Failed to setup SSE connection:', error);
+
+            // 에러 발생 시 재시도
+            setTimeout(() => {
+                this.setupSSEConnection();
+            }, 5000);
         }
     }
 
