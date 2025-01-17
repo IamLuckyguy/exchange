@@ -194,7 +194,6 @@ export class App {
 
     setupSSEConnection() {
         try {
-            // 기존 연결이 있다면 정리
             if (this.sseConnection) {
                 this.sseConnection.close();
             }
@@ -209,30 +208,36 @@ export class App {
                 console.log('SSE Connection established:', event);
             };
 
-            // 메시지 수신 시
-            eventSource.onmessage = (event) => {
+            // subscribe 이벤트 리스너 추가
+            eventSource.addEventListener('subscribe', (event) => {
+                console.log('Subscribe event received:', event);
                 try {
-                    console.log('Raw SSE message received:', event);
-                    console.log('SSE message data:', event.data);
+                    console.log('Subscribe event data:', event.data);
+                } catch (error) {
+                    console.error('Error processing subscribe event:', error);
+                }
+            });
 
+            // 실제 환율 업데이트를 위한 message 이벤트 리스너
+            eventSource.addEventListener('message', (event) => {
+                console.log('Exchange rate update received:', event);
+                try {
                     const data = JSON.parse(event.data);
                     if (!data || !data.updatedAt) {
-                        console.warn('Invalid SSE data format:', data);
+                        console.warn('Invalid exchange rate data format:', data);
                         return;
                     }
-
                     this.updateRealTimeData(data);
                 } catch (error) {
-                    console.error('Error processing SSE message:', error);
+                    console.error('Error processing exchange rate update:', error);
                 }
-            };
+            });
 
-            // 에러 발생 시
+            // 에러 핸들링
             eventSource.onerror = (error) => {
                 console.error('SSE connection error:', error);
                 eventSource.close();
 
-                // 재연결 시도
                 console.log('Attempting to reconnect in 5 seconds...');
                 setTimeout(() => {
                     this.setupSSEConnection();
@@ -243,8 +248,6 @@ export class App {
             console.log('SSE connection object created:', this.sseConnection);
         } catch (error) {
             console.error('Failed to setup SSE connection:', error);
-
-            // 에러 발생 시 재시도
             setTimeout(() => {
                 this.setupSSEConnection();
             }, 5000);
