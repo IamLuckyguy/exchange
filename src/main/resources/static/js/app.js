@@ -208,29 +208,31 @@ export class App {
                 console.log('SSE Connection established:', event);
             };
 
-            // subscribe 이벤트 리스너 추가
+            // 초기 구독 이벤트
             eventSource.addEventListener('subscribe', (event) => {
                 console.log('Subscribe event received:', event);
+            });
+
+            // FETCHED 이벤트 리스너
+            eventSource.addEventListener('FETCHED', (event) => {
+                console.log('FETCHED event received:', event);
                 try {
-                    console.log('Subscribe event data:', event.data);
+                    const response = JSON.parse(event.data);
+                    console.log('Parsed FETCHED event data:', response);
+
+                    if (response && response.exchangeRateRealTime) {
+                        this.updateRealTimeData(response);
+                    }
                 } catch (error) {
-                    console.error('Error processing subscribe event:', error);
+                    console.error('Error processing FETCHED event:', error);
+                    console.error('Raw event data:', event.data);
                 }
             });
 
-            // 실제 환율 업데이트를 위한 message 이벤트 리스너
-            eventSource.addEventListener('message', (event) => {
-                console.log('Exchange rate update received:', event);
-                try {
-                    const data = JSON.parse(event.data);
-                    if (!data || !data.updatedAt) {
-                        console.warn('Invalid exchange rate data format:', data);
-                        return;
-                    }
-                    this.updateRealTimeData(data);
-                } catch (error) {
-                    console.error('Error processing exchange rate update:', error);
-                }
+            // NON_FETCHED 이벤트 리스너 (선택적)
+            eventSource.addEventListener('NON_FETCHED', (event) => {
+                console.log('NON_FETCHED event received:', event);
+                // 필요한 경우 특별한 처리를 추가할 수 있습니다
             });
 
             // 에러 핸들링
