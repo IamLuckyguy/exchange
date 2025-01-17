@@ -12,19 +12,26 @@ export class App {
     }
 
     async initialize() {
+        console.log('App initialization started...');
         try {
             UIUtils.toggleLoading(true);
+            console.log('Fetching initial exchange rates...');
 
             // 환율 데이터 가져오기
             const rates = await UIUtils.showLoadingAsync(
                 this.fetchExchangeRates()
             );
+            console.log('Initial exchange rates fetched:', rates);
 
             // 초기 데이터 로컬 스토리지 저장
             this.saveExchangeRatesToLocalStorage(rates);
+            console.log('Exchange rates saved to localStorage');
 
+            console.log('Setting up SSE connection...');
             // SSE 연결 설정
             this.setupSSEConnection();
+
+            console.log('Initializing components...');
 
             // 컴포넌트 초기화
             this.calculator = new Calculator('#calculatorContainer');
@@ -43,6 +50,8 @@ export class App {
                 document.getElementById('animatedTitle'),
                 100
             );
+
+            console.log('App initialization completed');
 
         } catch (error) {
             console.error('Failed to initialize app:', error);
