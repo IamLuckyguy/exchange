@@ -106,72 +106,77 @@ export class App {
             let hasUpdates = false;
 
             // 새로운 실시간 데이터 처리
-            if (exchangeRateRealTime && exchangeRateRealTime.length > 0) {
-                savedRates.forEach(rate => {
-                    const newData = exchangeRateRealTime.find(data => data.currencyCode === rate.currencyCode);
-                    if (newData?.dailyRoundRates?.[0]) {
-                        hasUpdates = true;
+            savedRates.forEach(rate => {
+                const newData = exchangeRateRealTime.find(
+                    data => data.currencyCode === rate.currencyCode
+                );
 
-                        const latestRate = {
-                            rv: newData.dailyRoundRates[0].rv,
-                            r: newData.dailyRoundRates[0].r,
-                            t: newData.dailyRoundRates[0].t,
-                            tr: newData.dailyRoundRates[0].tr,
-                            td: newData.dailyRoundRates[0].td,
-                            live: newData.dailyRoundRates[0].live,
-                            market: newData.dailyRoundRates[0].market,
-                            at: newData.dailyRoundRates[0].at
-                        };
+                if (newData?.dailyRoundRates?.[0]) {
+                    hasUpdates = true;
 
-                        if (!rate.exchangeRateRealTime) {
-                            rate.exchangeRateRealTime = [];
-                        }
+                    const latestRate = {
+                        rv: newData.dailyRoundRates[0].rv,
+                        r: newData.dailyRoundRates[0].r,
+                        t: newData.dailyRoundRates[0].t,
+                        tr: newData.dailyRoundRates[0].tr,
+                        td: newData.dailyRoundRates[0].td,
+                        live: newData.dailyRoundRates[0].live,
+                        market: newData.dailyRoundRates[0].market,
+                        at: newData.dailyRoundRates[0].at
+                    };
 
-                        // 중복 데이터 체크 후 추가
-                        const isDuplicate = rate.exchangeRateRealTime.some(
-                            existingRate => existingRate.at === latestRate.at
+                    // exchangeRateRealTime 배열이 없으면 생성
+                    if (!rate.exchangeRateRealTime) {
+                        rate.exchangeRateRealTime = [];
+                    }
+
+                    // 중복 데이터 체크
+                    const isDuplicate = rate.exchangeRateRealTime.some(
+                        existingRate => existingRate.at === latestRate.at
+                    );
+
+                    if (!isDuplicate) {
+                        // 새 데이터 추가
+                        rate.exchangeRateRealTime.push(latestRate);
+
+                        // 시간순 정렬
+                        rate.exchangeRateRealTime.sort((a, b) =>
+                            new Date(a.at) - new Date(b.at)
                         );
 
-                        if (!isDuplicate) {
-                            rate.exchangeRateRealTime.push(latestRate);
-
-                            // 시간순 정렬
-                            rate.exchangeRateRealTime.sort((a, b) =>
-                                new Date(a.at).getTime() - new Date(b.at).getTime()
-                            );
-
-                            // 24시간 이전 데이터 필터링
-                            const twentyFourHoursAgo = new Date(new Date(updatedAt).getTime() - (24 * 60 * 60 * 1000));
-                            rate.exchangeRateRealTime = rate.exchangeRateRealTime.filter(data =>
-                                new Date(data.at) >= twentyFourHoursAgo
-                            );
-                        }
+                        // 24시간 이전 데이터 필터링
+                        const twentyFourHoursAgo = new Date(new Date(updatedAt).getTime() - (24 * 60 * 60 * 1000));
+                        rate.exchangeRateRealTime = rate.exchangeRateRealTime.filter(data =>
+                            new Date(data.at) >= twentyFourHoursAgo
+                        );
                     }
-                });
-            }
+                }
+            });
 
             if (hasUpdates) {
                 console.log('Updating components with new data');
-                // 업데이트된 데이터 저장
-                this.saveExchangeRatesToLocalStorage(savedRates);
 
-                // 컴포넌트 업데이트
+                // 로컬 스토리지 업데이트
+                localStorage.setItem('exchange.rates', JSON.stringify(savedRates));
+
+                // 계산기 컴포넌트 업데이트
                 if (this.calculator) {
                     this.calculator.updateRates(savedRates);
+
+                    // 현재 입력값 기준으로 모든 통화 재계산
                     const { currencyCode, amount } = this.calculator.state.lastInput;
                     this.calculator.updateCalculatorTitle(currencyCode, amount);
                     this.calculator.updateAllCurrencyInputs(currencyCode, amount);
                 }
 
+                // 차트 컴포넌트 업데이트
                 if (this.chart) {
                     this.chart.updateRates(savedRates, updatedAt);
                 }
-            } else {
-                console.log('No updates needed');
-            }
 
-            // 마지막 업데이트 시간 저장
-            localStorage.setItem('exchange.lastUpdate', updatedAt);
+                // 마지막 업데이트 시간 저장
+                localStorage.setItem('exchange.lastUpdate', updatedAt);
+            }
 
         } catch (error) {
             console.error('Failed to update real-time data:', error);
