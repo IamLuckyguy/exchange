@@ -210,29 +210,26 @@ export class App {
 
             // 초기 구독 이벤트
             eventSource.addEventListener('subscribe', (event) => {
-                console.log('Subscribe event received:', event);
+                console.log('Subscribe event received:', event.data);
             });
 
-            // FETCHED 이벤트 리스너
-            eventSource.addEventListener('FETCHED', (event) => {
-                console.log('FETCHED event received:', event);
+            // Publish Fetch Event 리스너
+            eventSource.addEventListener('Publish Fetch Event', (event) => {
+                console.log('Publish Fetch Event received:', event);
                 try {
                     const response = JSON.parse(event.data);
-                    console.log('Parsed FETCHED event data:', response);
+                    console.log('Parsed Fetch Event data:', response);
 
-                    if (response && response.exchangeRateRealTime) {
+                    // exchangeRateRealTime이 비어있지 않은 경우에만 업데이트
+                    if (response && response.exchangeRateRealTime && response.exchangeRateRealTime.length > 0) {
                         this.updateRealTimeData(response);
+                    } else {
+                        console.log('Skipping update - no new exchange rate data');
                     }
                 } catch (error) {
-                    console.error('Error processing FETCHED event:', error);
+                    console.error('Error processing Publish Fetch Event:', error);
                     console.error('Raw event data:', event.data);
                 }
-            });
-
-            // NON_FETCHED 이벤트 리스너 (선택적)
-            eventSource.addEventListener('NON_FETCHED', (event) => {
-                console.log('NON_FETCHED event received:', event);
-                // 필요한 경우 특별한 처리를 추가할 수 있습니다
             });
 
             // 에러 핸들링
