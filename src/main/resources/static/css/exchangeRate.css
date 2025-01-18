@@ -144,7 +144,7 @@
     color: transparent;
     caret-color: #ffffff; /* 커서 색상을 흰색으로 설정 */
     text-align: right;
-    padding: 0.75rem 1rem;
+    /*padding: 0.75rem 1rem;*/
 }
 
 .currency-input:focus {
@@ -686,4 +686,13 @@
 .currency-option.selected {
     /*background-color: #00ff88;*/
     color: #1a1a1a;
+}
+
+.last-update-time {
+    color: #a0a0a0;
+    font-size: 0.9rem;
+    text-align: right;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #4a4a4a;
+    margin-bottom: 1rem;
 }
