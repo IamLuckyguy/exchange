@@ -92,9 +92,9 @@ export class App {
 
             this.saveExchangeRatesToLocalStorage(savedRates);
 
-            // 컴포넌트 업데이트
+            // 컴포넌트 업데이트 시 로딩바 리셋하지 않음
             if (this.calculator) this.calculator.updateRates(savedRates);
-            if (this.chart) this.chart.updateRates(savedRates);
+            if (this.chart) this.chart.updateRates(savedRates, null, { resetLoadingBar: false });
         } catch (error) {
             console.error('Failed to cleanup old data:', error);
         }

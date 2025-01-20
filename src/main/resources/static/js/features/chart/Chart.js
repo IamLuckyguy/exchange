@@ -73,6 +73,10 @@ export class ExchangeRateChart {
 
     // 컴포넌트 정리
     destroy() {
+        if (this.loadingBarInterval) {
+            clearInterval(this.loadingBarInterval);
+        }
+
         this.cleanupCharts();
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
@@ -841,9 +845,9 @@ export class ExchangeRateChart {
             .join('');
     }
 
-    updateRates(rates, updatedAt = null) {
+    updateRates(rates, updatedAt = null, options = { resetLoadingBar: true }) {
         this.state.exchangeRates = rates;
-        if (updatedAt) {
+        if (updatedAt && options.resetLoadingBar) {
             this.state.lastUpdateTime = updatedAt;
         }
 
@@ -856,19 +860,49 @@ export class ExchangeRateChart {
         }
 
         this.render();
-        this.updateLastUpdateTime();
+        // 로딩바 리셋 옵션이 true일 때만 updateLastUpdateTime 호출
+        if (options.resetLoadingBar) {
+            this.updateLastUpdateTime();
+        }
     }
 
     updateLastUpdateTime() {
         const lastUpdateElement = document.createElement('div');
         lastUpdateElement.className = 'last-update-time';
 
+        // 업데이트 시간 결정
+        let updateTime;
         if (this.state.lastUpdateTime) {
-            const updateTime = new Date(this.state.lastUpdateTime);
+            updateTime = new Date(this.state.lastUpdateTime);
+        } else if (this.state.exchangeRates.length > 0) {
+            const latestRates = this.state.exchangeRates
+                .filter(rate => rate.exchangeRateRealTime && rate.exchangeRateRealTime.length > 0)
+                .map(rate => rate.exchangeRateRealTime[0].at)
+                .sort((a, b) => new Date(b) - new Date(a));
+
+            if (latestRates.length > 0) {
+                updateTime = new Date(latestRates[0]);
+            }
+        }
+
+        if (updateTime) {
             const formattedTime = `${updateTime.getHours().toString().padStart(2, '0')}:${
                 updateTime.getMinutes().toString().padStart(2, '0')}:${
                 updateTime.getSeconds().toString().padStart(2, '0')}`;
-            lastUpdateElement.textContent = `마지막 업데이트: ${formattedTime}`;
+
+            lastUpdateElement.innerHTML = `
+                <span>마지막 업데이트: ${formattedTime}</span>
+                <div class="realtime-indicator">
+                    <div class="realtime-dot"></div>
+                    <span>실시간 업데이트</span>
+                </div>
+                <div class="loading-bar-container">
+                    <div class="loading-bar"></div>
+                </div>
+            `;
+
+            // 로딩 바 애니메이션 시작
+            this.startLoadingBarAnimation(lastUpdateElement.querySelector('.loading-bar'));
         }
 
         // 기존 업데이트 시간 요소 제거
@@ -882,6 +916,33 @@ export class ExchangeRateChart {
         if (chartSettings) {
             chartSettings.appendChild(lastUpdateElement);
         }
+    }
+
+    startLoadingBarAnimation(loadingBar) {
+        if (!loadingBar) return;
+
+        const TOTAL_TIME = 120; // 2분 = 120초
+        const UPDATE_INTERVAL = 1000; // 1초마다 업데이트
+        const STEPS = TOTAL_TIME;
+        let currentStep = 0;
+
+        // 기존 인터벌 제거
+        if (this.loadingBarInterval) {
+            clearInterval(this.loadingBarInterval);
+        }
+
+        this.loadingBarInterval = setInterval(() => {
+            currentStep++;
+            const progress = (currentStep / STEPS) * 100;
+
+            if (currentStep >= STEPS) {
+                clearInterval(this.loadingBarInterval);
+                currentStep = 0;
+                this.startLoadingBarAnimation(loadingBar); // 애니메이션 재시작
+            }
+
+            loadingBar.style.width = `${progress}%`;
+        }, UPDATE_INTERVAL);
     }
 
     render() {
