@@ -1,1 +1,4 @@
 rootProject.name = 'exchange'
+// 로컬일 때 활성화
+//include ':common-ui'
+//project(':common-ui').projectDir = new File(settingsDir, '../common-ui')

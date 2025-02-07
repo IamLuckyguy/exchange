@@ -1,3 +1,4 @@
+/* exchangeRate.css */
 .visually-hidden {
     display: none;
 }
@@ -10,7 +11,7 @@
 .calculator-title {
     font-size: 2rem;
     font-weight: bold;
-    color: #00ff88;
+    color: var(--theme-color);
     display: inline-block; /* 인라인 블록으로 변경 */
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
@@ -21,7 +22,7 @@
     display: inline-block;
     width: 2px;
     height: 2rem;
-    background-color: #00ff88;
+    background-color: var(--theme-color);
     margin-left: 2px; /* 커서와 텍스트 사이 간격 */
     position: relative; /* 상대 위치 설정 */
     top: 4px; /* 커서 위치 미세 조정 */
@@ -89,7 +90,7 @@
 .btn:hover {
     background-color: #3a3a3a;
     border-color: #6a6a6a;
-    color: #00ff88;
+    color: var(--theme-color);
 }
 
 .chevron-down {
@@ -152,7 +153,7 @@
 }
 
 .currency-input::selection {
-    background-color: rgba(0, 255, 136, 0.3); /* 선택 영역 배경색 */
+    background-color: rgba(var(--theme-color-rgb), 0.3); /* 선택 영역 배경색 */
     color: transparent; /* 선택된 텍스트는 여전히 투명하게 */
 }
 
@@ -173,13 +174,13 @@
 }
 
 .decimal-separator {
-    color: #00ff88;
+    color: var(--theme-color);
     margin: 0 1px;
     font-weight: bold;
 }
 
 .decimal-part {
-    color: #00ff88;
+    color: var(--theme-color);
     min-width: 2ch;
     display: inline-block;
     font-size: 0.8rem;
@@ -248,7 +249,7 @@
 }
 
 .currency-item:hover .currency-code {
-    color: #00ff88;
+    color: var(--theme-color);
 }
 
 .currency-item:hover .currency-name {
@@ -301,13 +302,13 @@
 
 .period-btn:hover {
     background-color: #4a4a4a;
-    border-color: #00ff88;
-    color: #00ff88;
+    border-color: var(--theme-color);
+    color: var(--theme-color);
 }
 
 .period-btn.selected {
-    background-color: #00ff88;
-    border-color: #00ff88;
+    background-color: var(--theme-color);
+    border-color: var(--theme-color);
     color: #1a1a1a;
 }
 
@@ -375,7 +376,7 @@
 }
 
 .currency-pair-selector select:hover {
-    border-color: #00ff88;
+    border-color: var(--theme-color);
 }
 
 .form-check-input {
@@ -432,11 +433,11 @@
 
 .currency-option.selected {
     background: #2a2a2a;
-    border-color: #00ff88;
+    border-color: var(--theme-color);
 }
 
 .currency-option.selected .currency-code {
-    color: #00ff88;
+    color: var(--theme-color);
 }
 
 .currency-flag {
@@ -454,10 +455,10 @@
 
 .base-currency-title {
     font-size: 0.9rem;
-    color: #00ff88;
+    color: var(--theme-color);
     margin-bottom: 1rem;
     padding: 0.5rem;
-    background-color: rgba(0, 255, 136, 0.1);
+    background-color: rgba(var(--theme-color-rgb), 0.1);
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -493,13 +494,13 @@
 
 .chart-type-btn:hover {
     background-color: #4a4a4a;
-    border-color: #00ff88;
-    color: #00ff88;
+    border-color: var(--theme-color);
+    color: var(--theme-color);
 }
 
 .chart-type-btn.active {
-    background-color: #00ff88;
-    border-color: #00ff88;
+    background-color: var(--theme-color);
+    border-color: var(--theme-color);
     color: #1a1a1a;
 }
 
@@ -519,7 +520,7 @@
 }
 
 .form-select:focus {
-    border-color: #00ff88;
+    border-color: var(--theme-color);
     outline: none;
 }
 
@@ -560,13 +561,13 @@
 
 .btn-group .chart-type-btn:hover {
     background-color: #4a4a4a;
-    border-color: #00ff88;
-    color: #00ff88;
+    border-color: var(--theme-color);
+    color: var(--theme-color);
 }
 
 .btn-group .chart-type-btn.active {
-    background-color: #00ff88;
-    border-color: #00ff88;
+    background-color: var(--theme-color);
+    border-color: var(--theme-color);
     color: #1a1a1a;
 }
 
@@ -684,7 +685,7 @@
 }
 
 .currency-option.selected {
-    /*background-color: #00ff88;*/
+    /*background-color: var(--theme-color);*/
     color: #1a1a1a;
 }
 
@@ -702,11 +703,11 @@
 }
 
 .realtime-indicator {
-    background: rgba(0, 255, 136, 0.1);
+    background: rgba(var(--theme-color-rgb), 0.1);
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 0.8rem;
-    color: #00ff88;
+    color: var(--theme-color);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -715,7 +716,7 @@
 .realtime-dot {
     width: 6px;
     height: 6px;
-    background-color: #00ff88;
+    background-color: var(--theme-color);
     border-radius: 50%;
     animation: pulse 2s infinite;
 }
@@ -750,23 +751,23 @@
     height: 100%;
     width: 0;
     background: linear-gradient(90deg,
-    rgba(0, 255, 136, 0.3) 0%,
-    rgba(0, 255, 136, 1) 50%,
-    rgba(0, 255, 136, 0.3) 100%
+    rgba(var(--theme-color-rgb), 0.3) 0%,
+    rgba(var(--theme-color-rgb), 1) 50%,
+    rgba(var(--theme-color-rgb), 0.3) 100%
     );
     transition: width 1s linear;
     position: absolute;
     left: 0;
     top: 0;
-    box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+    box-shadow: 0 0 8px rgba(var(--theme-color-rgb), 0.5);
     animation: glow 2s infinite;
 }
 
 @keyframes glow {
     0%, 100% {
-        box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+        box-shadow: 0 0 8px rgba(var(--theme-color-rgb), 0.5);
     }
     50% {
-        box-shadow: 0 0 12px rgba(0, 255, 136, 0.8);
+        box-shadow: 0 0 12px rgba(var(--theme-color-rgb), 0.8);
     }
 }

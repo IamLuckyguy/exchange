@@ -1,6 +1,6 @@
 <!-- exchangeRate.html -->
 <!DOCTYPE html>
-<html th:replace="~{layout :: layout(~{::title}, ~{::main}, ~{::meta}, ~{::css}, ~{::scripts})}">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#content}, ~{::meta}, ~{::css}, ~{::scripts})}">
 <head>
     <th:block th:fragment="meta">
         <th:block th:replace="~{fragments/meta :: meta(
@@ -17,8 +17,8 @@
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     </th:block>
 </head>
-<body>
-<main class="container-fluid">
+<body class="">
+<main class="container-fluid" id="content">
     <div class="main-content">
         <div class="title-container">
             <h1 class="visually-hidden">실시간 환율 계산기</h1>
@@ -82,12 +82,11 @@
                         </div>
 
                         <!-- 차트 컨테이너 -->
-                        <div class="charts-container">
-                            <!-- 차트들이 동적으로 추가될 영역 -->
-                        </div>
+                        <div class="charts-container"></div>
                     </div>
                 </div>
             </div>
+        </div>
 
         <!-- 다이얼로그 -->
         <div id="currencyDialog" class="dialog">

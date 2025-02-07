@@ -41,3 +41,9 @@ logging:
     kr.co.kwt.exchange: INFO
     io.r2dbc.pool: INFO
     org.hibernate.sql: INFO
+
+service:
+  id: "exchange"
+  name: "환율계산기"
+  url: https://exchange.kwt.co.kr
+  themeColor: "#00ff88"

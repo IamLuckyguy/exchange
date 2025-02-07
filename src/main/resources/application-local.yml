@@ -53,3 +53,12 @@ logging:
   level:
     kr.co.kwt.exchange: DEBUG
     org.hibernate.sql: INFO
+
+server:
+  shutdown: immediate # 즉시 종료
+
+service:
+  id: "exchange"
+  name: "환율계산기"
+  url: http://localhost:8080
+  themeColor: "#00ff88"
