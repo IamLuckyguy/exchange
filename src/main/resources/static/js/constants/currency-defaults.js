@@ -1,4 +1,4 @@
-// resources/static/js/constants/currency-defaults.js
+// exchange/resources/static/js/constants/currency-defaults.js
 export const CURRENCY_DEFAULTS = {
     DEFAULT_CURRENCIES: ['USD', 'KRW', 'JPY', 'CNY', 'EUR'],
     DEFAULT_BASE_CURRENCY: 'USD',

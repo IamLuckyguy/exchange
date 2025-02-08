@@ -1,4 +1,4 @@
-// resources/static/js/constants/chart-options.js
+// exchange/resources/static/js/constants/chart-options.js
 export const CHART_OPTIONS = {
     trend: {
         responsive: true,

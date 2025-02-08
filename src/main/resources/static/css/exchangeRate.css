@@ -1,4 +1,4 @@
-/* exchangeRate.css */
+/* exchange/resources/static/css/exchangeRate.css */
 .visually-hidden {
     display: none;
 }
@@ -44,13 +44,7 @@
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.main-content.loading {
-    opacity: 0;
-    visibility: hidden;
-}
-
 .container-fluid {
-    min-height: 100vh;
     padding: 2rem;
 }
 
@@ -60,9 +54,9 @@
 }
 
 .card {
-    background-color: #2a2a2a;
+    background-color: var(--bg-secondary);
     border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
     width: 100%;
     margin-bottom: 2rem;
 }
@@ -79,17 +73,17 @@
     width: 100%;
     padding: 0.75rem 1rem;
     background-color: transparent;
-    border: 1px solid #4a4a4a;
+    border: 1px solid var(--border-primary);
     border-radius: 0.25rem;
-    color: #ffffff;
+    color: var(--text-primary);
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .btn:hover {
-    background-color: #3a3a3a;
-    border-color: #6a6a6a;
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-primary-hover);
     color: var(--theme-color);
 }
 
@@ -103,8 +97,8 @@
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
-    background-color: #3a3a3a;
-    border: 1px solid #4a4a4a;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
     border-radius: 0.25rem;
     flex-wrap: nowrap; /* 줄바꿈 방지 */
 }
@@ -115,18 +109,23 @@
     font-size: 0.875rem;
 }
 
+.currency-code,
+.currency-info {
+    color: var(--text-primary);
+}
+
 .currency-btn {
     width: 100px;
     background-color: transparent;
     border: none;
-    color: #ffffff;
+    color: var(--text-primary);
     padding: 0.75rem 1rem;
     font-size: 1rem;
     cursor: move;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    border-right: 1px solid #4a4a4a;
+    border-right: 1px solid var(--border-primary);
 }
 
 .currency-input-wrapper {
@@ -143,9 +142,8 @@
     background: transparent;
     border: none;
     color: transparent;
-    caret-color: #ffffff; /* 커서 색상을 흰색으로 설정 */
+    caret-color: var(--text-primary); /* 커서 색상을 흰색으로 설정 */
     text-align: right;
-    /*padding: 0.75rem 1rem;*/
 }
 
 .currency-input:focus {
@@ -170,7 +168,7 @@
 }
 
 .integer-part {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .decimal-separator {
@@ -200,7 +198,7 @@
 }
 
 .dialog-content {
-    background-color: #2a2a2a;
+    background-color: var(--bg-secondary);
     border-radius: 0.5rem;
     width: 90%;
     max-width: 400px;
@@ -213,18 +211,19 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    border-bottom: 1px solid #4a4a4a;
+    border-bottom: 1px solid var(--border-primary);
 }
 
 .dialog-header h2 {
     margin: 0;
     font-size: 1.25rem;
+    color: var(--text-tertiary);
 }
 
 .close-btn {
     background-color: transparent;
     border: none;
-    color: #ffffff;
+    color: var(--text-primary);
     font-size: 1.5rem;
     cursor: pointer;
 }
@@ -237,23 +236,24 @@
     display: flex;
     align-items: center;
     padding: 0.75rem;
-    border: 1px solid #4a4a4a;
+    border: 1px solid var(--border-primary);
     border-radius: 0.25rem;
     margin-bottom: 0.5rem;
     transition: all 0.3s ease;
 }
 
 .currency-item:hover {
-    background-color: #3a3a3a;
-    border-color: #6a6a6a;
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-primary-hover);
 }
 
 .currency-item:hover .currency-code {
     color: var(--theme-color);
+    font-weight: bold;
 }
 
 .currency-item:hover .currency-name {
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .currency-item input[type="checkbox"] {
@@ -273,11 +273,11 @@
 }
 
 .currency-item .currency-name {
-    color: #a0a0a0;
+    color: var(--text-tertiary);
 }
 
 .chart-section {
-    background-color: #2a2a2a;
+    background-color: var(--bg-secondary);
     border-radius: 0.5rem;
 }
 
@@ -290,9 +290,9 @@
 
 .period-btn {
     padding: 0.5rem 1rem;
-    background-color: #3a3a3a;
-    border: 1px solid #4a4a4a;
-    color: #ffffff;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     flex: 1;
@@ -301,7 +301,7 @@
 }
 
 .period-btn:hover {
-    background-color: #4a4a4a;
+    background-color: var(--bg-hover);
     border-color: var(--theme-color);
     color: var(--theme-color);
 }
@@ -309,7 +309,7 @@
 .period-btn.selected {
     background-color: var(--theme-color);
     border-color: var(--theme-color);
-    color: #1a1a1a;
+    color: var(--text-selected);
 }
 
 .chart-container {
@@ -322,10 +322,10 @@
 #customDays {
     width: 100%;
     padding: 0.5rem;
-    background-color: #3a3a3a;
-    border: 1px solid #4a4a4a;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
     border-radius: 0.25rem;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 /* 반응형 스타일 */
@@ -367,9 +367,9 @@
 }
 
 .currency-pair-selector select {
-    background-color: #3a3a3a;
-    border: 1px solid #4a4a4a;
-    color: #ffffff;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
     padding: 0.4rem;
     border-radius: 0.25rem;
     cursor: pointer;
@@ -408,7 +408,7 @@
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
-    background: #3a3a3a;
+    background: var(--bg-tertiary);
     border-radius: 0.25rem;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -428,11 +428,11 @@
 }
 
 .currency-option:hover {
-    background: #4a4a4a;
+    background: var(--bg-hover);
 }
 
 .currency-option.selected {
-    background: #2a2a2a;
+    background: var(--bg-secondary);
     border-color: var(--theme-color);
 }
 
@@ -446,7 +446,7 @@
 
 .select-all-wrapper {
     padding: 1rem;
-    border-bottom: 1px solid #4a4a4a;
+    border-bottom: 1px solid var(--border-primary);
 }
 
 .select-all-wrapper .currency-item {
@@ -483,9 +483,9 @@
 
 .chart-type-btn {
     padding: 0.5rem 1rem;
-    background-color: #3a3a3a;
-    border: 1px solid #4a4a4a;
-    color: #ffffff;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     flex: 1;
@@ -493,7 +493,7 @@
 }
 
 .chart-type-btn:hover {
-    background-color: #4a4a4a;
+    background-color: var(--bg-hover);
     border-color: var(--theme-color);
     color: var(--theme-color);
 }
@@ -501,7 +501,7 @@
 .chart-type-btn.active {
     background-color: var(--theme-color);
     border-color: var(--theme-color);
-    color: #1a1a1a;
+    color: var(--text-selected);
 }
 
 .currency-pair-selector {
@@ -513,9 +513,9 @@
 .form-select {
     width: 100%;
     padding: 0.5rem;
-    background-color: #3a3a3a;
-    border: 1px solid #4a4a4a;
-    color: #ffffff;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
     border-radius: 4px;
 }
 
@@ -534,7 +534,7 @@
 }
 
 .settings-title {
-    color: #9ca3af;
+    color: var(--text-tertiary);
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 1rem;
@@ -552,15 +552,15 @@
     flex: 1;
     padding: 8px 16px;
     text-align: center;
-    border: 1px solid #4a4a4a;
+    border: 1px solid var(--border-primary);
     border-radius: 4px;
-    background-color: #3a3a3a;
-    color: #ffffff;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
     transition: all 0.2s ease;
 }
 
 .btn-group .chart-type-btn:hover {
-    background-color: #4a4a4a;
+    background-color: var(--bg-hover);
     border-color: var(--theme-color);
     color: var(--theme-color);
 }
@@ -568,7 +568,7 @@
 .btn-group .chart-type-btn.active {
     background-color: var(--theme-color);
     border-color: var(--theme-color);
-    color: #1a1a1a;
+    color: var(--text-selected);
 }
 
 .drag-handle {
@@ -576,7 +576,7 @@
     cursor: move;
     display: flex;
     align-items: center;
-    color: #666;
+    color: var(--text-tertiary);
     font-size: 1.2rem;
 }
 
@@ -590,7 +590,7 @@
     align-items: center;
     width: 95px; /* 고정 너비 설정 */
     padding: 0.75rem 1rem;
-    border-right: 1px solid #4a4a4a;
+    border-right: 1px solid var(--border-primary);
 }
 
 .currency-flag {
@@ -620,7 +620,7 @@
 }
 
 .chart-wrapper {
-    background: #2a2a2a;
+    background: var(--bg-secondary);
     border-radius: 0.5rem;
     position: relative;
     width: 100%;
@@ -674,23 +674,22 @@
     display: flex;
     align-items: center;
     padding: 0.75rem;
-    background-color: #3a3a3a;
+    background-color: var(--bg-tertiary);
     border-radius: 0.25rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .currency-option:hover {
-    background-color: #4a4a4a;
+    background-color: var(--bg-hover);
 }
 
 .currency-option.selected {
-    /*background-color: var(--theme-color);*/
-    color: #1a1a1a;
+    color: var(--text-selected);
 }
 
 .last-update-time {
-    color: #a0a0a0;
+    color: var(--text-tertiary);
     font-size: 0.9rem;
     text-align: right;
     padding: 0.5rem 0;

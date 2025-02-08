@@ -1,4 +1,4 @@
-// resources/static/js/constants/storage-keys.js
+// exchange/resources/static/js/constants/storage-keys.js
 export const STORAGE_KEYS = {
     CALCULATOR: {
         SETTINGS: 'exchange.calculator.settings',

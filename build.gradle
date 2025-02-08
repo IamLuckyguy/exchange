@@ -23,7 +23,7 @@ def env = project.findProperty('env') ?: 'dev'
 def repositoryUrl = env == 'prod' ?
         "https://nexus.kwt.co.kr/repository/maven-releases/" :
         "https://nexus.kwt.co.kr/repository/maven-snapshots/"
-def commonUiVersion = '0.0.18'
+def commonUiVersion = '0.0.19'
 if (env != 'prod') {
     commonUiVersion += '-SNAPSHOT'
 }
@@ -59,8 +59,8 @@ dependencies {
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 
     // 공통 UI 라이브러리 dev : SNAPSHOT, prod : RELEASE
-//    implementation project(':common-ui') // 로컬 일 때
-    implementation "kr.co.kwt:common-ui:${commonUiVersion}" // 배포 할 때
+    implementation project(':common-ui') // 로컬 일 때
+//    implementation "kr.co.kwt:common-ui:${commonUiVersion}" // 배포 할 때
 
     // Database Driver (MySQL)
     runtimeOnly 'com.mysql:mysql-connector-j' // MySQL JPA 드라이버

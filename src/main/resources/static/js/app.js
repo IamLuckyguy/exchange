@@ -1,4 +1,4 @@
-// resources/static/js/app.js
+// exchange/resources/static/js/app.js
 import { Calculator } from './features/calculator/Calculator.js';
 import { ExchangeRateChart } from './features/chart/Chart.js';
 import { UIUtils } from './utils/ui-utils.js';
@@ -13,8 +13,10 @@ export class App {
 
     async initialize() {
         console.log('App initialization started...');
+
+        const mainContent = document.querySelector('.app-wrapper');
         try {
-            UIUtils.toggleLoading(true);
+            UIUtils.toggleLoading(true, mainContent);
             console.log('Fetching initial exchange rates...');
 
             // 환율 데이터 가져오기
@@ -57,7 +59,7 @@ export class App {
             console.error('Failed to initialize app:', error);
             UIUtils.showAlert('애플리케이션 초기화에 실패했습니다.');
         } finally {
-            UIUtils.toggleLoading(false);
+            UIUtils.toggleLoading(false, mainContent);
         }
     }
 

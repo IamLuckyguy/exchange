@@ -1,3 +1,4 @@
+// exchange/resources/static/js/features/chart/Chart.js
 import {CHART_COLORS, CHART_OPTIONS, CHART_PERIODS} from "../../constants/chart-options.js";
 import {STORAGE_KEYS} from "../../constants/storage-keys.js";
 import {UIUtils} from "../../utils/ui-utils.js";

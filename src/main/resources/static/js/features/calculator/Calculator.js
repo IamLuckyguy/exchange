@@ -1,4 +1,4 @@
-// resources/static/js/features/calculator/Calculator.js
+// exchange/resources/static/js/features/calculator/Calculator.js
 import Sortable from 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/modular/sortable.esm.js';
 import { STORAGE_KEYS } from '../../constants/storage-keys.js';
 import { CURRENCY_DEFAULTS } from '../../constants/currency-defaults.js';

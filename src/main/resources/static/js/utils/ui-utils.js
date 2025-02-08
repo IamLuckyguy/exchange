@@ -1,4 +1,4 @@
-// resources/static/js/utils/ui-utils.js
+// exchange/resources/static/js/utils/ui-utils.js
 export class UIUtils {
     static MIN_LOADING_TIME = 800; // 최소 로딩 시간 (ms)
 
